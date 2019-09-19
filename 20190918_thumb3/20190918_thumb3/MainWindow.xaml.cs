@@ -162,6 +162,15 @@ namespace _20190918_thumb3
                 ft.DragDelta += DirectionThumb_DragDelta;
             }
 
+            this.DragDelta += VariableThumb_DragDelta;
+
+        }
+
+        private void VariableThumb_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            Canvas.SetLeft(this, Canvas.GetLeft(this) + e.HorizontalChange);
+            Canvas.SetTop(this, Canvas.GetTop(this) + e.VerticalChange);
+            Thumbs8SetLocate();
         }
 
         public Point[] MakeThumbs8Locate()
@@ -236,43 +245,80 @@ namespace _20190918_thumb3
             double xMove = e.HorizontalChange;
             double yMove = e.VerticalChange;
 
+            //Thumbの横幅と横位置を計算
+            void yoko()
+            {
+                if (w - xMove < 1)//幅1ピクセル未満になる場合
+                {
+                    l = l + w - 1;//幅1ピクセルの位置で固定
+                    w = 1;//幅1ピクセルを指定
+                }
+                else
+                {
+                    l += xMove;
+                    w -= xMove;
+                }
+            }
+            //縦幅と位置を修正
+            void tate()
+            {
+                if (h - yMove < 1)
+                {
+                    t = t + h - 1;
+                    h = 1;
+                }
+                else
+                {
+                    t += yMove;
+                    h -= yMove;
+                }
+            }
+
             //自身の位置とサイズ変更する
             switch (flatThumb.Tag)
             {
-                case 0:
-
+                case 0://下
+                    h += yMove;
                     break;
                 case 1:
-
+                    yoko();
+                    h += yMove;
                     break;
-                case 2:
-
+                case 2://左
+                    yoko();
                     break;
                 case 3://左上
-                    w -= xMove;
-                    h -= yMove;
-                    l += xMove;
-                    t += yMove;
+                    yoko();
+                    tate();
                     break;
-                case 4:
-
+                case 4://上
+                    tate();
                     break;
                 case 5:
-
+                    w += xMove;
+                    tate();
                     break;
-                case 6:
-
+                case 6://右
+                    w += xMove;
                     break;
                 case 7:
-
+                    w += xMove;
+                    h += yMove;
                     break;
                 default:
                     break;
             }
-            Canvas.SetLeft(this, l);
-            Canvas.SetTop(this, t);
+
+            if (w < 0) w = 1;
+            if (h < 0) h = 1;
+
+            //Thumbのサイズと位置を指定
             this.Width = w;
             this.Height = h;
+            Canvas.SetLeft(this, l);
+            Canvas.SetTop(this, t);
+
+            //8つのThumbの位置変更
             Thumbs8SetLocate();
 
         }
