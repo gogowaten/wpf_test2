@@ -15,6 +15,7 @@
     <StackPanel Grid.Column="1">
       <Button x:Name="MyButton1" Content="button1"/>
       <Button x:Name="MyButton2" Content="button2"/>
+      <Button x:Name="MyButton3" Content="button3"/>
     </StackPanel>
   </Grid>
 </Window>

@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 
+//●のThumb
 
 namespace _20190919_thumb5
 {
@@ -30,12 +31,18 @@ namespace _20190919_thumb5
 
             MyButton1.Click += MyButton1_Click;
             MyButton2.Click += MyButton2_Click;
+            MyButton3.Click += MyButton3_Click;
 
             MyThumb = new SquareOrEllipseThumb(Colors.Cyan) { Width = 100, Height = 100 };
             MyCanvas.Children.Add(MyThumb);
             Canvas.SetLeft(MyThumb, 100); Canvas.SetTop(MyThumb, 100);
 
             MyThumb.DragDelta += Thumb_DragDelta;
+        }
+
+        private void MyButton3_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private void MyButton2_Click(object sender, RoutedEventArgs e)
@@ -64,7 +71,6 @@ namespace _20190919_thumb5
             Thumb t = (Thumb)sender;
             Canvas.SetLeft(t, Canvas.GetLeft(t) + e.HorizontalChange);
             Canvas.SetTop(t, Canvas.GetTop(t) + e.VerticalChange);
-            //e.Handled = true;//後続のバブルイベントをキャンセル
         }
     }
 
@@ -72,6 +78,9 @@ namespace _20190919_thumb5
   /// 形状を■と●に切り替えられるThumb
   /// ■のときはGridで表現
   /// ●のときはGridにEllipseを乗せて、Gridの背景色をnullで表現
+  /// Template
+  /// Grid(VisualTree)
+  ///   ┗Ellipse
   /// </summary>
     public class SquareOrEllipseThumb : Thumb
     {
@@ -110,7 +119,7 @@ namespace _20190919_thumb5
 
         }
 
-        //●のする
+        //●に変更
         public void ToEllipse()
         {
             if (IsSquare)
@@ -121,7 +130,7 @@ namespace _20190919_thumb5
             }
         }
 
-        //■にする
+        //■に変更
         public void ToSquare()
         {
             if (!IsSquare)
@@ -131,6 +140,7 @@ namespace _20190919_thumb5
                 IsSquare = true;
             }
         }
+
     }
 
 
