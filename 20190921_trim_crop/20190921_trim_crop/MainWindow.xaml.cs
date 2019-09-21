@@ -31,7 +31,7 @@ namespace _20190921_trim_crop
             //画像ファイルを表示
             string filePath = @"D:\ブログ用\テスト用画像\NEC_1853_2018_04_08_午後わてん_.jpg";
             MyImage.Source = new BitmapImage(new Uri(filePath));
-
+            
         }
 
         private void MyButton1_Click(object sender, RoutedEventArgs e)
