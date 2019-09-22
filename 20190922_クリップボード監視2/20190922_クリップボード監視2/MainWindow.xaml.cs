@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 
+//クリップボードの更新を監視、AddClipboardFormatListener - 午後わてんのブログ
+//https://gogowaten.hatenablog.com/entry/2019/09/22/143931
 
 namespace _20190922_クリップボード監視2
 {
@@ -13,7 +16,7 @@ namespace _20190922_クリップボード監視2
     public partial class MainWindow : Window
     {
         ClipboardWatcher clipboardWatcher = null;
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -41,10 +44,12 @@ namespace _20190922_クリップボード監視2
         //    if (Clipboard.ContainsImage())
         //    {
         //        var img = new Image();
-        //        img.Source = Clipboard.GetImage();
+        //        img.Source = Clipboard.GetImage();//たまにエラーになる
         //        MyListBox.Items.Add(img);
         //    }
         //}
+
+     
 
         //クリップボード内容変更イベント時の処理
         private void ClipboardWatcher_DrawClipboard(object sender, EventArgs e)
@@ -62,7 +67,7 @@ namespace _20190922_クリップボード監視2
             {
                 var img = new Image();
                 int count = 1;
-                int limit = 3;//取得試行回数制限
+                int limit = 5;//取得試行回数制限、1以上指定、5あれば十分
                 do
                 {
                     try
@@ -76,7 +81,7 @@ namespace _20190922_クリップボード監視2
                         {
                             string str = $"{ex.Message}\n" +
                                 $"画像の取得に失敗\n" +
-                                $"{count}回試行";
+                                $"{limit}回試行";
                             MessageBox.Show(str);
                         }
                     }
@@ -87,6 +92,18 @@ namespace _20190922_クリップボード監視2
                 } while (limit >= count && img.Source == null);
             }
         }
+
+        ////クリップボードに画像があったら取得
+        ////エラーが出なければこれでいい
+        //private void AddImage2()
+        //{
+        //    if (Clipboard.ContainsImage())
+        //    {
+        //        BitmapSource img = Clipboard.GetImage();//たまにエラーになる
+        //    }
+        //}
+
+
 
         //クリップボード監視開始
         private void MyButtonStart_Click(object sender, RoutedEventArgs e)
@@ -155,7 +172,7 @@ namespace _20190922_クリップボード監視2
             hwndSource = HwndSource.FromHwnd(handle);
             hwndSource.AddHook(WndProc);
             this.handle = handle;
-            AddClipboardFormatListener(handle);
+            //AddClipboardFormatListener(handle);
         }
 
         //クリップボード監視開始
