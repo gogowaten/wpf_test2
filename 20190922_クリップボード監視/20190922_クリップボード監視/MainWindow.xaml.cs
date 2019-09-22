@@ -55,34 +55,6 @@ namespace _20190922_クリップボード監視
         }
 
 
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            if (msg == WM_DRAWCLIPBOARD)
-            {
-                try
-                {
-                    //if (Clipboard.ContainsText()) MyListBox.Items.Add(Clipboard.GetText());
-
-                    if (Clipboard.ContainsImage())
-                    {
-                        var img = new Image();
-                        img.Source = Clipboard.GetImage();
-                        MyListBox.Items.Add(img);
-                    }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                    //MessageBox.Show(e.ToString());
-                }
-                finally
-                {
-                    handled = true;
-                }
-            }
-            return IntPtr.Zero;
-        }
-
 
         private IntPtr WndProc2(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
@@ -120,12 +92,9 @@ namespace _20190922_クリップボード監視
                             handled = true;
                         }
                     } while (isEmpty && limit > count);
-
                 }
-
             }
             return IntPtr.Zero;
         }
-
     }
 }
