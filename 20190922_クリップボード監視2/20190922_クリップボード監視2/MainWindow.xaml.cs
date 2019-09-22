@@ -5,9 +5,6 @@ using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 
-//クリップボードの更新を監視、AddClipboardFormatListener - 午後わてんのブログ
-//https://gogowaten.hatenablog.com/entry/2019/09/22/143931
-
 namespace _20190922_クリップボード監視2
 {
     /// <summary>
@@ -188,3 +185,6 @@ namespace _20190922_クリップボード監視2
         }
     }
 }
+
+//クリップボードの更新を監視、AddClipboardFormatListener - 午後わてんのブログ
+//https://gogowaten.hatenablog.com/entry/2019/09/22/143931
