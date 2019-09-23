@@ -65,16 +65,13 @@ namespace _20190923_thumbサイズ変更
         //サイズ変更はe.HorizontalChangeやe.VerticalChangeをWidthに加算すると
         //思った以上に伸縮するので、直前の変更量を引き算したのを加算している
         private void MyThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
-        {
-            double horizontal = e.HorizontalChange;
-            double verchical = e.VerticalChange;
-
+        {            
             //横幅変更
             void ChangeWidthSize()
             {
                 //変更後の幅が小さくなりすぎないように調整
                 //もし、小さすぎなら変更しない
-                double w = MyThumb.Width + horizontal - PastHorizontalChange;
+                double w = MyThumb.Width + e.HorizontalChange - PastHorizontalChange;
                 if (MyPadding > w)
                 {
                     PastHorizontalChange = 0;
@@ -82,13 +79,13 @@ namespace _20190923_thumbサイズ変更
                 else
                 {
                     MyThumb.Width = w;//変更
-                    PastHorizontalChange = horizontal;//変更量を記録
+                    PastHorizontalChange = e.HorizontalChange;//変更量を記録
                 }
             }
             //縦幅変更
             void ChangeHeightSize()
             {
-                double h = MyThumb.Height + verchical - PastVerticalChange;
+                double h = MyThumb.Height + e.VerticalChange - PastVerticalChange;
                 if (MyPadding > h)
                 {
                     PastVerticalChange = 0;
@@ -96,7 +93,7 @@ namespace _20190923_thumbサイズ変更
                 else
                 {
                     MyThumb.Height = h;
-                    PastVerticalChange = verchical;
+                    PastVerticalChange = e.VerticalChange;
                 }
             }
 
@@ -117,8 +114,8 @@ namespace _20190923_thumbサイズ変更
             else if (MyThumb.Cursor == Cursors.Arrow)//通常の矢印
             {
                 //ドラッグ移動
-                Canvas.SetLeft(MyThumb, Canvas.GetLeft(MyThumb) + horizontal);
-                Canvas.SetTop(MyThumb, Canvas.GetTop(MyThumb) + verchical);
+                Canvas.SetLeft(MyThumb, Canvas.GetLeft(MyThumb) + e.HorizontalChange);
+                Canvas.SetTop(MyThumb, Canvas.GetTop(MyThumb) + e.VerticalChange);
             }
         }
     }

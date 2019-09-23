@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20190923_thumbサイズ変更"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="500">
   <Grid>
     <Canvas Name="MyCanvas">
       <Thumb Name="MyThumb" Width="100" Height="100" Canvas.Left="100" Canvas.Top="100"/>
