@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Collections.ObjectModel;
 
 namespace _20190922_Pextrim2
 {
@@ -21,7 +22,8 @@ namespace _20190922_Pextrim2
     public partial class MainWindow : Window
     {
         private ClipboardWatcher ClipboardWatcher;
-        private List<BitmapSource> ListBitmap;
+        //private List<BitmapSource> ListBitmap;
+        private ObservableCollection<MyBitmapSource> ListMyBitmapSource;
 
         public MainWindow()
         {
@@ -29,9 +31,48 @@ namespace _20190922_Pextrim2
 
             this.Loaded += MainWindow_Loaded;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
+            MyListBox.SelectionChanged += MyListBox_SelectionChanged;
             
-            ListBitmap = new List<BitmapSource>();
+            //ListBitmap = new List<BitmapSource>();
 
+            ListMyBitmapSource = new ObservableCollection<MyBitmapSource>();
+            ListMyBitmapSource.CollectionChanged += ListName_CollectionChanged;
+            MyButtonRemoveSelectedImtem.Click += MyButtonRemoveSelectedImtem_Click;
+            MyListBox.DataContext = ListMyBitmapSource;
+        }
+
+        
+        private void MyButtonRemoveSelectedImtem_Click(object sender, RoutedEventArgs e)
+        {
+            //選択アイテム削除
+            var cc = new ObservableCollection<MyBitmapSource>();
+            foreach (MyBitmapSource item in MyListBox.SelectedItems)
+            {
+                cc.Add(item);
+            }
+            foreach (MyBitmapSource item in cc)
+            {
+                ListMyBitmapSource.Remove(item);
+            }
+
+        }
+
+        private void ListName_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+        }
+
+        private void MyListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            MyBitmapSource myBitmap = (MyBitmapSource)MyListBox.SelectedItem;
+            if (myBitmap == null)
+            {
+                MyImage.Source = null;
+            }
+            else
+            {
+                MyImage.Source = myBitmap.Source;
+            }
         }
 
         private void ClipboardWatcher_DrawClipboard(object sender, EventArgs e)
@@ -40,26 +81,36 @@ namespace _20190922_Pextrim2
             {
                 BitmapSource bitmap = null;
                 int count = 1;
-                int limit = 1;
+                int limit = 5;
                 do
                 {
                     try
                     {
                         bitmap = Clipboard.GetImage();
-                        ListBitmap.Add(bitmap);
-                        MyImage.Source = bitmap;
+                        
+                        //MyImage.Source = bitmap;
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
-                        MyListBox.Items.Add(TextBox_FileName.Text + TextBox_SerialNumber.Text);
-                        int sn = int.Parse(TextBox_SerialNumber.Text)+1;
-                        //TextBox_SerialNumber.Text = $"{sn,0:D4}";
-                        TextBox_SerialNumber.Text = $"{sn,0:0000}";
+                        
+                        int sn = int.Parse(TextBox_SerialNumber.Text);
+                        string number = $"{sn,0:00000}";
+                        string name = TextBox_FileName.Text + number;
+                        
+                        sn = int.Parse(TextBox_SerialNumber.Text) + 1;
+                        //TextBox_SerialNumber.Text = $"{sn,0:D5}";
+                        TextBox_SerialNumber.Text = $"{sn,0:00000}";
+                        var source = new MyBitmapSource(bitmap, name);
+                        ListMyBitmapSource.Add(source);
+                        MyListBox.SelectedItem = source;
+                        MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
+
                     }
                     catch (Exception ex)
                     {
                         if (count == limit)
                         {
                             string str = $"{limit}回試したけど画像の取得に失敗\n{ex.Message}";
+                            MessageBox.Show(str);
                         }
                     }
                     finally { count++; }
@@ -79,9 +130,22 @@ namespace _20190922_Pextrim2
             ClipboardWatcher = new ClipboardWatcher(
                 new System.Windows.Interop.WindowInteropHelper(this).Handle);
             ClipboardWatcher.DrawClipboard += ClipboardWatcher_DrawClipboard;
+            if (CheckBox_ClipCheck.IsChecked == true) ClipboardWatcher.Start();
         }
 
     }
 
-
+    public class MyBitmapSource
+    {
+        public BitmapSource Source { get; }
+        public string Name { get; }
+        public MyBitmapSource(BitmapSource source, string name)
+        {
+            Source = source;
+            Name = name;
+        }
+    }
 }
+
+//C#のListBoxを使ってみた
+//https://water2litter.net/gin/?p=1414

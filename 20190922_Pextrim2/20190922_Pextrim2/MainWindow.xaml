@@ -5,68 +5,77 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20190922_Pextrim2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="600" Width="800">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="200" Name="MySide"/>
       <ColumnDefinition/>
     </Grid.ColumnDefinitions>
-    <StackPanel>
-      <Button Content="実行"/>
-      <StackPanel Orientation="Horizontal">
-        <TextBlock Text="保存形式" VerticalAlignment="Center"/>
-        <ComboBox>
-          <ComboBoxItem Content="png"/>
-        </ComboBox>
-      </StackPanel>
-      <Button Content="保存場所"/>
-      <Button Content="保存場所を開く"/>
-
-      <GroupBox Padding="10" Header="切り取り範囲">
-        <StackPanel>
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="横幅, 高さ"/>
-            <TextBox Text="100"/>
-            <TextBox Text="100"/>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="左上位置"/>
-            <TextBox Text="100"/>
-            <TextBox Text="100"/>
-          </StackPanel>
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Top">
+        <Button Content="実行"/>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="保存形式" VerticalAlignment="Center"/>
+          <ComboBox>
+            <ComboBoxItem Content="png"/>
+          </ComboBox>
         </StackPanel>
-      </GroupBox>
+        <Button Content="保存場所"/>
+        <Button Content="保存場所を開く"/>
 
-      <GroupBox Padding="10" Header="クリップボード">
-        <StackPanel>
-          <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視"/>
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="連番"/>
-            <TextBox Text="001" Name="TextBox_SerialNumber"/>
+        <GroupBox Padding="10" Header="切り取り範囲">
+          <StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="横幅, 高さ"/>
+              <TextBox Text="100"/>
+              <TextBox Text="100"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="左上位置"/>
+              <TextBox Text="100"/>
+              <TextBox Text="100"/>
+            </StackPanel>
           </StackPanel>
-          <CheckBox Content="音"/>
-          <CheckBox Content="自動保存"/>
-          <Button Content="音の確認"/>
-          <Button Content="音声ファイル選択"/>
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="ファイル名"/>
-            <TextBox Text="ファイル名_" Name="TextBox_FileName"/>
+        </GroupBox>
+
+        <GroupBox Padding="10" Header="クリップボード">
+          <StackPanel>
+            <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視" IsChecked="True"/>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="連番"/>
+              <TextBox Text="00001" Name="TextBox_SerialNumber"/>
+            </StackPanel>
+            <CheckBox Content="音"/>
+            <CheckBox Content="自動保存"/>
+            <Button Content="音の確認"/>
+            <Button Content="音声ファイル選択"/>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="ファイル名"/>
+              <TextBox Text="ファイル名_" Name="TextBox_FileName"/>
+            </StackPanel>
           </StackPanel>
+        </GroupBox>
+
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="拡縮"/>
+          <Button Content="x0.25"/>
+          <Button Content="x0.5"/>
+          <Button Content="x1"/>
+          <Button Content="x2"/>
+          <Button Content="x3"/>
+          <Button Content="x4"/>
         </StackPanel>
-      </GroupBox>
-
-      <StackPanel Orientation="Horizontal">
-        <TextBlock Text="拡縮"/>
-        <Button Content="x0.25"/>
-        <Button Content="x0.5"/>
-        <Button Content="x1"/>
-        <Button Content="x2"/>
-        <Button Content="x3"/>
-        <Button Content="x4"/>
+        <Button Content="リストクリア"/>
+        <Button Content="選択アイテム削除" Name="MyButtonRemoveSelectedImtem"/>
       </StackPanel>
-      <Button Content="リストクリア"/>
-      <ListBox Name="MyListBox"/>
-    </StackPanel>
+      <ListBox DockPanel.Dock="Top" Name="MyListBox" ItemsSource="{Binding}" SelectionMode="Extended">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Path=Name}"/>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
     <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Canvas Name="MyCanvas" UseLayoutRounding="True" HorizontalAlignment="Left" VerticalAlignment="top">
         <Image Name="MyImage" Stretch="None"/>
