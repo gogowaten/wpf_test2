@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:_20190922_Pextrim2"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+  <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="200" Name="MySide"/>
       <ColumnDefinition/>
@@ -39,10 +39,10 @@
 
       <GroupBox Padding="10" Header="クリップボード">
         <StackPanel>
-          <CheckBox Content="クリップボード監視"/>
+          <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視"/>
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="連番"/>
-            <TextBox Text="001"/>
+            <TextBox Text="001" Name="TextBox_SerialNumber"/>
           </StackPanel>
           <CheckBox Content="音"/>
           <CheckBox Content="自動保存"/>
@@ -50,7 +50,7 @@
           <Button Content="音声ファイル選択"/>
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="ファイル名"/>
-            <TextBox Text="ファイル名_"/>
+            <TextBox Text="ファイル名_" Name="TextBox_FileName"/>
           </StackPanel>
         </StackPanel>
       </GroupBox>
@@ -65,7 +65,12 @@
         <Button Content="x4"/>
       </StackPanel>
       <Button Content="リストクリア"/>
-      <ListBox/>
+      <ListBox Name="MyListBox"/>
     </StackPanel>
+    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+      <Canvas Name="MyCanvas" UseLayoutRounding="True" HorizontalAlignment="Left" VerticalAlignment="top">
+        <Image Name="MyImage" Stretch="None"/>
+      </Canvas>
+    </ScrollViewer>
   </Grid>
 </Window>
