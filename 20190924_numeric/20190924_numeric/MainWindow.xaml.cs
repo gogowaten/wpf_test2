@@ -25,11 +25,9 @@ namespace _20190924_numeric
         {
             InitializeComponent();
 
-            var neko = String.Format("{0:000}", 1);
-
-
+            
             numeric = new MyNumeric();
-            numeric.Maximun = 15;
+            numeric.Maximum = 15;
             MyStackPanel.Children.Add(numeric);
 
             MyButton10.Click += (o, e) => { numeric.MyValue = 10; };

@@ -10,7 +10,7 @@
     <StackPanel Name="MyStackPanel">
       <Button Name="MyButton10" Content="10を指定"/>
       <Button Name="Kakunin" Content="確認ボタン"/>
-      <local:MyNumeric Maximun="5" SmallChange="2" MyWidth="100" MyHeight="50" MyFontSize="20"/>
+      <local:MyNumeric Maximum="5" SmallChange="2" MyWidth="100" MyHeight="50" MyFontSize="20"/>
       <!--<local:MyNumeric LargeChange="2"/>-->
       <local:MyNumeric MyValue="2" x:Name="nume1"/>
       <local:MyNumeric x:Name="nume2" MyValue="{Binding ElementName=nume1, Path=MyValue, Mode=TwoWay}"/>
