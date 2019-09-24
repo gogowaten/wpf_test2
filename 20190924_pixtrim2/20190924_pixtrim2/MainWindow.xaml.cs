@@ -13,11 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
-using MyNumericUpDownInteger;
-using System.Windows.Controls.Primitives;
 
 
-namespace _20190922_Pextrim2
+namespace _20190924_pixtrim2
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
@@ -45,11 +43,11 @@ namespace _20190922_Pextrim2
             MyListBox.DataContext = ListMyBitmapSource;
 
             //切り取り範囲Thumb初期化
-            
+
             MyTrimThumb = new TrimThumb(MyCanvas, 20, 100, 100, 100, 100);
             MyTrimThumb.SetBackGroundColor(Color.FromArgb(100, 0, 0, 0));
             MyCanvas.Children.Add(MyTrimThumb);
-            NumericUDInteger nn = new NumericUDInteger();
+            //NumericUDInteger nn = new NumericUDInteger();
 
         }
 
@@ -66,7 +64,7 @@ namespace _20190922_Pextrim2
             {
                 ListMyBitmapSource.Remove(item);
             }
-            
+
         }
 
         private void ListName_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -83,7 +81,7 @@ namespace _20190922_Pextrim2
             }
             else
             {
-                
+
                 MyImage.Source = myBitmap.Source;
             }
         }
@@ -159,6 +157,3 @@ namespace _20190922_Pextrim2
         }
     }
 }
-
-//C#のListBoxを使ってみた
-//https://water2litter.net/gin/?p=1414
