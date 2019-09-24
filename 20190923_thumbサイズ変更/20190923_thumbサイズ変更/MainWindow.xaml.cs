@@ -120,3 +120,6 @@ namespace _20190923_thumbサイズ変更
         }
     }
 }
+
+//WPF、マウスドラッグ移動でThumbのサイズ変更 - 午後わてんのブログ
+//https://gogowaten.hatenablog.com/entry/2019/09/24/111153
