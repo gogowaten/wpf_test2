@@ -11,21 +11,16 @@ using System.Windows.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-//////////////////////////////////////////////////////////////
-//これは失敗、double型だと小数点以下の数値をSmallChangeにすると誤差が出る
-//decimal型で作り直した、ファイル名：20190925_NumericNecimal
-////////////////////////////////////////////////////////////////
-
 /// <summary>
-/// double型のNumericUpDownのようなもの
+/// Decimal型のNumericUpDownのようなもの
 /// StackPanel
 ///     ┣TextBox    数値表示用
 ///     ┗ScrollBar  数値変化用
 ///     
 /// 指定できる項目は
 /// プロパティ名              内容
-/// MyValue         数値(double型)、初期値は1.0
-/// MyValue2        TextBoxに表示している数値(double型)外部からはgetのみ可能
+/// MyValue         数値(decimal型)、初期値は1.0
+/// MyValue2        TextBoxに表示している数値(decimal型)外部からはgetのみ可能
 /// MyMinimum       最小値、初期値 -10.0
 /// MyMaximum       最大値、初期値 10.0
 /// MySmallChange   変化値小、初期値 1.0
@@ -46,10 +41,9 @@ using System.Text.RegularExpressions;
 /// TextBoxの上でマウスホイール回転でSmallChange
 /// ScrollBarの上でマウスホイール回転でLargeChange
 /// </summary>
-
-namespace _20190925_numericDouble
+namespace _20190925_NumericDecimal
 {
-    class MyNumericDouble : StackPanel
+    class MyNumeric : StackPanel
     {
 
         private TextBox MyTextBox;
@@ -57,63 +51,63 @@ namespace _20190925_numericDouble
 
         #region dependencyProperty依存関係プロパティ
         //内部数値
-        public double MyValue
+        public decimal MyValue
         {
-            get => (double)GetValue(MyValueProperty);
+            get => (decimal)GetValue(MyValueProperty);
             set => SetValue(MyValueProperty, value);
         }
         public static readonly DependencyProperty MyValueProperty =
-            DependencyProperty.Register(nameof(MyValue), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(1.0, MyValuePropertyChanged));
+            DependencyProperty.Register(nameof(MyValue), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(1.0m, MyValuePropertyChanged));
 
         //表示している数値
-        public double MyValue2
+        public decimal MyValue2
         {
-            get => (double)GetValue(MyValue2Property);
+            get => (decimal)GetValue(MyValue2Property);
             private set => SetValue(MyValue2Property, value);//外部からはsetできないように
         }
         public static readonly DependencyProperty MyValue2Property =
-            DependencyProperty.Register(nameof(MyValue2), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(1.0));
+            DependencyProperty.Register(nameof(MyValue2), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(1.0m));
 
         //値がセットされたときに上限加減のチェック
         private static void MyValuePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var nu = (MyNumericDouble)d;
-            double v = nu.MyValue;
-            if(v > nu.MyMaximum) { nu.MyValue = nu.MyMaximum; }
+            var nu = (MyNumeric)d;
+            decimal v = nu.MyValue;
+            if (v > nu.MyMaximum) { nu.MyValue = nu.MyMaximum; }
             else if (v < nu.MyMinimum) { nu.MyValue = nu.MyMinimum; }
         }
 
 
-        public double MyMinimum
+        public decimal MyMinimum
         {
-            get => (double)GetValue(MyMinimumProperty);
+            get => (decimal)GetValue(MyMinimumProperty);
             set => SetValue(MyMinimumProperty, value);
         }
         public static readonly DependencyProperty MyMinimumProperty =
-            DependencyProperty.Register(nameof(MyMinimum), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(-10.0, MyValuePropertyChanged));
+            DependencyProperty.Register(nameof(MyMinimum), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(-10.0m, MyValuePropertyChanged));
 
-        public double MyMaximum
+        public decimal MyMaximum
         {
-            get => (double)GetValue(MyMaximumProperty);
+            get => (decimal)GetValue(MyMaximumProperty);
             set => SetValue(MyMaximumProperty, value);
         }
         public static readonly DependencyProperty MyMaximumProperty =
-            DependencyProperty.Register(nameof(MyMaximum), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(10.0, MyValuePropertyChanged));
+            DependencyProperty.Register(nameof(MyMaximum), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(10.0m, MyValuePropertyChanged));
 
-        public double MySmallChange
+        public decimal MySmallChange
         {
-            get => (double)GetValue(MySmallChangeProperty);
+            get => (decimal)GetValue(MySmallChangeProperty);
             set => SetValue(MySmallChangeProperty, value);
         }
         public static readonly DependencyProperty MySmallChangeProperty =
-            DependencyProperty.Register(nameof(MySmallChange), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(1.0));
-        public double MyLargeChange
+            DependencyProperty.Register(nameof(MySmallChange), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(1.0m));
+        public decimal MyLargeChange
         {
-            get => (double)GetValue(MyLargeChangeProperty);
+            get => (decimal)GetValue(MyLargeChangeProperty);
             set => SetValue(MyLargeChangeProperty, value);
         }
         public static readonly DependencyProperty MyLargeChangeProperty =
-            DependencyProperty.Register(nameof(MyLargeChange), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(10.0));
+            DependencyProperty.Register(nameof(MyLargeChange), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(10.0m));
 
         public double MyWidth
         {
@@ -121,7 +115,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyWidthProperty, value);
         }
         public static readonly DependencyProperty MyWidthProperty =
-            DependencyProperty.Register(nameof(MyWidth), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(double.NaN));
+            DependencyProperty.Register(nameof(MyWidth), typeof(double), typeof(MyNumeric), new PropertyMetadata(double.NaN));
 
         public double MyHeight
         {
@@ -129,7 +123,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyHeightProperty, value);
         }
         public static readonly DependencyProperty MyHeightProperty =
-            DependencyProperty.Register(nameof(MyHeight), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(double.NaN));
+            DependencyProperty.Register(nameof(MyHeight), typeof(double), typeof(MyNumeric), new PropertyMetadata(double.NaN));
 
         public double MyFontSize
         {
@@ -137,7 +131,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyFontSizeProperty, value);
         }
         public static readonly DependencyProperty MyFontSizeProperty =
-            DependencyProperty.Register(nameof(MyFontSize), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(double.NaN));
+            DependencyProperty.Register(nameof(MyFontSize), typeof(double), typeof(MyNumeric), new PropertyMetadata(double.NaN));
 
         //整数部分の0埋め桁数
         public int MyDigitsInteger
@@ -146,7 +140,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyDigitsIntegerProperty, value);
         }
         public static readonly DependencyProperty MyDigitsIntegerProperty =
-            DependencyProperty.Register(nameof(MyDigitsInteger), typeof(int), typeof(MyNumericDouble),
+            DependencyProperty.Register(nameof(MyDigitsInteger), typeof(int), typeof(MyNumeric),
                 new PropertyMetadata(4, MyDigitsPropertyChanged));
 
         //小数点以下部分の表示(0埋め)桁数
@@ -156,13 +150,13 @@ namespace _20190925_numericDouble
             set => SetValue(MyDigitsDecimalProperty, value);
         }
         public static readonly DependencyProperty MyDigitsDecimalProperty =
-            DependencyProperty.Register(nameof(MyDigitsDecimal), typeof(int), typeof(MyNumericDouble),
+            DependencyProperty.Register(nameof(MyDigitsDecimal), typeof(int), typeof(MyNumeric),
                 new PropertyMetadata(0, MyDigitsPropertyChanged));
 
         //表示桁数変更時に表示を更新
         private static void MyDigitsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var nu = (MyNumericDouble)d;
+            var nu = (MyNumeric)d;
 
             string str = "0";
             for (int i = 1; i < nu.MyDigitsInteger; i++)
@@ -175,13 +169,12 @@ namespace _20190925_numericDouble
                 str += "0";
             }
             str = nu.MyValue.ToString(str);
-            //nu.MyValue2 = double.Parse(str);
             nu.MyTextBox.Text = str;
         }
 
         #endregion
 
-        public MyNumericDouble()
+        public MyNumeric()
         {
             Orientation = Orientation.Horizontal;
             HorizontalAlignment = HorizontalAlignment.Center;
@@ -251,7 +244,7 @@ namespace _20190925_numericDouble
             {
                 Source = MyTextBox,
                 Path = new PropertyPath(TextBox.TextProperty),
-                Mode = BindingMode.OneWay
+                Mode = BindingMode.OneWay,
             };
             BindingOperations.SetBinding(this, MyValue2Property, b);
         }
@@ -271,11 +264,11 @@ namespace _20190925_numericDouble
             ScrollBar sb = (ScrollBar)sender;
             if (e.Delta > 0)
             {
-                MyScrollBar.Value += this.MyLargeChange;
+                MyValue += this.MyLargeChange;
             }
             else
             {
-                MyScrollBar.Value -= this.MyLargeChange;
+                MyValue -= this.MyLargeChange;
             }
         }
 
@@ -286,15 +279,15 @@ namespace _20190925_numericDouble
             if (e.Delta > 0)
             {
 
-                double i = MyValue + this.MySmallChange;
+                decimal i = MyValue + this.MySmallChange;
                 if (MyMaximum < i) i = MyMaximum;
-                MyScrollBar.Value = i;
+                MyValue = i;
             }
             else
             {
-                double i = MyValue - this.MySmallChange;
+                decimal i = MyValue - this.MySmallChange;
                 if (this.MyMinimum > i) i = MyMinimum;
-                MyScrollBar.Value = i;
+                MyValue = i;
             }
         }
 
@@ -346,12 +339,12 @@ namespace _20190925_numericDouble
         /// </summary>
         /// <param name="value"></param>
         /// <param name="targetType"></param>
-        /// <param name="parameter">MyNumericDouble自身</param>
+        /// <param name="parameter">MyNumeric自身</param>
         /// <param name="culture"></param>
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var param = (MyNumericDouble)parameter;
+            var param = (MyNumeric)parameter;
             string str = "0";//書式作成
             for (int i = 1; i < param.MyDigitsInteger; i++)
             {
@@ -362,7 +355,7 @@ namespace _20190925_numericDouble
             {
                 str += "0";
             }
-            double v = (double)value;
+            decimal v = (decimal)value;
             //上限下限チェック
             if (v > param.MyMaximum) v = param.MyMaximum;
             else if (v < param.MyMinimum) v = param.MyMinimum;
@@ -378,17 +371,21 @@ namespace _20190925_numericDouble
         /// </summary>
         /// <param name="value"></param>
         /// <param name="targetType"></param>
-        /// <param name="parameter">MyNumericDouble</param>
+        /// <param name="parameter">MyNumeric</param>
         /// <param name="culture"></param>
         /// <returns></returns>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            MyNumericDouble param = (MyNumericDouble)parameter;
+            MyNumeric param = (MyNumeric)parameter;
             string str = (string)value;
-            double v = double.Parse(str);
+            decimal v = decimal.Parse(str);
             if (v > param.MyMaximum) v = param.MyMaximum;
             else if (v < param.MyMinimum) v = param.MyMinimum;
             return v;
         }
     }
+
+
+
+   
 }
