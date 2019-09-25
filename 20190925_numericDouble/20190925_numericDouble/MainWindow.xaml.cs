@@ -24,22 +24,47 @@ namespace _20190925_numericDouble
         {
             InitializeComponent();
             Button10000.Click += Button10000_Click;
+            ButtonGetValue.Click += ButtonGetValue_Click;
+            Button1.Click += Button1_Click;
 
-            var neko =string.Format("{0:f4}", 30.5);
-            double p = 3.14;
-            int i = (int)p;
-            var pp = p.ToString("{0:f4}");
-            pp = p.ToString("0");
-            double dd = double.Parse(pp);
-            pp = p.ToString("00.000");
-            dd = double.Parse(pp);
-            pp = p.ToString("0000");
-            dd = double.Parse(pp);
+            object neko = 99.8;
+            double d = (double)neko;
+
+        }
+
+        private void Button1_Click(object sender, RoutedEventArgs e)
+        {
+            Numeric.MyValue = 12.3456;
+            //Numeric.MyValue2 = 12.3456;
+        }
+
+        private void ButtonGetValue_Click(object sender, RoutedEventArgs e)
+        {
+            var v = Numeric.MyValue;
+            var v2 = Numeric.MyValue2;
+            MessageBox.Show(v.ToString()+" "+v2.ToString());
+            
         }
 
         private void Button10000_Click(object sender, RoutedEventArgs e)
         {
             Numeric.MyValue = 10000;
+        }
+
+    
+        private void ButtonAutoHeight_Click(object sender, RoutedEventArgs e)
+        {
+            Numeric.MyHeight = double.NaN;
+        }
+
+        private void ButtonAutoWidth_Click(object sender, RoutedEventArgs e)
+        {
+            Numeric.MyWidth = double.NaN;
+        }
+
+        private void ButtonAutoFontSize_Click(object sender, RoutedEventArgs e)
+        {
+            Numeric.MyFontSize = double.NaN;
         }
     }
 }

@@ -5,14 +5,73 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20190925_numericDouble"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid Margin="20">
-    <StackPanel>
-      <Button Name="Button10000" Content="10000"/>
-      <local:MyNumericDouble Height="100" x:Name="Numeric"/>
-      <local:MyNumericDouble Height="100" MyValue="12.34" MyDigitsInteger="10" MyDigitsDecimal="-1"/>
-      <local:MyNumericDouble Height="100" MyValue="3.14" MyDigitsInteger="1" MyDigitsDecimal="5"/>
+        Title="MainWindow" Height="450" Width="550">
+  <Grid Margin="20">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="300"/>
+    </Grid.ColumnDefinitions>
+    <StackPanel Grid.Column="0">
+      <local:MyNumericDouble MyValue="99.9" MyMaximum="9999" x:Name="Numeric"/>
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="{Binding ElementName=Numeric, Path=MyValue, StringFormat=MyValue \= #.################# }"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+        <TextBlock Text="{Binding ElementName=Numeric, Path=MyValue2, StringFormat=MyValue2 \= #.################# }"/>
+      </StackPanel>
+
+      <local:MyNumericDouble MyHeight="50" MyValue="12.34" MyDigitsInteger="5" MyDigitsDecimal="2"/>
+      <local:MyNumericDouble MyWidth="150" MyValue="3.14" MyDigitsInteger="1" MyDigitsDecimal="5"/>
+      <local:MyNumericDouble/>
+      <local:MyNumericDouble MyValue="1234.56789" MyMaximum="10000"/>
     </StackPanel>
-        
-    </Grid>
+    <StackPanel Grid.Column="1">
+      <Button Name="ButtonGetValue" Content="値取得"/>
+      <Button Name="Button10000" Content="set 10000"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <Slider x:Name="SliderMyMaximum" Value="{Binding ElementName=Numeric, Path=MyMaximum}" SmallChange="1" LargeChange="1"
+                Minimum="9998" Maximum="10001" TickFrequency="1" Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderMyMaximum, Path=Value, StringFormat=MyMaximum \= 0}"/>
+      </StackPanel>
+      <Button x:Name="Button1" Content="set 12.3456"/>
+      <StackPanel Orientation="Horizontal">
+        <Slider x:Name="SliderSmall" Value="{Binding ElementName=Numeric, Path=MySmallChange}" SmallChange="0.1" LargeChange="0.1" TickFrequency="0.1" Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderSmall, Path=Value, StringFormat=SmallChange \= 0.0}"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Slider x:Name="SliderLarge" Value="{Binding ElementName=Numeric, Path=MyLargeChange}" SmallChange="0.1" LargeChange="0.1" TickFrequency="0.1"  Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderLarge, Path=Value, StringFormat=LargeChange \= 0.0}"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Slider x:Name="SliderInteger" Value="{Binding ElementName=Numeric, Path=MyDigitsInteger}" SmallChange="1" LargeChange="1" TickFrequency="1"  Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderInteger, Path=Value, StringFormat=Integer整数表示桁数 \= 0}"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <Slider x:Name="SliderDecimal" Value="{Binding ElementName=Numeric, Path=MyDigitsDecimal}" SmallChange="1" LargeChange="1" TickFrequency="1"  Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderDecimal, Path=Value, StringFormat=Decimal少数表示桁数 \= 0}"/>
+      </StackPanel>
+      <Button x:Name="ButtonAutoWidth" Content="AutoWidth" Click="ButtonAutoWidth_Click"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <Slider x:Name="SliderMyWidth" Value="{Binding ElementName=Numeric, Path=MyWidth}" SmallChange="1" LargeChange="10"
+                TickFrequency="1" Minimum="20" Maximum="300" Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderMyWidth, Path=Value, StringFormat=MyWidth \= 0.0}"/>
+      </StackPanel>
+      <Button x:Name="ButtonAutoHeight" Content="AutoHeight" Click="ButtonAutoHeight_Click"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <Slider x:Name="SliderMyHeight" Value="{Binding ElementName=Numeric, Path=MyHeight}" SmallChange="1" LargeChange="10"
+                TickFrequency="1" Minimum="10" Maximum="100" Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderMyHeight, Path=Value, StringFormat=MyHeight \= 0.0}"/>
+      </StackPanel>
+      <Button x:Name="ButtonAutoFontSize" Content="AutoFontSize" Click="ButtonAutoFontSize_Click"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <Slider x:Name="SliderMyFontSize" Value="{Binding ElementName=Numeric, Path=MyFontSize}" SmallChange="1" LargeChange="1"
+                Maximum="100" TickFrequency="1"  Width="150"/>
+        <TextBlock Text="{Binding ElementName=SliderMyFontSize, Path=Value, StringFormat=MyFontSize \= 0}"/>
+      </StackPanel>
+
+     
+      
+    </StackPanel>
+
+  </Grid>
 </Window>
