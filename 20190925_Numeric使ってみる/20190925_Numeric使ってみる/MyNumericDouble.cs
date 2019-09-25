@@ -49,7 +49,7 @@ namespace _20190925_numericDouble
 {
     class MyNumericDouble : StackPanel
     {
-
+        //
         private TextBox MyTextBox;
         private ScrollBar MyScrollBar;
 
