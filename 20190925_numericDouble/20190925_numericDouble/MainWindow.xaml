@@ -1,0 +1,18 @@
+﻿<Window x:Class="_20190925_numericDouble.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:_20190925_numericDouble"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Margin="20">
+    <StackPanel>
+      <Button Name="Button10000" Content="10000"/>
+      <local:MyNumericDouble Height="100" x:Name="Numeric"/>
+      <local:MyNumericDouble Height="100" MyValue="12.34" MyDigitsInteger="10" MyDigitsDecimal="-1"/>
+      <local:MyNumericDouble Height="100" MyValue="3.14" MyDigitsInteger="1" MyDigitsDecimal="5"/>
+    </StackPanel>
+        
+    </Grid>
+</Window>
