@@ -27,8 +27,14 @@ namespace _20190925_numericDouble
             ButtonGetValue.Click += ButtonGetValue_Click;
             Button1.Click += Button1_Click;
 
-            object neko = 99.8;
-            double d = (double)neko;
+            double neko = 0.1;
+            double inu = 0.0;
+            decimal deci = 0m;
+            for (int i = 0; i < 100; i++)
+            {
+                inu += neko;
+                deci += (decimal)neko;
+            }
 
         }
 

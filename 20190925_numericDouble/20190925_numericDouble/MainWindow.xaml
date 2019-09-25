@@ -35,7 +35,8 @@
       </StackPanel>
       <Button x:Name="Button1" Content="set 12.3456"/>
       <StackPanel Orientation="Horizontal">
-        <Slider x:Name="SliderSmall" Value="{Binding ElementName=Numeric, Path=MySmallChange}" SmallChange="0.1" LargeChange="0.1" TickFrequency="0.1" Width="150"/>
+        <Slider x:Name="SliderSmall" Value="{Binding ElementName=Numeric, Path=MySmallChange}" SmallChange="0.1" LargeChange="0.1"
+                Minimum="0.1" Maximum="1.0" TickFrequency="0.1" Width="150"/>
         <TextBlock Text="{Binding ElementName=SliderSmall, Path=Value, StringFormat=SmallChange \= 0.0}"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal">
