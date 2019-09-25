@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using _20190925_numericDouble;
+using _20190925_NumericDecimal;
 
 namespace _20190925_Numeric使ってみる
 {
@@ -24,7 +24,7 @@ namespace _20190925_Numeric使ってみる
         public MainWindow()
         {
             InitializeComponent();
-            MyNumericDouble myNumericDouble = new _20190925_numericDouble.MyNumericDouble();
+            MyNumeric myNumericDouble = new MyNumeric();
             MyStackPanel.Children.Add(myNumericDouble);
 
         }

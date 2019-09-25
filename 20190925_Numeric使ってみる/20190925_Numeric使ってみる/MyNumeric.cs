@@ -12,14 +12,19 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 
 /// <summary>
-/// double型のNumericUpDownのようなもの
+/// Decimal型のNumericUpDownのようなもの
+/// StackPanel
+///     ┣TextBox    数値表示用
+///     ┗ScrollBar  数値変化用
+///     
 /// 指定できる項目は
 /// プロパティ名              内容
-/// Myvalue         数値(double型)
-/// Minimum         最小値
-/// Maximum         最大値
-/// SmallChange     変化値小
-/// LargeChange     変化値大
+/// MyValue         数値(decimal型)、初期値は1.0
+/// MyValue2        TextBoxに表示している数値(decimal型)外部からはgetのみ可能
+/// MyMinimum       最小値、初期値 -10.0
+/// MyMaximum       最大値、初期値 10.0
+/// MySmallChange   変化値小、初期値 1.0
+/// MyLargeChange   変化値大、初期値 10.0
 /// MyWidth         TextBoxの横幅、初期値はdouble.NaNで自動調節
 /// MyHeight        全体(StackPanel)の高さ、初期値はdouble.NaNで自動調節
 /// MyFontSize      初期値はdouble.NaNで普通サイズ？
@@ -31,68 +36,78 @@ using System.Text.RegularExpressions;
 /// MyDigitsInteger = 4, MyDigitsDecimal = 2    0012.34
 /// MyDigitsInteger = 1, MyDigitsDecimal = 2    12.34
 /// MyDigitsInteger = 1, MyDigitsDecimal = 4    12.3400
-/// MyDigitsInteger = 4, MyDigitsDecimal = 0    0012
-/// MyDigitsInteger = 4, MyDigitsDecimal = 0    0012
-/// 
-/// 桁数    int型    double型
-/// 1       12       12.3
-/// 2       12       12.34
-/// 3       012      12.345
-/// 4       0012     12.3456
 /// 
 /// 追加操作
 /// TextBoxの上でマウスホイール回転でSmallChange
 /// ScrollBarの上でマウスホイール回転でLargeChange
 /// </summary>
-
-namespace _20190925_numericDouble
+namespace _20190925_NumericDecimal
 {
-    class MyNumericDouble : StackPanel
+    class MyNumeric : StackPanel
     {
-        //
+
         private TextBox MyTextBox;
         private ScrollBar MyScrollBar;
 
         #region dependencyProperty依存関係プロパティ
-        public double MyValue
+        //内部数値
+        public decimal MyValue
         {
-            get => (double)GetValue(MyValueProperty);
+            get => (decimal)GetValue(MyValueProperty);
             set => SetValue(MyValueProperty, value);
         }
         public static readonly DependencyProperty MyValueProperty =
-            DependencyProperty.Register(nameof(MyValue), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(1.0));
+            DependencyProperty.Register(nameof(MyValue), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(1.0m, MyValuePropertyChanged));
+
+        //表示している数値
+        public decimal MyValue2
+        {
+            get => (decimal)GetValue(MyValue2Property);
+            private set => SetValue(MyValue2Property, value);//外部からはsetできないように
+        }
+        public static readonly DependencyProperty MyValue2Property =
+            DependencyProperty.Register(nameof(MyValue2), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(1.0m));
+
+        //値がセットされたときに上限加減のチェック
+        private static void MyValuePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var nu = (MyNumeric)d;
+            decimal v = nu.MyValue;
+            if (v > nu.MyMaximum) { nu.MyValue = nu.MyMaximum; }
+            else if (v < nu.MyMinimum) { nu.MyValue = nu.MyMinimum; }
+        }
 
 
-        public double Minimum
+        public decimal MyMinimum
         {
-            get => (double)GetValue(MinimumProperty);
-            set => SetValue(MinimumProperty, value);
+            get => (decimal)GetValue(MyMinimumProperty);
+            set => SetValue(MyMinimumProperty, value);
         }
-        public static readonly DependencyProperty MinimumProperty =
-            DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(-10.0));
+        public static readonly DependencyProperty MyMinimumProperty =
+            DependencyProperty.Register(nameof(MyMinimum), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(-10.0m, MyValuePropertyChanged));
 
-        public double Maximum
+        public decimal MyMaximum
         {
-            get => (double)GetValue(MaximumProperty);
-            set => SetValue(MaximumProperty, value);
+            get => (decimal)GetValue(MyMaximumProperty);
+            set => SetValue(MyMaximumProperty, value);
         }
-        public static readonly DependencyProperty MaximumProperty =
-            DependencyProperty.Register(nameof(Maximum), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(100.0));
+        public static readonly DependencyProperty MyMaximumProperty =
+            DependencyProperty.Register(nameof(MyMaximum), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(10.0m, MyValuePropertyChanged));
 
-        public double SmallChange
+        public decimal MySmallChange
         {
-            get => (double)GetValue(SmallChangeProperty);
-            set => SetValue(SmallChangeProperty, value);
+            get => (decimal)GetValue(MySmallChangeProperty);
+            set => SetValue(MySmallChangeProperty, value);
         }
-        public static readonly DependencyProperty SmallChangeProperty =
-            DependencyProperty.Register(nameof(SmallChange), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(1.0));
-        public double LargeChange
+        public static readonly DependencyProperty MySmallChangeProperty =
+            DependencyProperty.Register(nameof(MySmallChange), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(1.0m));
+        public decimal MyLargeChange
         {
-            get => (double)GetValue(LargeChangeProperty);
-            set => SetValue(LargeChangeProperty, value);
+            get => (decimal)GetValue(MyLargeChangeProperty);
+            set => SetValue(MyLargeChangeProperty, value);
         }
-        public static readonly DependencyProperty LargeChangeProperty =
-            DependencyProperty.Register(nameof(LargeChange), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(10.0));
+        public static readonly DependencyProperty MyLargeChangeProperty =
+            DependencyProperty.Register(nameof(MyLargeChange), typeof(decimal), typeof(MyNumeric), new PropertyMetadata(10.0m));
 
         public double MyWidth
         {
@@ -100,7 +115,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyWidthProperty, value);
         }
         public static readonly DependencyProperty MyWidthProperty =
-            DependencyProperty.Register(nameof(MyWidth), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(double.NaN));
+            DependencyProperty.Register(nameof(MyWidth), typeof(double), typeof(MyNumeric), new PropertyMetadata(double.NaN));
 
         public double MyHeight
         {
@@ -108,7 +123,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyHeightProperty, value);
         }
         public static readonly DependencyProperty MyHeightProperty =
-            DependencyProperty.Register(nameof(MyHeight), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(double.NaN));
+            DependencyProperty.Register(nameof(MyHeight), typeof(double), typeof(MyNumeric), new PropertyMetadata(double.NaN));
 
         public double MyFontSize
         {
@@ -116,7 +131,7 @@ namespace _20190925_numericDouble
             set => SetValue(MyFontSizeProperty, value);
         }
         public static readonly DependencyProperty MyFontSizeProperty =
-            DependencyProperty.Register(nameof(MyFontSize), typeof(double), typeof(MyNumericDouble), new PropertyMetadata(double.NaN));
+            DependencyProperty.Register(nameof(MyFontSize), typeof(double), typeof(MyNumeric), new PropertyMetadata(double.NaN));
 
         //整数部分の0埋め桁数
         public int MyDigitsInteger
@@ -125,8 +140,8 @@ namespace _20190925_numericDouble
             set => SetValue(MyDigitsIntegerProperty, value);
         }
         public static readonly DependencyProperty MyDigitsIntegerProperty =
-            DependencyProperty.Register(nameof(MyDigitsInteger), typeof(int), typeof(MyNumericDouble),
-                new PropertyMetadata(4, MyNumberTypePropertyChanged));
+            DependencyProperty.Register(nameof(MyDigitsInteger), typeof(int), typeof(MyNumeric),
+                new PropertyMetadata(4, MyDigitsPropertyChanged));
 
         //小数点以下部分の表示(0埋め)桁数
         public int MyDigitsDecimal
@@ -135,13 +150,13 @@ namespace _20190925_numericDouble
             set => SetValue(MyDigitsDecimalProperty, value);
         }
         public static readonly DependencyProperty MyDigitsDecimalProperty =
-            DependencyProperty.Register(nameof(MyDigitsDecimal), typeof(int), typeof(MyNumericDouble),
-                new PropertyMetadata(0, MyNumberTypePropertyChanged));
+            DependencyProperty.Register(nameof(MyDigitsDecimal), typeof(int), typeof(MyNumeric),
+                new PropertyMetadata(0, MyDigitsPropertyChanged));
 
         //表示桁数変更時に表示を更新
-        private static void MyNumberTypePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void MyDigitsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var nu = (MyNumericDouble)d;
+            var nu = (MyNumeric)d;
 
             string str = "0";
             for (int i = 1; i < nu.MyDigitsInteger; i++)
@@ -153,13 +168,13 @@ namespace _20190925_numericDouble
             {
                 str += "0";
             }
-            
-            nu.MyTextBox.Text = nu.MyValue.ToString(str);
+            str = nu.MyValue.ToString(str);
+            nu.MyTextBox.Text = str;
         }
 
         #endregion
 
-        public MyNumericDouble()
+        public MyNumeric()
         {
             Orientation = Orientation.Horizontal;
             HorizontalAlignment = HorizontalAlignment.Center;
@@ -184,7 +199,7 @@ namespace _20190925_numericDouble
 
 
             //Binding設定
-            void MyBinding(DependencyProperty source, FrameworkElement targetElement, DependencyProperty target)
+            void MyBindingTwoWay(DependencyProperty source, FrameworkElement targetElement, DependencyProperty target)
             {
                 Binding bb = new Binding()
                 {
@@ -194,14 +209,24 @@ namespace _20190925_numericDouble
                 };
                 targetElement.SetBinding(target, bb);
             }
-            MyBinding(MyValueProperty, MyScrollBar, ScrollBar.ValueProperty);
-            MyBinding(MaximumProperty, MyScrollBar, ScrollBar.MaximumProperty);
-            MyBinding(MinimumProperty, MyScrollBar, ScrollBar.MinimumProperty);
-            MyBinding(SmallChangeProperty, MyScrollBar, ScrollBar.SmallChangeProperty);
-            MyBinding(LargeChangeProperty, MyScrollBar, ScrollBar.LargeChangeProperty);
-            MyBinding(MyWidthProperty, MyTextBox, TextBox.WidthProperty);
-            MyBinding(MyHeightProperty, this, StackPanel.HeightProperty);
-            MyBinding(MyFontSizeProperty, MyTextBox, TextBox.FontSizeProperty);
+            void MyBindingOneWay(DependencyProperty source, FrameworkElement targetElement, DependencyProperty target)
+            {
+                Binding bb = new Binding()
+                {
+                    Source = this,
+                    Path = new PropertyPath(source),
+                    Mode = BindingMode.OneWay,
+                };
+                targetElement.SetBinding(target, bb);
+            }
+            MyBindingTwoWay(MyValueProperty, MyScrollBar, ScrollBar.ValueProperty);
+            MyBindingTwoWay(MyMaximumProperty, MyScrollBar, ScrollBar.MaximumProperty);
+            MyBindingTwoWay(MyMinimumProperty, MyScrollBar, ScrollBar.MinimumProperty);
+            MyBindingOneWay(MySmallChangeProperty, MyScrollBar, ScrollBar.SmallChangeProperty);
+            MyBindingOneWay(MyLargeChangeProperty, MyScrollBar, ScrollBar.LargeChangeProperty);
+            MyBindingTwoWay(MyWidthProperty, MyTextBox, TextBox.WidthProperty);
+            MyBindingTwoWay(MyHeightProperty, MyTextBox, StackPanel.HeightProperty);
+            MyBindingTwoWay(MyFontSizeProperty, MyTextBox, TextBox.FontSizeProperty);
 
             //textboxのBindingはConveterを使うので別に設定
             Binding b = new Binding
@@ -214,6 +239,14 @@ namespace _20190925_numericDouble
             };
             MyTextBox.SetBinding(TextBox.TextProperty, b);
 
+            //TextBoxの値をソースに、MyValue2をターゲット
+            b = new Binding
+            {
+                Source = MyTextBox,
+                Path = new PropertyPath(TextBox.TextProperty),
+                Mode = BindingMode.OneWay,
+            };
+            BindingOperations.SetBinding(this, MyValue2Property, b);
         }
 
         #region イベント関連
@@ -231,11 +264,11 @@ namespace _20190925_numericDouble
             ScrollBar sb = (ScrollBar)sender;
             if (e.Delta > 0)
             {
-                MyScrollBar.Value += this.LargeChange;
+                MyValue += this.MyLargeChange;
             }
             else
             {
-                MyScrollBar.Value -= this.LargeChange;
+                MyValue -= this.MyLargeChange;
             }
         }
 
@@ -245,15 +278,16 @@ namespace _20190925_numericDouble
             TextBox tb = (TextBox)sender;
             if (e.Delta > 0)
             {
-                double i = double.Parse(tb.Text) + this.SmallChange;
-                if (Maximum < i) i = Maximum;
-                MyScrollBar.Value = i;
+
+                decimal i = MyValue + this.MySmallChange;
+                if (MyMaximum < i) i = MyMaximum;
+                MyValue = i;
             }
             else
             {
-                double i = double.Parse(tb.Text) - this.SmallChange;
-                if (this.Minimum > i) i = Minimum;
-                MyScrollBar.Value = i;
+                decimal i = MyValue - this.MySmallChange;
+                if (this.MyMinimum > i) i = MyMinimum;
+                MyValue = i;
             }
         }
 
@@ -296,8 +330,8 @@ namespace _20190925_numericDouble
     public class MyConvert : IValueConverter
     {
         /// <summary>
-        /// doubleのvalueをstringに変換、指定桁数分を0で埋めた書式で返す
-        /// parameterにMyNumericDoubleを入れる
+        /// 数値を文字列に変換、指定桁数分を0で埋めた書式で返す
+        /// 
         /// ToStringの書式作成
         /// 整数部分と小数点以下部分を指定された桁ぶんを表示、溢れた部分は0埋めか切り捨てになる
         /// 整数桁3、少数桁4なら書式は"000.0000"で
@@ -305,13 +339,13 @@ namespace _20190925_numericDouble
         /// </summary>
         /// <param name="value"></param>
         /// <param name="targetType"></param>
-        /// <param name="parameter">MyNumericDouble</param>
+        /// <param name="parameter">MyNumeric自身</param>
         /// <param name="culture"></param>
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var param = (MyNumericDouble)parameter;
-            string str="0";//書式作成
+            var param = (MyNumeric)parameter;
+            string str = "0";//書式作成
             for (int i = 1; i < param.MyDigitsInteger; i++)
             {
                 str += "0";
@@ -321,9 +355,12 @@ namespace _20190925_numericDouble
             {
                 str += "0";
             }
-            double v = (double)value;
-            if (v > param.Maximum) v = param.Maximum;
-            else if (v < param.Minimum) v = param.Minimum;
+            decimal v = (decimal)value;
+            //上限下限チェック
+            if (v > param.MyMaximum) v = param.MyMaximum;
+            else if (v < param.MyMinimum) v = param.MyMinimum;
+            //
+            //int ii = (int)v;//切り捨て
             str = v.ToString(str);
             return str;
         }
@@ -334,17 +371,21 @@ namespace _20190925_numericDouble
         /// </summary>
         /// <param name="value"></param>
         /// <param name="targetType"></param>
-        /// <param name="parameter">MyNumericDouble</param>
+        /// <param name="parameter">MyNumeric</param>
         /// <param name="culture"></param>
         /// <returns></returns>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            MyNumericDouble param = (MyNumericDouble)parameter;
+            MyNumeric param = (MyNumeric)parameter;
             string str = (string)value;
-            double v = double.Parse(str);
-            if (v > param.Maximum) v = param.Maximum;
-            else if (v < param.Minimum) v = param.Minimum;
+            decimal v = decimal.Parse(str);
+            if (v > param.MyMaximum) v = param.MyMaximum;
+            else if (v < param.MyMinimum) v = param.MyMinimum;
             return v;
         }
     }
+
+
+
+   
 }
