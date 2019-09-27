@@ -13,10 +13,20 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
+
 using _20190925_NumericDecimal;
+using Microsoft.WindowsAPICodePack.Dialogs;//フォルダ選択用
 
 namespace _20190924_pixtrim2
 {
+    enum SaveImageType
+    {
+        png = 0,
+        jpg,
+        bmp,
+        gif,
+        tiff
+    }
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
     /// </summary>
@@ -26,13 +36,20 @@ namespace _20190924_pixtrim2
         //private List<BitmapSource> ListBitmap;
         private ObservableCollection<MyBitmapSource> ListMyBitmapSource;
         private TrimThumb MyTrimThumb;//切り取り範囲
+        private string SaveDir;//保存フォルダ
 
 
         public MainWindow()
         {
             InitializeComponent();
 
-            ButtonTest.Click += ButtonTest_Click;
+            MyTest();
+            ButtonSave.Click += ButtonSave_Click;
+            ButtonSaveDirSelect.Click += ButtonSaveDirSelect_Click;
+            ButtonSaveDirOpen.Click += ButtonSaveDirOpen_Click;
+            ButtonSaveDirPaste.Click += ButtonSaveDirPaste_Click;
+
+            this.KeyDown += MainWindow_KeyDown;
 
             this.Loaded += MainWindow_Loaded;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
@@ -57,15 +74,197 @@ namespace _20190924_pixtrim2
             MyBinding(MyNumericW, MyNumeric.MyValueProperty, MyTrimThumb, WidthProperty);
             MyBinding(MyNumericH, MyNumeric.MyValueProperty, MyTrimThumb, FrameworkElement.HeightProperty);
 
+            //画像形式コンボボックス初期化
+            ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
+            ComboBoxSaveImageType.SelectedIndex = 0;
         }
+
+
+        #region キーボードで操作
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up) { MyNumericY.MyValue -= MyNumericY.MySmallChange; }
+
+            //if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.Down)
+            //{
+            //    MyNumericY.MyValue += MyNumericY.MyLargeChange;
+            //}
+            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.Up) { MyNumericY.MyValue -= MyNumericY.MyLargeChange; }
+                switch (e.Key)
+                {   case Key.Left:
+                        MyNumericX.MyValue -= MyNumericY.MyLargeChange;
+                        break;
+                    case Key.Up:
+                        MyNumericY.MyValue -= MyNumericY.MyLargeChange;
+                        break;
+                    case Key.Right:
+                        MyNumericX.MyValue += MyNumericY.MyLargeChange;
+                        break;
+                    case Key.Down:
+                        MyNumericY.MyValue += MyNumericY.MyLargeChange;
+                        break;
+                    case Key.P:
+                        break;
+                    case Key.S:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+
+        #endregion
+
+
+        #region 保存フォルダ
+        //パスの貼り付け
+        //        文字列から特定の文字列を取り除くには？［C#／VB］：.NET TIPS - ＠IT
+        //https://www.atmarkit.co.jp/ait/articles/0711/15/news142.html
+
+        private void ButtonSaveDirPaste_Click(object sender, RoutedEventArgs e)
+        {
+            //エクスプローラーのパスのコピーからだと " がついているので取り除く
+            string str = Clipboard.GetText();
+            string target = "\"";
+            str = str.Replace(target, "");
+            if (System.IO.Directory.Exists(str))
+            {
+                TextBoxSaveDir.Text = str;
+                SaveDir = str;
+            }
+            else
+            {
+                MessageBox.Show(str.ToString() + "というフォルダは見当たらない");
+            }
+
+        }
+
+
+        //保存フォルダを開く
+        private void ButtonSaveDirOpen_Click(object sender, RoutedEventArgs e)
+        {
+            string dir = TextBoxSaveDir.Text;
+            if (System.IO.Directory.Exists(dir))
+            {
+                System.Diagnostics.Process.Start(dir);//フォルダを開く
+            }
+            else
+            {
+                MessageBox.Show("\"" + dir.ToString() + "\"" + "というフォルダは見当たらない");
+            }
+        }
+
+        //保存フォルダ選択
+        private void ButtonSaveDirSelect_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
+            dialog.InitialDirectory = SaveDir;
+            dialog.IsFolderPicker = true;
+
+            if (dialog.ShowDialog(this) == CommonFileDialogResult.Ok)
+            {
+                TextBoxSaveDir.Text = dialog.FileName;
+                //var tt = new ToolTip();
+                //tt.Content = temp.FileName;
+                //TextBoxSaveDir.ToolTip = tt;
+
+            }
+
+        }
+
+        //後で消す
+        private void MyTest()
+        {
+            ButtonTest.Click += ButtonTest_Click;
+            SaveDir = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        }
+        #endregion
+
+
+        #region 画像保存
+        //画像保存時、ファイル名の重複を回避、拡張子の前に"_"を付け足す
+        private string GetFileName(MyBitmapSource source)
+        {
+            var dir = System.IO.Path.Combine(SaveDir, source.Name);
+            var ex = "." + ComboBoxSaveImageType.SelectedValue.ToString();
+            var fullPath = dir + ex;
+
+            string bar = "";
+            while (System.IO.File.Exists(fullPath))
+            {
+                bar += "_";
+                fullPath = dir + bar + ex;
+            }
+            return fullPath;
+        }
+        //画像の保存
+        private void ButtonSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListMyBitmapSource.Count == 0) return;
+            //切り抜き範囲取得
+            Int32Rect rect = new Int32Rect((int)MyNumericX.MyValue2,
+                (int)MyNumericY.MyValue2, (int)MyNumericW.MyValue2, (int)MyNumericH.MyValue2);
+
+            //リストの画像全部をCroppedBitmapを使って切り抜いて保存
+            for (int i = 0; i < ListMyBitmapSource.Count; i++)
+            {
+                string filePath = GetFileName(ListMyBitmapSource[i]);
+                SaveImage2(new CroppedBitmap(ListMyBitmapSource[i].Source, rect), filePath);
+            }
+        }
+
+        //Bitmapをファイルに保存
+        private void SaveImage2(BitmapSource bitmap, string filePath)
+        {
+            BitmapEncoder encoder = GetEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using (var fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+            {
+                encoder.Save(fs);
+            }
+        }
+
+        //画像ファイル形式によるEncoder取得
+        private BitmapEncoder GetEncoder()
+        {
+            var type = ComboBoxSaveImageType.SelectedItem;
+
+            switch (type)
+            {
+                case SaveImageType.png:
+                    return new PngBitmapEncoder();
+                case SaveImageType.jpg:
+                    var jpeg = new JpegBitmapEncoder();
+                    jpeg.QualityLevel = (int)MyNumericJpegQuality.MyValue2;
+                    return jpeg;
+                case SaveImageType.bmp:
+                    return new BmpBitmapEncoder();
+                case SaveImageType.gif:
+                    return new GifBitmapEncoder();
+                case SaveImageType.tiff:
+                    return new TiffBitmapEncoder();
+                default:
+                    throw new Exception();
+            }
+        }
+
+        #endregion
+
 
         private void ButtonTest_Click(object sender, RoutedEventArgs e)
         {
             var x = Canvas.GetLeft(MyTrimThumb);
             var vx = MyNumericX.MyValue;
+            var ty = ComboBoxSaveImageType.SelectedItem;
+            var tv = ComboBoxSaveImageType.SelectedValue;
+            var type = GetEncoder();
         }
 
-        private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty, 
+        private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty,
             FrameworkElement target, DependencyProperty targetProperty)
         {
             var b = new Binding()
@@ -129,13 +328,9 @@ namespace _20190924_pixtrim2
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
 
-                        //int sn = decimal.Parse(MyNumericSerial.MyValue2);
-                        //string number = $"{sn,0:00000}";
                         string name = TextBox_FileName.Text + MyNumericSerial.GetText();
                         MyNumericSerial.MyValue++;
-                        //sn = int.Parse(TextBox_SerialNumber.Text) + 1;
-                        //TextBox_SerialNumber.Text = $"{sn,0:D5}";
-                        //TextBox_SerialNumber.Text = $"{sn,0:00000}";
+                        //TextBox_SerialNumber.Text = $"{sn,0:D5}";                        
                         var source = new MyBitmapSource(bitmap, name);
                         ListMyBitmapSource.Add(source);
                         MyListBox.SelectedItem = source;

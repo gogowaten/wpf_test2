@@ -7,6 +7,13 @@
         xmlns:nu="clr-namespace:_20190925_NumericDecimal"
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="800">
+  <Window.Resources>
+    <Style TargetType="TextBlock">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="10,0,0,0"/>
+    </Style>
+  </Window.Resources>
+  
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="200" Name="MySide"/>
@@ -15,31 +22,35 @@
     <DockPanel>
       <StackPanel DockPanel.Dock="Top">
         <Button x:Name="ButtonTest" Content="Test"/>
-        <Button Content="実行"/>
+        <Button Content="実行" Name="ButtonSave"/>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="保存形式" VerticalAlignment="Center"/>
-          <ComboBox>
-            <ComboBoxItem Content="png"/>
-          </ComboBox>
+          <TextBlock Text="保存形式"/>
+          <ComboBox Name="ComboBoxSaveImageType" VerticalAlignment="Center"/>
+          <TextBlock Text="jpeg画質="/>
+          <nu:MyNumeric x:Name="MyNumericJpegQuality" MyMinimum="1" MyMaximum="100" MyValue="97" MyDigitsInteger="3"/>
+
         </StackPanel>
-        <Button Content="保存場所"/>
-        <Button Content="保存場所を開く"/>
+        <Button Content="保存場所変更" Name="ButtonSaveDirSelect"/>
+        <Button Content="保存場所を開く" Name="ButtonSaveDirOpen"/>
+        <Button Content="貼り付け" Name="ButtonSaveDirPaste"/>
+        <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="False"/>
+        <ComboBox Name="BomboBoxSaveDir"/>
 
         <GroupBox Padding="10" Header="切り取り範囲">
           <StackPanel>
             <StackPanel Orientation="Horizontal">              
-              <TextBlock Text="サイズ" VerticalAlignment="Center"/>
+              <TextBlock Text="サイズ"/>
               <nu:MyNumeric x:Name="MyNumericW" MyMinimum="1" MyMaximum="100000" MyValue="100"/>
-              <TextBlock Text="x" VerticalAlignment="Center"/>
+              <TextBlock Text="x"/>
               <nu:MyNumeric x:Name="MyNumericH" MyMinimum="1" MyMaximum="100000" MyValue="100"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="左上位置"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-              <TextBlock Text="X:" VerticalAlignment="Center"/>
+              <TextBlock Text="X="/>
               <nu:MyNumeric x:Name="MyNumericX" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
-              <TextBlock Text="Y:" VerticalAlignment="Center"/>
+              <TextBlock Text="Y="/>
               <nu:MyNumeric x:Name="MyNumericY" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
             </StackPanel>
             
