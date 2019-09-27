@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20190924_pixtrim2"
+        xmlns:nu="clr-namespace:_20190925_NumericDecimal"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="500" Width="800">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="200" Name="MySide"/>
@@ -13,6 +14,7 @@
     </Grid.ColumnDefinitions>
     <DockPanel>
       <StackPanel DockPanel.Dock="Top">
+        <Button x:Name="ButtonTest" Content="Test"/>
         <Button Content="実行"/>
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="保存形式" VerticalAlignment="Center"/>
@@ -25,16 +27,22 @@
 
         <GroupBox Padding="10" Header="切り取り範囲">
           <StackPanel>
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="横幅, 高さ"/>
-              <TextBox Text="100"/>
-              <TextBox Text="100"/>
+            <StackPanel Orientation="Horizontal">              
+              <TextBlock Text="サイズ" VerticalAlignment="Center"/>
+              <nu:MyNumeric x:Name="MyNumericW" MyMinimum="1" MyMaximum="100000" MyValue="100"/>
+              <TextBlock Text="x" VerticalAlignment="Center"/>
+              <nu:MyNumeric x:Name="MyNumericH" MyMinimum="1" MyMaximum="100000" MyValue="100"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="左上位置"/>
-              <TextBox Text="100"/>
-              <TextBox Text="100"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="X:" VerticalAlignment="Center"/>
+              <nu:MyNumeric x:Name="MyNumericX" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
+              <TextBlock Text="Y:" VerticalAlignment="Center"/>
+              <nu:MyNumeric x:Name="MyNumericY" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
+            </StackPanel>
+            
           </StackPanel>
         </GroupBox>
 
@@ -43,7 +51,7 @@
             <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視" IsChecked="True"/>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="連番"/>
-              <TextBox Text="00001" Name="TextBox_SerialNumber"/>
+              <nu:MyNumeric x:Name="MyNumericSerial" MyMinimum="0" MyMaximum="1000000" MyValue="1"/>              
             </StackPanel>
             <CheckBox Content="音"/>
             <CheckBox Content="自動保存"/>

@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
-
+using _20190925_NumericDecimal;
 
 namespace _20190924_pixtrim2
 {
@@ -27,9 +27,12 @@ namespace _20190924_pixtrim2
         private ObservableCollection<MyBitmapSource> ListMyBitmapSource;
         private TrimThumb MyTrimThumb;//切り取り範囲
 
+
         public MainWindow()
         {
             InitializeComponent();
+
+            ButtonTest.Click += ButtonTest_Click;
 
             this.Loaded += MainWindow_Loaded;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
@@ -44,11 +47,34 @@ namespace _20190924_pixtrim2
 
             //切り取り範囲Thumb初期化
 
-            MyTrimThumb = new TrimThumb(MyCanvas, 20, 100, 100, 100, 100);
+            MyTrimThumb = new TrimThumb(MyCanvas, 20, (int)MyNumericX.MyValue2, 100, 100, 100);
             MyTrimThumb.SetBackGroundColor(Color.FromArgb(100, 0, 0, 0));
             MyCanvas.Children.Add(MyTrimThumb);
             //NumericUDInteger nn = new NumericUDInteger();
 
+            MyBinding(MyNumericX, MyNumeric.MyValueProperty, MyTrimThumb, Window.LeftProperty);
+            MyBinding(MyNumericY, MyNumeric.MyValueProperty, MyTrimThumb, Window.TopProperty);
+            MyBinding(MyNumericW, MyNumeric.MyValueProperty, MyTrimThumb, WidthProperty);
+            MyBinding(MyNumericH, MyNumeric.MyValueProperty, MyTrimThumb, FrameworkElement.HeightProperty);
+
+        }
+
+        private void ButtonTest_Click(object sender, RoutedEventArgs e)
+        {
+            var x = Canvas.GetLeft(MyTrimThumb);
+            var vx = MyNumericX.MyValue;
+        }
+
+        private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty, 
+            FrameworkElement target, DependencyProperty targetProperty)
+        {
+            var b = new Binding()
+            {
+                Source = source,
+                Path = new PropertyPath(sourceProperty),
+                Mode = BindingMode.TwoWay
+            };
+            target.SetBinding(targetProperty, b);
         }
 
 
@@ -103,13 +129,13 @@ namespace _20190924_pixtrim2
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
 
-                        int sn = int.Parse(TextBox_SerialNumber.Text);
-                        string number = $"{sn,0:00000}";
-                        string name = TextBox_FileName.Text + number;
-
-                        sn = int.Parse(TextBox_SerialNumber.Text) + 1;
+                        //int sn = decimal.Parse(MyNumericSerial.MyValue2);
+                        //string number = $"{sn,0:00000}";
+                        string name = TextBox_FileName.Text + MyNumericSerial.GetText();
+                        MyNumericSerial.MyValue++;
+                        //sn = int.Parse(TextBox_SerialNumber.Text) + 1;
                         //TextBox_SerialNumber.Text = $"{sn,0:D5}";
-                        TextBox_SerialNumber.Text = $"{sn,0:00000}";
+                        //TextBox_SerialNumber.Text = $"{sn,0:00000}";
                         var source = new MyBitmapSource(bitmap, name);
                         ListMyBitmapSource.Add(source);
                         MyListBox.SelectedItem = source;
