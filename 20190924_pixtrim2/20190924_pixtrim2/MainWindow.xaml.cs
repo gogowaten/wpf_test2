@@ -34,22 +34,26 @@ namespace _20190924_pixtrim2
     {
         private ClipboardWatcher ClipboardWatcher;
         //private List<BitmapSource> ListBitmap;
-        private ObservableCollection<MyBitmapSource> ListMyBitmapSource;
+        private ObservableCollection<MyBitmapAndName> ListMyBitmapSource;
         private TrimThumb MyTrimThumb;//切り取り範囲
         private string SaveDir;//保存フォルダ
-
+        private Window1 window1 = new Window1();
 
         public MainWindow()
         {
             InitializeComponent();
 
             MyTest();
+
+
             ButtonSave.Click += ButtonSave_Click;
+            ButtonPreview.Click += ButtonPreview_Click;
             ButtonSaveDirSelect.Click += ButtonSaveDirSelect_Click;
             ButtonSaveDirOpen.Click += ButtonSaveDirOpen_Click;
             ButtonSaveDirPaste.Click += ButtonSaveDirPaste_Click;
 
-            this.KeyDown += MainWindow_KeyDown;
+            //this.KeyDown += MainWindow_KeyDown;
+            this.PreviewKeyDown += MainWindow_KeyDown;
 
             this.Loaded += MainWindow_Loaded;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
@@ -57,14 +61,14 @@ namespace _20190924_pixtrim2
 
             //ListBitmap = new List<BitmapSource>();
 
-            ListMyBitmapSource = new ObservableCollection<MyBitmapSource>();
+            ListMyBitmapSource = new ObservableCollection<MyBitmapAndName>();
             ListMyBitmapSource.CollectionChanged += ListName_CollectionChanged;
             MyButtonRemoveSelectedImtem.Click += MyButtonRemoveSelectedImtem_Click;
             MyListBox.DataContext = ListMyBitmapSource;
 
             //切り取り範囲Thumb初期化
-
             MyTrimThumb = new TrimThumb(MyCanvas, 20, (int)MyNumericX.MyValue2, 100, 100, 100);
+            MyTrimThumb.Focusable = true;//重要！！！
             MyTrimThumb.SetBackGroundColor(Color.FromArgb(100, 0, 0, 0));
             MyCanvas.Children.Add(MyTrimThumb);
             //NumericUDInteger nn = new NumericUDInteger();
@@ -77,23 +81,150 @@ namespace _20190924_pixtrim2
             //画像形式コンボボックス初期化
             ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
             ComboBoxSaveImageType.SelectedIndex = 0;
+
+            //プレビューウィンドウ
+            //window1 = new Window1();
+
+            //切り抜き後の拡縮
+            SliderSaveScale.ValueChanged += SliderSaveScale_ValueChanged;
+        }
+
+
+
+        private void NearestnaverScaleUp(BitmapSource bitmap, int scale)
+        {
+            int w = bitmap.PixelWidth;
+            int h = bitmap.PixelHeight;
+            int stride = w * 4;
+            byte[] pixels = new byte[h * stride];
+            bitmap.CopyPixels(pixels, stride, 0);
+
+
+            int ww = w * scale; int hh = h * scale; int stride2 = ww * 4;
+            byte[] pixels2 = new byte[hh * stride2];
+            int p, pp;
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    p = y * stride + x * 4;
+                    for (int yy = y * scale; yy < y * scale + scale; yy++)
+                    {
+                        for (int xx = x * scale; xx < x * scale + scale; xx++)
+                        {
+                            pp = yy * stride2 + xx * 4;
+                            pixels2[pp] = pixels[p];
+                            pixels2[pp + 1] = pixels[p + 1];
+                            pixels2[pp + 2] = pixels[p + 2];
+                            pixels2[pp + 3] = pixels[p + 3];
+                        }
+                    }
+
+                }
+            }
+            BitmapSource bmp = BitmapSource.Create(ww, hh, 96, 96, bitmap.Format, null, pixels2, stride2);
+            SaveImage(bmp, MakeFullPath(ListMyBitmapSource[0].Name));
+        }
+
+        private void NearestnaverScaleDown(BitmapSource bitmap, int scale)
+        {
+            int w = bitmap.PixelWidth;
+            int h = bitmap.PixelHeight;
+            int stride = w * 4;
+            byte[] pixels = new byte[h * stride];
+            bitmap.CopyPixels(pixels, stride, 0);
+
+
+            int ww = w * 1 / scale;
+            int hh = h * 1 / scale;
+            int stride2 = ww * 4;
+            byte[] pixels2 = new byte[hh * stride2];
+            int p, pp;
+            for (int y = 0; y < hh; y++)
+            {
+                for (int x = 0; x < ww; x++)
+                {
+                    pp = y * stride2 + x * 4;
+                    p = (y * scale * stride) + (x * scale * 4);
+
+                    pixels2[pp] = pixels[p];
+                    pixels2[pp + 1] = pixels[p + 1];
+                    pixels2[pp + 2] = pixels[p + 2];
+                    pixels2[pp + 3] = pixels[p + 3];
+
+                }
+            }
+            BitmapSource bmp = BitmapSource.Create(ww, hh, 96, 96, bitmap.Format, null, pixels2, stride2);
+            SaveImage(bmp, MakeFullPath(ListMyBitmapSource[0].Name));
+        }
+
+
+        private void SliderSaveScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            string str;
+            int i = (int)SliderSaveScale.Value;
+            if (i < 0) { str = $"1/{-i + 1}"; }
+            else { str = $"x{i + 1}"; }
+            TextBoxSaveScale.Text = str;
+        }
+
+
+
+        //プレビュー
+        private void ButtonPreview_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListMyBitmapSource.Count == 0) return;
+            var bs = (MyBitmapAndName)MyListBox.SelectedItem;
+            BitmapSource bmp = MakeCroppedBitmap(bs.Source);
+            //window1.MyPreview.RenderTransform = new ScaleTransform(0.25, 0.25);
+            int i = (int)SliderSaveScale.Value;
+            double rate = (i < 0) ? 1.0 / (-i + 1) : i + 1;
+            var scale = new ScaleTransform(rate, rate);
+
+            window1.MyPreview.RenderTransform = scale;
+            window1.MaxWidth = this.ActualWidth;
+            window1.MaxHeight = this.ActualHeight;
+            window1.MyPreview.Source = bmp;
+            window1.Visibility = Visibility.Visible;
+            //window1.Show();
+            //window1.Owner = this;
+
+            //切り抜いた画像を拡縮表示は別ウィンドウに表示して、それをBitmapレンダーで保存？
+            //できたけど、別ウィンドウを表示した状態visivleじゃないと画像が更新されない
+            //自分で拡縮したほうがいいかも？
         }
 
 
         #region キーボードで操作
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Up) { MyNumericY.MyValue -= MyNumericY.MySmallChange; }
-
-            //if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.Down)
-            //{
-            //    MyNumericY.MyValue += MyNumericY.MyLargeChange;
-            //}
-            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            //ctrl+Shift、サイズ変更、ラージ
+            if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
             {
-                if (e.Key == Key.Up) { MyNumericY.MyValue -= MyNumericY.MyLargeChange; }
                 switch (e.Key)
-                {   case Key.Left:
+                {
+                    case Key.Left:
+                        MyNumericW.MyValue -= MyNumericW.MyLargeChange;
+                        break;
+                    case Key.Up:
+                        MyNumericH.MyValue -= MyNumericH.MyLargeChange;
+                        break;
+                    case Key.Right:
+                        MyNumericW.MyValue += MyNumericW.MyLargeChange;
+                        break;
+                    case Key.Down:
+                        MyNumericH.MyValue += MyNumericH.MyLargeChange;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //ctrl+、移動、ラージ
+            else if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
                         MyNumericX.MyValue -= MyNumericY.MyLargeChange;
                         break;
                     case Key.Up:
@@ -108,6 +239,48 @@ namespace _20190924_pixtrim2
                     case Key.P:
                         break;
                     case Key.S:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //shift+、サイズ変更、スモール
+            else if (e.KeyboardDevice.Modifiers == ModifierKeys.Shift)
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        MyNumericW.MyValue -= MyNumericW.MySmallChange;
+                        break;
+                    case Key.Up:
+                        MyNumericH.MyValue -= MyNumericH.MySmallChange;
+                        break;
+                    case Key.Right:
+                        MyNumericW.MyValue += MyNumericW.MySmallChange;
+                        break;
+                    case Key.Down:
+                        MyNumericH.MyValue += MyNumericH.MySmallChange;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //移動、スモール
+            else
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        MyNumericX.MyValue -= MyNumericY.MySmallChange;
+                        break;
+                    case Key.Up:
+                        MyNumericY.MyValue -= MyNumericY.MySmallChange;
+                        break;
+                    case Key.Right:
+                        MyNumericX.MyValue += MyNumericY.MySmallChange;
+                        break;
+                    case Key.Down:
+                        MyNumericY.MyValue += MyNumericY.MySmallChange;
                         break;
                     default:
                         break;
@@ -186,10 +359,43 @@ namespace _20190924_pixtrim2
 
 
         #region 画像保存
-        //画像保存時、ファイル名の重複を回避、拡張子の前に"_"を付け足す
-        private string GetFileName(MyBitmapSource source)
+
+        //画像の保存
+        private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-            var dir = System.IO.Path.Combine(SaveDir, source.Name);
+            if (ListMyBitmapSource.Count == 0) return;
+
+            //リストの画像全部を保存
+            for (int i = 0; i < ListMyBitmapSource.Count; i++)
+            {
+                SaveImage(ListMyBitmapSource[i]);
+            }
+        }
+
+        //画像保存処理
+        private void SaveImage(MyBitmapAndName data)
+        {
+            //CroppedBitmapで切り抜いた画像で保存
+            SaveImage(MakeCroppedBitmap(data.Source), data.Name);
+        }
+
+        //Bitmapをファイルに保存
+        private void SaveImage(BitmapSource bitmap, string fileName)
+        {
+            //CroppedBitmapで切り抜いた画像でBitmapFrame作成して保存
+            BitmapEncoder encoder = GetEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using (var fs = new System.IO.FileStream(
+                MakeFullPath(fileName), System.IO.FileMode.Create, System.IO.FileAccess.Write))
+            {
+                encoder.Save(fs);
+            }
+        }
+
+        //ファイル名の重複を回避、拡張子の前に"_"を付け足す
+        private string MakeFullPath(string fileName)
+        {
+            var dir = System.IO.Path.Combine(SaveDir, fileName);
             var ex = "." + ComboBoxSaveImageType.SelectedValue.ToString();
             var fullPath = dir + ex;
 
@@ -201,32 +407,17 @@ namespace _20190924_pixtrim2
             }
             return fullPath;
         }
-        //画像の保存
-        private void ButtonSave_Click(object sender, RoutedEventArgs e)
+
+
+        //CroppedBitmapを使って切り抜いた画像を作成
+        private BitmapSource MakeCroppedBitmap(BitmapSource bitmap)
         {
-            if (ListMyBitmapSource.Count == 0) return;
             //切り抜き範囲取得
-            Int32Rect rect = new Int32Rect((int)MyNumericX.MyValue2,
+            var rect = new Int32Rect((int)MyNumericX.MyValue2,
                 (int)MyNumericY.MyValue2, (int)MyNumericW.MyValue2, (int)MyNumericH.MyValue2);
-
-            //リストの画像全部をCroppedBitmapを使って切り抜いて保存
-            for (int i = 0; i < ListMyBitmapSource.Count; i++)
-            {
-                string filePath = GetFileName(ListMyBitmapSource[i]);
-                SaveImage2(new CroppedBitmap(ListMyBitmapSource[i].Source, rect), filePath);
-            }
+            return new CroppedBitmap(bitmap, rect);
         }
 
-        //Bitmapをファイルに保存
-        private void SaveImage2(BitmapSource bitmap, string filePath)
-        {
-            BitmapEncoder encoder = GetEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmap));
-            using (var fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create, System.IO.FileAccess.Write))
-            {
-                encoder.Save(fs);
-            }
-        }
 
         //画像ファイル形式によるEncoder取得
         private BitmapEncoder GetEncoder()
@@ -262,6 +453,20 @@ namespace _20190924_pixtrim2
             var ty = ComboBoxSaveImageType.SelectedItem;
             var tv = ComboBoxSaveImageType.SelectedValue;
             var type = GetEncoder();
+            var aw = window1.MyPreview.ActualWidth;
+
+            //var bmp = MakeCroppedBitmap(ListMyBitmapSource[0].Source);
+            //window1.MyPreview.Source = bmp;
+            //window1.Show();
+            //var im = window1.MyPreview;
+            //var rb = new RenderTargetBitmap(200, 200, 96, 96, PixelFormats.Default);
+            //rb.Render(im);
+            //SaveImage2(rb, GetFileName(ListMyBitmapSource[0]));
+
+            //var bmp = MakeCroppedBitmap(ListMyBitmapSource[0].Source);
+            //NearestnaverScaleDown(bmp, 2);
+
+            var ti = GetStringNowTime();
         }
 
         private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty,
@@ -280,12 +485,12 @@ namespace _20190924_pixtrim2
         private void MyButtonRemoveSelectedImtem_Click(object sender, RoutedEventArgs e)
         {
             //選択アイテム削除
-            var cc = new ObservableCollection<MyBitmapSource>();
-            foreach (MyBitmapSource item in MyListBox.SelectedItems)
+            var cc = new ObservableCollection<MyBitmapAndName>();
+            foreach (MyBitmapAndName item in MyListBox.SelectedItems)
             {
                 cc.Add(item);
             }
-            foreach (MyBitmapSource item in cc)
+            foreach (MyBitmapAndName item in cc)
             {
                 ListMyBitmapSource.Remove(item);
             }
@@ -299,7 +504,7 @@ namespace _20190924_pixtrim2
 
         private void MyListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            MyBitmapSource myBitmap = (MyBitmapSource)MyListBox.SelectedItem;
+            MyBitmapAndName myBitmap = (MyBitmapAndName)MyListBox.SelectedItem;
             if (myBitmap == null)
             {
                 MyImage.Source = null;
@@ -311,6 +516,8 @@ namespace _20190924_pixtrim2
             }
         }
 
+        //クリップボード更新時に画像取得してリストに追加、名前もつける
+        //画像取得時に失敗することがあるので指定回数連続トライしている
         private void ClipboardWatcher_DrawClipboard(object sender, EventArgs e)
         {
             if (Clipboard.ContainsImage())
@@ -323,19 +530,13 @@ namespace _20190924_pixtrim2
                     try
                     {
                         bitmap = Clipboard.GetImage();
-
-                        //MyImage.Source = bitmap;
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
-
-                        string name = TextBox_FileName.Text + MyNumericSerial.GetText();
-                        MyNumericSerial.MyValue++;
-                        //TextBox_SerialNumber.Text = $"{sn,0:D5}";                        
-                        var source = new MyBitmapSource(bitmap, name);
+                        //画像と名前をリストに追加
+                        var source = new MyBitmapAndName(bitmap, TextBox_FileName.Text + GetStringNowTime());
                         ListMyBitmapSource.Add(source);
                         MyListBox.SelectedItem = source;
                         MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
-
                     }
                     catch (Exception ex)
                     {
@@ -348,6 +549,17 @@ namespace _20190924_pixtrim2
                     finally { count++; }
                 } while (limit >= count && bitmap == null);
             }
+        }
+
+        //        【C#入門】現在時刻を取得する方法(DateTime.Now/UtcNow) | 侍エンジニア塾ブログ（Samurai Blog） - プログラミング入門者向けサイト
+        //https://www.sejuku.net/blog/51208
+
+        //今の日時をStringで作成
+        private string GetStringNowTime()
+        {
+            DateTime dt = DateTime.Now;
+            string str = dt.ToString("yyyyMMdd" + "_" + "HHmmss" + "_" + dt.Millisecond.ToString());
+            return str;
         }
 
         private void CheckBox_ClipCheck_Click(object sender, RoutedEventArgs e)
@@ -365,13 +577,15 @@ namespace _20190924_pixtrim2
             if (CheckBox_ClipCheck.IsChecked == true) ClipboardWatcher.Start();
         }
 
+
+
     }
 
-    public class MyBitmapSource
+    public class MyBitmapAndName
     {
         public BitmapSource Source { get; }
         public string Name { get; }
-        public MyBitmapSource(BitmapSource source, string name)
+        public MyBitmapAndName(BitmapSource source, string name)
         {
             Source = source;
             Name = name;

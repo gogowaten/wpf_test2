@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:_20190924_pixtrim2"
         xmlns:nu="clr-namespace:_20190925_NumericDecimal"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="800">
+        Title="MainWindow" Height="700" Width="800">
   <Window.Resources>
     <Style TargetType="TextBlock">
       <Setter Property="VerticalAlignment" Value="Center"/>
@@ -23,6 +23,7 @@
       <StackPanel DockPanel.Dock="Top">
         <Button x:Name="ButtonTest" Content="Test"/>
         <Button Content="実行" Name="ButtonSave"/>
+        <Button Content="プレビュー" Name="ButtonPreview"/>
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="保存形式"/>
           <ComboBox Name="ComboBoxSaveImageType" VerticalAlignment="Center"/>
@@ -52,26 +53,33 @@
               <nu:MyNumeric x:Name="MyNumericX" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
               <TextBlock Text="Y="/>
               <nu:MyNumeric x:Name="MyNumericY" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
-            </StackPanel>
-            
+            </StackPanel>            
           </StackPanel>
         </GroupBox>
+
+        <StackPanel>
+          <TextBlock Text="切り抜き後の拡大率"/>
+          <DockPanel FlowDirection="RightToLeft">
+          <TextBlock Name="TextBoxSaveScale" Text="x1"/>
+            <Slider Name="SliderSaveScale" Value="0" Minimum="-3" Maximum="3" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
+          </DockPanel>
+        </StackPanel>
 
         <GroupBox Padding="10" Header="クリップボード">
           <StackPanel>
             <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視" IsChecked="True"/>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="連番"/>
-              <nu:MyNumeric x:Name="MyNumericSerial" MyMinimum="0" MyMaximum="1000000" MyValue="1"/>              
+              <!--<nu:MyNumeric x:Name="MyNumericSerial" MyMinimum="0" MyMaximum="1000000" MyValue="1"/>-->              
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="ファイル名"/>
+              <TextBox Text="ファイル名_" Name="TextBox_FileName"/>
             </StackPanel>
             <CheckBox Content="音"/>
             <CheckBox Content="自動保存"/>
             <Button Content="音の確認"/>
             <Button Content="音声ファイル選択"/>
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="ファイル名"/>
-              <TextBox Text="ファイル名_" Name="TextBox_FileName"/>
-            </StackPanel>
           </StackPanel>
         </GroupBox>
 
