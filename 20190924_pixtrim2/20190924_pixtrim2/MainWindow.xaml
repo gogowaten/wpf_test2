@@ -13,7 +13,7 @@
       <Setter Property="Margin" Value="10,0,0,0"/>
     </Style>
   </Window.Resources>
-  
+
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="200" Name="MySide"/>
@@ -39,7 +39,7 @@
 
         <GroupBox Padding="10" Header="切り取り範囲">
           <StackPanel>
-            <StackPanel Orientation="Horizontal">              
+            <StackPanel Orientation="Horizontal">
               <TextBlock Text="サイズ"/>
               <nu:MyNumeric x:Name="MyNumericW" MyMinimum="1" MyMaximum="100000" MyValue="100"/>
               <TextBlock Text="x"/>
@@ -53,14 +53,14 @@
               <nu:MyNumeric x:Name="MyNumericX" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
               <TextBlock Text="Y="/>
               <nu:MyNumeric x:Name="MyNumericY" MyMinimum="0" MyMaximum="100000" MyValue="0"/>
-            </StackPanel>            
+            </StackPanel>
           </StackPanel>
         </GroupBox>
 
         <StackPanel>
           <TextBlock Text="切り抜き後の拡大率"/>
           <DockPanel FlowDirection="RightToLeft">
-          <TextBlock Name="TextBoxSaveScale" Text="x1"/>
+            <TextBlock Name="TextBoxSaveScale" Text="x1"/>
             <Slider Name="SliderSaveScale" Value="0" Minimum="-3" Maximum="3" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
           </DockPanel>
         </StackPanel>
@@ -69,30 +69,23 @@
           <StackPanel>
             <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視" IsChecked="True"/>
             <StackPanel Orientation="Horizontal">
-              <TextBlock Text="連番"/>
-              <!--<nu:MyNumeric x:Name="MyNumericSerial" MyMinimum="0" MyMaximum="1000000" MyValue="1"/>-->              
+              <!--<nu:MyNumeric x:Name="MyNumericSerial" MyMinimum="0" MyMaximum="1000000" MyValue="1"/>-->
             </StackPanel>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="ファイル名"/>
-              <TextBox Text="ファイル名_" Name="TextBox_FileName"/>
+              <TextBox Text="ファイル名_" Name="TextBox_FileName" MinWidth="100"/>
             </StackPanel>
-            <CheckBox Content="音"/>
-            <CheckBox Content="自動保存"/>
-            <Button Content="音の確認"/>
-            <Button Content="音声ファイル選択"/>
+            <CheckBox Content="自動保存" IsEnabled="False"/>
+            <GroupBox Header="音" IsEnabled="False">
+              <StackPanel>
+                <CheckBox Content="音"/>
+                <Button Content="音の確認"/>
+                <Button Content="音声ファイル選択"/>
+              </StackPanel>
+            </GroupBox>
           </StackPanel>
         </GroupBox>
 
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="拡縮"/>
-          <Button Content="x0.25"/>
-          <Button Content="x0.5"/>
-          <Button Content="x1"/>
-          <Button Content="x2"/>
-          <Button Content="x3"/>
-          <Button Content="x4"/>
-        </StackPanel>
-        <Button Content="リストクリア"/>
         <Button Content="選択アイテム削除" Name="MyButtonRemoveSelectedImtem"/>
       </StackPanel>
       <ListBox DockPanel.Dock="Top" Name="MyListBox" ItemsSource="{Binding}" SelectionMode="Extended">
