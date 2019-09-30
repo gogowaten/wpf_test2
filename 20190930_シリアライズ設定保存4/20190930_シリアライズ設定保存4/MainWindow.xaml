@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20190930_シリアライズ設定保存4"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+          Title="MainWindow" Height="450" Width="400">
+  <Grid Margin="20">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="150"/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+    <StackPanel>
+      <Slider Name="MySliderLeft" TickFrequency="1.0" IsSnapToTickEnabled="True" Maximum="100" Value="{Binding Path=Left}"/>
+      <TextBlock Text="{Binding ElementName=MySliderLeft, Path=Value, StringFormat=x \= 000}"/>
+      <Slider Name="MySliderTop" TickFrequency="1.0" IsSnapToTickEnabled="True" Value="20" Maximum="100"/>
+      <TextBlock Text="{Binding ElementName=MySliderTop, Path=Value, StringFormat=y \= 000}"/>
+      <Button Name="ButtonSave" Content="設定保存"/>
+      <Button Name="ButtonLoad" Content="設定読み込み" Click="ButtonLoad_Click"/>
+      <Button x:Name="ButtonColorCyan" Content="ColorCyan"/>
+      <Button Name="ButtonColorMediumPurple" Content="MediumPurple"/>
+      <Button Name="ButtonKakunin" Content="kakunin" Click="ButtonKakunin_Click"/>
+    </StackPanel>
+    <Canvas Name="MyCanvas" Grid.Column="1">
+      <Border Name="MyBorder" Background="MediumPurple" Width="100" Height="100"/>
+    </Canvas>
+  </Grid>
 </Window>
