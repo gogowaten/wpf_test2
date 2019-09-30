@@ -16,10 +16,10 @@
 
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="200" Name="MySide"/>
+      <ColumnDefinition Width="250" Name="GridLeft"/>
       <ColumnDefinition/>
     </Grid.ColumnDefinitions>
-    <DockPanel>
+    <DockPanel Name="DockPanelMain">
       <StackPanel DockPanel.Dock="Top">
         <Button x:Name="ButtonTest" Content="Test"/>
         <Button Content="実行" Name="ButtonSave"/>
@@ -35,7 +35,7 @@
         <Button Content="保存場所を開く" Name="ButtonSaveDirOpen"/>
         <Button Content="貼り付け" Name="ButtonSaveDirPaste"/>
         <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="False"/>
-        <ComboBox Name="BomboBoxSaveDir"/>
+        <ComboBox Name="ComboBoxSaveDir"/>
 
         <GroupBox Padding="10" Header="切り取り範囲">
           <StackPanel>
@@ -64,7 +64,7 @@
             <Slider Name="SliderSaveScale" Value="0" Minimum="-3" Maximum="3" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
           </DockPanel>
         </StackPanel>
-
+        <TextBox Name="TextBoxDammy" Text="dammy"/>
         <GroupBox Padding="10" Header="クリップボード">
           <StackPanel>
             <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視" IsChecked="True"/>
@@ -75,16 +75,17 @@
               <TextBlock Text="ファイル名"/>
               <TextBox Text="ファイル名_" Name="TextBox_FileName" MinWidth="100"/>
             </StackPanel>
-            <CheckBox Content="自動保存" IsEnabled="False"/>
-            <GroupBox Header="音" IsEnabled="False">
-              <StackPanel>
-                <CheckBox Content="音"/>
-                <Button Content="音の確認"/>
-                <Button Content="音声ファイル選択"/>
-              </StackPanel>
-            </GroupBox>
+            <CheckBox Content="自動保存" Name="CheckBoxSaveAuto"/>
           </StackPanel>
         </GroupBox>
+            <GroupBox Header="音" IsEnabled="True">
+              <StackPanel>
+                <CheckBox Content="画像取り込み時に再生する" Name="CheckBoxSoundPlay"/>
+                <Button Content="音声ファイル選択" Name="ButtonSoundSelect"/>
+                <Button Content="音の確認" Name="ButtonSoundPlay"/>
+                <TextBox Text="音声ファイル" Name="TextBoxSoundDir" TextWrapping="Wrap" IsEnabled="False"/>
+              </StackPanel>
+            </GroupBox>
 
         <Button Content="選択アイテム削除" Name="MyButtonRemoveSelectedImtem"/>
       </StackPanel>
@@ -96,7 +97,7 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Name="MyScrollViewer" Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Canvas Name="MyCanvas" UseLayoutRounding="True" HorizontalAlignment="Left" VerticalAlignment="top">
         <Image Name="MyImage" Stretch="None"/>
       </Canvas>

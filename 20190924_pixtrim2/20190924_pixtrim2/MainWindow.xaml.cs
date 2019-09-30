@@ -17,6 +17,36 @@ using System.Collections.ObjectModel;
 using _20190925_NumericDecimal;
 using Microsoft.WindowsAPICodePack.Dialogs;//フォルダ選択用
 
+
+#region メモ
+//WPFでキーボードフォーカスを変更できないようにするには « Bluestick.JP 開発メモ
+//http://bluestick.jp/tech/index.php/archives/131
+
+/*キーボードのカーソルでもMyTrimThumb(切り抜き範囲)の移動やサイズを変更したいけど
+ カーソルキー押すとフォーカスも移動してまう、これはよくない、期待する動作は
+ MyTrimThumbからフォーカスを外すのは、サイドにある設定用の要素群のどれかをクリックしたときだけ
+
+ フォーカスをMyTrimThumbに完全固定するには
+ MyTrimThumbのPreviewLostKeyboardFocusイベントの
+ KeyboardFocusChangedEventArgsプロパティにTrueを指定する、 
+ Handled = true
+ これでキーボードによるフォーカス移動がキャンセルされるみたい
+
+    期待する動作のために
+ フィールドに切り抜き範囲のフラグ用のIsTrimForcusedを用意しておいて
+ Trueにするのは、MyTrimThumbクリックイベント時
+ falseにするのは、 設定用の要素のベースパネルになっているDockPanelMainのPreviewMouseDownイベント
+ DockPanelMain.PreviewMouseDown += (o, e) => { IsTrimFocused = false; };
+
+ あとは、MyTrimThumbのPreviewLostKeyboardFocusイベント時にフラグ判定して
+ if (IsTrimFocused == true) { e.Handled = true; }
+ 
+ */
+
+
+#endregion
+
+
 namespace _20190924_pixtrim2
 {
     enum SaveImageType
@@ -38,6 +68,7 @@ namespace _20190924_pixtrim2
         private TrimThumb MyTrimThumb;//切り取り範囲
         private string SaveDir;//保存フォルダ
         private Window1 window1 = new Window1();
+        //private bool IsTrimFocused;
 
         public MainWindow()
         {
@@ -45,7 +76,9 @@ namespace _20190924_pixtrim2
 
             MyTest();
 
-          
+
+            ComboBoxSaveDir.Items.Add("neko1");
+            ComboBoxSaveDir.Items.Add("neko2");
 
 
             ButtonSave.Click += ButtonSave_Click;
@@ -55,7 +88,7 @@ namespace _20190924_pixtrim2
             ButtonSaveDirPaste.Click += ButtonSaveDirPaste_Click;
 
             //this.KeyDown += MainWindow_KeyDown;
-            this.PreviewKeyDown += MainWindow_KeyDown;
+            //this.PreviewKeyDown += MainWindow_KeyDown;
 
             this.Loaded += MainWindow_Loaded;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
@@ -70,10 +103,20 @@ namespace _20190924_pixtrim2
 
             //切り取り範囲Thumb初期化
             MyTrimThumb = new TrimThumb(MyCanvas, 20, (int)MyNumericX.MyValue2, 100, 100, 100);
-            MyTrimThumb.Focusable = true;//重要！！！
+            //MyTrimThumb.Focusable = true;//重要！！！
+            //MyTrimThumb.PreviewLostKeyboardFocus += MyTrimThumb_PreviewLostKeyboardFocus;
+            //MyTrimThumb.PreviewMouseDown += (o, e) => { IsTrimFocused = true;TextBoxDammy.Focus(); Keyboard.Focus(TextBoxDammy); };
+            TextBoxDammy.PreviewKeyDown += MyTrimThumb_KeyDown;
+            MyTrimThumb.PreviewMouseDown += (o, e) => { TextBoxDammy.Focus(); Keyboard.Focus(TextBoxDammy); };
+            MyTrimThumb.MouseDown += (o, e) => { TextBoxDammy.Focus(); };
+            //MyTrimThumb.KeyDown += MyTrimThumb_KeyDown;
             MyTrimThumb.SetBackGroundColor(Color.FromArgb(100, 0, 0, 0));
             MyCanvas.Children.Add(MyTrimThumb);
-            //NumericUDInteger nn = new NumericUDInteger();
+            //DockPanelMain.PreviewMouseDown += (o, e) => { IsTrimFocused = false; };
+            
+            
+            
+            
 
             MyBinding(MyNumericX, MyNumeric.MyValueProperty, MyTrimThumb, Window.LeftProperty);
             MyBinding(MyNumericY, MyNumeric.MyValueProperty, MyTrimThumb, Window.TopProperty);
@@ -90,9 +133,45 @@ namespace _20190924_pixtrim2
             //切り抜き後の拡縮
             SliderSaveScale.ValueChanged += SliderSaveScale_ValueChanged;
 
-            
-
+            //音声
+            ButtonSoundSelect.Click += ButtonSoundSelect_Click;
+            ButtonSoundPlay.Click += ButtonSoundPlay_Click;
         }
+
+     
+
+
+
+        #region 音
+        private void ButtonSoundPlay_Click(object sender, RoutedEventArgs e)
+        {
+            PlaySoundFile();
+        }
+        //音声ファイル再生
+        private void PlaySoundFile()
+        {
+            try
+            {
+                var so = new System.Media.SoundPlayer(TextBoxSoundDir.Text);
+                so.Play();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show($"指定されたファイルは再生できなかったよ\n" +
+                    $"再生できる音声ファイルは、wav形式だけ");
+            }
+        }
+        private void ButtonSoundSelect_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "(wav)|*.wav";
+            if (dialog.ShowDialog() == true)
+            {
+                TextBoxSoundDir.Text = dialog.FileName;
+            }
+        }
+        #endregion
+
 
         //切り抜き範囲を画像内に収める、移動させる     
         private void TrimAreaCorrection()
@@ -121,6 +200,7 @@ namespace _20190924_pixtrim2
                 MyNumericY.MyValue -= yDiff;
             }
         }
+
 
         //  画像の拡縮、最近傍補間法
         private BitmapSource NearestnaverScale(BitmapSource bitmap, decimal scale)
@@ -204,8 +284,15 @@ namespace _20190924_pixtrim2
 
 
         #region キーボードで操作
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+
+        //private void MyTrimThumb_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        //{
+        //    //フォーカス移動をHandled = trueでキャンセル
+        //    if (IsTrimFocused == true) { e.Handled = true; }
+        //}
+        private void MyTrimThumb_KeyDown(object sender, KeyEventArgs e)
         {
+            //IsTrimFocused = true;
             //ctrl+Shift、サイズ変更、ラージ
             if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
             {
@@ -402,15 +489,23 @@ namespace _20190924_pixtrim2
         }
 
         //Bitmapをファイルに保存
-        private void SaveImage(BitmapSource bitmap, string fileName)
+        private void SaveImage(BitmapSource croppedBitmap, string fileName)
         {
             //CroppedBitmapで切り抜いた画像でBitmapFrame作成して保存
             BitmapEncoder encoder = GetEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmap));
-            using (var fs = new System.IO.FileStream(
-                MakeFullPath(fileName), System.IO.FileMode.Create, System.IO.FileAccess.Write))
+            encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+            try
             {
-                encoder.Save(fs);
+                using (var fs = new System.IO.FileStream(
+                    MakeFullPath(fileName), System.IO.FileMode.Create, System.IO.FileAccess.Write))
+                {
+                    encoder.Save(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ファイル保存できなかったよ\n" +
+                    $"{ex.Message}");
             }
         }
 
@@ -542,7 +637,7 @@ namespace _20190924_pixtrim2
             target.SetBinding(targetProperty, b);
         }
 
-
+        #region リストボックス
         private void MyButtonRemoveSelectedImtem_Click(object sender, RoutedEventArgs e)
         {
             //選択アイテム削除
@@ -572,6 +667,8 @@ namespace _20190924_pixtrim2
                 MyImage.Source = myBitmap.Source;
             }
         }
+        #endregion
+
 
         //クリップボード更新時に画像取得してリストに追加、名前もつける
         //画像取得時に失敗することがあるので指定回数連続トライしている
@@ -589,11 +686,18 @@ namespace _20190924_pixtrim2
                         bitmap = Clipboard.GetImage();
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
+                        string name = TextBox_FileName.Text + GetStringNowTime();
                         //画像と名前をリストに追加
-                        var source = new MyBitmapAndName(bitmap, TextBox_FileName.Text + GetStringNowTime());
+                        var source = new MyBitmapAndName(bitmap, name);
                         ListMyBitmapSource.Add(source);
                         MyListBox.SelectedItem = source;
                         MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
+                        //音声ファイル再生
+                        if (CheckBoxSoundPlay.IsChecked == true) { PlaySoundFile(); }
+                        if (CheckBoxSaveAuto.IsChecked == true)
+                        {
+                            SaveImage(MakeCroppedBitmap(bitmap), name);
+                        }
                     }
                     catch (Exception ex)
                     {
