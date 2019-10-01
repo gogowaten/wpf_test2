@@ -34,8 +34,10 @@
         <Button Content="保存場所変更" Name="ButtonSaveDirSelect"/>
         <Button Content="保存場所を開く" Name="ButtonSaveDirOpen"/>
         <Button Content="貼り付け" Name="ButtonSaveDirPaste"/>
-        <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="False"/>
-        <ComboBox Name="ComboBoxSaveDir"/>
+        <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="True"/>
+        <Button Name="ButtonSaveConfig" Content="設定保存"/>
+        <Button Name="ButtonLoadConfig" Content="設定読み込み"/>
+        <ComboBox Name="ComboBoxConfigs"/>
 
         <GroupBox Padding="10" Header="切り取り範囲">
           <StackPanel>
@@ -60,8 +62,10 @@
         <StackPanel>
           <TextBlock Text="切り抜き後の拡大率"/>
           <DockPanel FlowDirection="RightToLeft">
-            <TextBlock Name="TextBoxSaveScale" Text="x1"/>
-            <Slider Name="SliderSaveScale" Value="0" Minimum="-3" Maximum="3" TickFrequency="1.0" IsSnapToTickEnabled="True"/>
+            <!--<TextBlock Name="TextBoxSaveScale" Text="x1"/>
+            <Slider Name="SliderSaveScale" Value="0" Minimum="-3" Maximum="3" TickFrequency="1.0" IsSnapToTickEnabled="True"/>-->
+            <nu:MyNumeric x:Name="MyNumericSaveScale" MyMinimum="0.1" MyMaximum="10" MySmallChange="0.1" MyLargeChange="1"
+                          MyDigitsInteger="2" MyDigitsDecimal="4"/>
           </DockPanel>
         </StackPanel>
         <TextBox Name="TextBoxDammy" Text="dammy"/>
@@ -73,7 +77,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="ファイル名"/>
-              <TextBox Text="ファイル名_" Name="TextBox_FileName" MinWidth="100"/>
+              <TextBox Text="ファイル名_" Name="TextBoxFileName" MinWidth="100"/>
             </StackPanel>
             <CheckBox Content="自動保存" Name="CheckBoxSaveAuto"/>
           </StackPanel>

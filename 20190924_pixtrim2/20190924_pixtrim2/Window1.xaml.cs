@@ -41,8 +41,8 @@ namespace _20190924_pixtrim2
         {
 
 
-            e.Cancel = true;
-            this.Visibility = Visibility.Hidden;
+            //e.Cancel = true;
+            //this.Visibility = Visibility.Hidden;
 
         }
     }

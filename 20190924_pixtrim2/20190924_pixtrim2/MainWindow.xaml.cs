@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 
 using _20190925_NumericDecimal;
 using Microsoft.WindowsAPICodePack.Dialogs;//フォルダ選択用
+using System.ComponentModel;
 
 
 #region メモ
@@ -49,7 +50,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;//フォルダ選択用
 
 namespace _20190924_pixtrim2
 {
-    enum SaveImageType
+    public enum SaveImageType
     {
         png = 0,
         jpg,
@@ -63,34 +64,36 @@ namespace _20190924_pixtrim2
     public partial class MainWindow : Window
     {
         private ClipboardWatcher ClipboardWatcher;
-        //private List<BitmapSource> ListBitmap;
         private ObservableCollection<MyBitmapAndName> ListMyBitmapSource;
         private TrimThumb MyTrimThumb;//切り取り範囲
-        private string SaveDir;//保存フォルダ
-        private Window1 window1 = new Window1();
-        //private bool IsTrimFocused;
+        private Window1 window1 = new Window1();//プレビュー用        
+        private Config MyConfig;//設定
 
         public MainWindow()
         {
             InitializeComponent();
 
-            MyTest();
+            
+
+            ComboBoxConfigs.Items.Add("neko1");
+            ComboBoxConfigs.Items.Add("neko2");
 
 
-            ComboBoxSaveDir.Items.Add("neko1");
-            ComboBoxSaveDir.Items.Add("neko2");
-
-
+            ButtonTest.Click += ButtonTest_Click;
             ButtonSave.Click += ButtonSave_Click;
             ButtonPreview.Click += ButtonPreview_Click;
             ButtonSaveDirSelect.Click += ButtonSaveDirSelect_Click;
             ButtonSaveDirOpen.Click += ButtonSaveDirOpen_Click;
             ButtonSaveDirPaste.Click += ButtonSaveDirPaste_Click;
+            ButtonLoadConfig.Click += ButtonLoadConfig_Click;
+            ButtonSaveConfig.Click += ButtonSaveConfig_Click;
 
             //this.KeyDown += MainWindow_KeyDown;
             //this.PreviewKeyDown += MainWindow_KeyDown;
 
             this.Loaded += MainWindow_Loaded;
+            this.Closing += MainWindow_Closing;
+            this.Closed += MainWindow_Closed;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
             MyListBox.SelectionChanged += MyListBox_SelectionChanged;
 
@@ -113,15 +116,13 @@ namespace _20190924_pixtrim2
             MyTrimThumb.SetBackGroundColor(Color.FromArgb(100, 0, 0, 0));
             MyCanvas.Children.Add(MyTrimThumb);
             //DockPanelMain.PreviewMouseDown += (o, e) => { IsTrimFocused = false; };
-            
-            
-            
-            
 
-            MyBinding(MyNumericX, MyNumeric.MyValueProperty, MyTrimThumb, Window.LeftProperty);
-            MyBinding(MyNumericY, MyNumeric.MyValueProperty, MyTrimThumb, Window.TopProperty);
-            MyBinding(MyNumericW, MyNumeric.MyValueProperty, MyTrimThumb, WidthProperty);
-            MyBinding(MyNumericH, MyNumeric.MyValueProperty, MyTrimThumb, FrameworkElement.HeightProperty);
+
+            //設定
+            MyConfig = new Config();
+
+            MySetBinding();
+
 
             //画像形式コンボボックス初期化
             ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
@@ -131,15 +132,140 @@ namespace _20190924_pixtrim2
             //window1 = new Window1();
 
             //切り抜き後の拡縮
-            SliderSaveScale.ValueChanged += SliderSaveScale_ValueChanged;
+            //SliderSaveScale.ValueChanged += SliderSaveScale_ValueChanged;
 
             //音声
             ButtonSoundSelect.Click += ButtonSoundSelect_Click;
             ButtonSoundPlay.Click += ButtonSoundPlay_Click;
+
+            //Binding終わったあとに初期設定
+            MyConfig.Width = 160; MyConfig.Height = 100;
+            MyConfig.SaveScale = 1;
+            MyConfig.JpegQuality = 97;
+            MyConfig.SaveScale = 1;
         }
 
-     
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            
+        }
 
+        //アプリ終了時、設定保存
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            var neko = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string fullpath = System.IO.Path.Combine(neko + "MyConfig.xml");
+            SaveConfig(fullpath);
+        }
+
+
+        //設定を読み込んだあとはこれを実行
+        private void MySetBinding()
+        {
+            //MyNumericX.SetBinding(MyNumeric.MyValueProperty, new Binding(nameof(MyConfig.Left)));
+            //↑これだとBindingにならないので↓
+            Binding b;
+            b = MakeBinding(nameof(MyConfig.Left));
+            MyNumericX.SetBinding(MyNumeric.MyValueProperty, b);
+            MyTrimThumb.SetBinding(LeftProperty, b);
+            b = MakeBinding(nameof(MyConfig.Top));
+            MyNumericY.SetBinding(MyNumeric.MyValueProperty, b);
+            MyTrimThumb.SetBinding(TopProperty, b);
+            b = MakeBinding(nameof(MyConfig.Width));
+            MyNumericW.SetBinding(MyNumeric.MyValueProperty, b);
+            MyTrimThumb.SetBinding(WidthProperty, b);
+            b = MakeBinding(nameof(MyConfig.Height));
+            MyNumericH.SetBinding(MyNumeric.MyValueProperty, b);
+            MyTrimThumb.SetBinding(HeightProperty, b);
+
+
+            //MyConfig.SaveScale;//切り抜き後のサイズ変更
+            MyNumericSaveScale.SetBinding(MyNumeric.MyValueProperty, MakeBinding(nameof(Config.SaveScale)));
+            //MyConfig.JpegQuality;
+            MyNumericJpegQuality.SetBinding(MyNumeric.MyValueProperty, MakeBinding(nameof(Config.JpegQuality)));
+            //MyConfig.IsPlaySound;
+            CheckBoxSoundPlay.SetBinding(CheckBox.IsCheckedProperty, MakeBinding(nameof(Config.IsPlaySound)));
+            //MyConfig.SaveImageType;
+            ComboBoxSaveImageType.SetBinding(ComboBox.SelectedValueProperty, MakeBinding(nameof(Config.SaveImageType)));
+            //MyConfig.SoundDir;
+            TextBoxSoundDir.SetBinding(TextBox.TextProperty, MakeBinding(nameof(Config.SoundDir)));
+            //MyConfig.FileName;
+            TextBoxFileName.SetBinding(TextBox.TextProperty, MakeBinding(nameof(Config.FileName)));
+            //MyConfig.SavaDir;
+            TextBoxSaveDir.SetBinding(TextBox.TextProperty, MakeBinding(nameof(Config.SavaDir)));
+
+            //SliderSaveScale.Value = 1;
+
+            //this.DataContext = MyConfig;//要らないみたい
+        }
+
+        private Binding MakeBinding(string config)
+        {
+            var b = new Binding()
+            {
+                Source = MyConfig,
+                Path = new PropertyPath(config),
+                Mode = BindingMode.TwoWay,
+            };
+            return b;
+        }
+
+        #region 設定の読み書き
+
+        //設定の保存
+        private void ButtonSaveConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog();
+            dialog.DefaultExt = ".config";
+            dialog.Filter = "*.config|*.config";
+            dialog.AddExtension = true;
+
+            if (dialog.ShowDialog() == true)
+            {
+                if (SaveConfig(dialog.FileName)) MessageBox.Show("保存できたよ");
+            }
+        }
+        private bool SaveConfig(string fullPath)
+        {            
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Config));
+            try
+            {
+                using (var stream = new System.IO.StreamWriter(fullPath, false, new System.Text.UTF8Encoding(false)))
+                {
+                    serializer.Serialize(stream, MyConfig);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"なんかエラーで設定の保存できんかったわ\n" +
+                    $"{ex.Message}");
+                return false;
+            }
+        }
+
+        //設定の読み込み
+        private void ButtonLoadConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var temp = new Config();
+            string fullPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "config.config");
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Config));
+            using (var stream = new System.IO.StreamReader(fullPath, new UTF8Encoding(false)))
+            {
+                temp = (Config)serializer.Deserialize(stream);
+            }
+
+            MyConfig = temp;
+            MySetBinding();//再Binding
+        }
+        #endregion
+
+        private void ButtonTest_Click(object sender, RoutedEventArgs e)
+        {
+            var neko = MyConfig;
+
+
+        }
 
 
         #region 音
@@ -152,7 +278,7 @@ namespace _20190924_pixtrim2
         {
             try
             {
-                var so = new System.Media.SoundPlayer(TextBoxSoundDir.Text);
+                var so = new System.Media.SoundPlayer(MyConfig.SoundDir);
                 so.Play();
             }
             catch (Exception)
@@ -167,12 +293,22 @@ namespace _20190924_pixtrim2
             dialog.Filter = "(wav)|*.wav";
             if (dialog.ShowDialog() == true)
             {
-                TextBoxSoundDir.Text = dialog.FileName;
+                //TextBoxSoundDir.Text = dialog.FileName;//これだとBindingが解けてしまうので
+                MyConfig.SoundDir = dialog.FileName;
             }
         }
         #endregion
 
-
+        #region その他
+        //フォルダの存在確認、なければマイドキュメントのパスを返す
+        private string CheckDir(string path)
+        {
+            if (System.IO.Directory.Exists(path) == false)
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+            return path;
+        }
         //切り抜き範囲を画像内に収める、移動させる     
         private void TrimAreaCorrection()
         {
@@ -216,36 +352,54 @@ namespace _20190924_pixtrim2
             int hh = (int)Math.Round(h * scale);
             int stride2 = ww * 4;
             byte[] pixels2 = new byte[hh * stride2];
-            int p, pp;
+            int motoP, pp;
             decimal rate = 1 / scale;
             for (int y = 0; y < hh; y++)
             {
                 for (int x = 0; x < ww; x++)
                 {
 
-                    int motoX = (int)Math.Round(x * rate);
-                    int motoY = (int)Math.Round(y * rate);
-                    p = motoY * stride + motoX * 4;
-                    pp = (y * stride2) + (x * 4);
+                    int motoX = (int)Math.Floor(x * rate);// (int)Math.Round(x * rate) ;
+                    int motoY = (int)Math.Floor(y * rate);
+                    motoP = motoY * stride + motoX * 4;
 
-                    pixels2[pp] = pixels[p];
-                    pixels2[pp + 1] = pixels[p + 1];
-                    pixels2[pp + 2] = pixels[p + 2];
-                    pixels2[pp + 3] = pixels[p + 3];
 
+                    pp = y * stride2 + x * 4;
+
+                    pixels2[pp] = pixels[motoP];
+                    pixels2[pp + 1] = pixels[motoP + 1];
+                    pixels2[pp + 2] = pixels[motoP + 2];
+                    pixels2[pp + 3] = pixels[motoP + 3];
                 }
             }
+            //for (int y = 0; y < hh; y++)
+            //{
+            //    for (int x = 0; x < ww; x++)
+            //    {
+
+            //        int motoX = (int)Math.Round(x * rate);
+            //        int motoY = (int)Math.Round(y * rate);
+            //        motoP = motoY * stride + motoX * 4;
+            //        pp = (y * stride2) + (x * 4);
+
+            //        pixels2[pp] = pixels[motoP];
+            //        pixels2[pp + 1] = pixels[motoP + 1];
+            //        pixels2[pp + 2] = pixels[motoP + 2];
+            //        pixels2[pp + 3] = pixels[motoP + 3];
+            //    }
+            //}
+
             return BitmapSource.Create(ww, hh, 96, 96, bitmap.Format, null, pixels2, stride2);
         }
 
-        private void SliderSaveScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            string str;
-            int i = (int)SliderSaveScale.Value;
-            if (i < 0) { str = $"1/{-i + 1}"; }
-            else { str = $"x{i + 1}"; }
-            TextBoxSaveScale.Text = str;
-        }
+        //private void SliderSaveScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        //{
+        //    string str;
+        //    int i = (int)SliderSaveScale.Value;
+        //    if (i < 0) { str = $"1/{-i + 1}"; }
+        //    else { str = $"x{i + 1}"; }
+        //    TextBoxSaveScale.Text = str;
+        //}
 
 
 
@@ -256,7 +410,7 @@ namespace _20190924_pixtrim2
             var bs = (MyBitmapAndName)MyListBox.SelectedItem;
             BitmapSource bmp = MakeCroppedBitmap(bs.Source);
 
-            double rate = (double)GetMagnificationScale();
+            double rate = (double)MyConfig.SaveScale;
             var scale = new ScaleTransform(rate, rate);
 
             window1.MyPreview.RenderTransform = scale;
@@ -272,15 +426,16 @@ namespace _20190924_pixtrim2
             //自分で拡縮したほうがいいかも？
         }
         //拡大率取得
-        private decimal GetMagnificationScale()
-        {
-            //スライダーの値から生成
-            //0 = 1, 1 = 2, 2 = 3,...
-            //-1 = 1 / 2, -2 = 1 / 3,...
-            int i = (int)SliderSaveScale.Value;
-            decimal rate = (i < 0) ? 1.0m / (-i + 1) : i + 1;
-            return rate;
-        }
+        //private decimal GetMagnificationScale()
+        //{
+        //    //スライダーの値から生成
+        //    //0 = 1, 1 = 2, 2 = 3,...
+        //    //-1 = 1 / 2, -2 = 1 / 3,...
+        //    int i = (int)SliderSaveScale.Value;
+        //    decimal rate = (i < 0) ? 1.0m / (-i + 1) : i + 1;
+        //    return rate;
+        //}
+        #endregion
 
 
         #region キーボードで操作
@@ -400,8 +555,9 @@ namespace _20190924_pixtrim2
             str = str.Replace(target, "");
             if (System.IO.Directory.Exists(str))
             {
-                TextBoxSaveDir.Text = str;
-                SaveDir = str;
+                //TextBoxSaveDir.Text = str;//これだとBindingが解けてしまうので
+                MyConfig.SavaDir = str;
+
             }
             else
             {
@@ -414,7 +570,7 @@ namespace _20190924_pixtrim2
         //保存フォルダを開く
         private void ButtonSaveDirOpen_Click(object sender, RoutedEventArgs e)
         {
-            string dir = TextBoxSaveDir.Text;
+            string dir = MyConfig.SavaDir;
             if (System.IO.Directory.Exists(dir))
             {
                 System.Diagnostics.Process.Start(dir);//フォルダを開く
@@ -429,27 +585,18 @@ namespace _20190924_pixtrim2
         private void ButtonSaveDirSelect_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
-            dialog.InitialDirectory = SaveDir;
-            dialog.IsFolderPicker = true;
+            string path = CheckDir(MyConfig.SavaDir);//フォルダの存在確認
+            dialog.InitialDirectory = path;
+            dialog.IsFolderPicker = true;//フォルダ選択あり
 
             if (dialog.ShowDialog(this) == CommonFileDialogResult.Ok)
             {
-                TextBoxSaveDir.Text = dialog.FileName;
-                //var tt = new ToolTip();
-                //tt.Content = temp.FileName;
-                //TextBoxSaveDir.ToolTip = tt;
-
+                //TextBoxSaveDir.Text = dialog.FileName;//これだとBindingが解けてしまう
+                MyConfig.SavaDir = dialog.FileName;
             }
 
         }
 
-        //後で消す
-        private void MyTest()
-        {
-            ButtonTest.Click += ButtonTest_Click;
-            SaveDir = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-        }
         #endregion
 
 
@@ -475,14 +622,13 @@ namespace _20190924_pixtrim2
         {
             //
             BitmapSource bmp = MakeCroppedBitmap(data.Source);
-            decimal scale = GetMagnificationScale();
-            if (scale == 1)
+            if (MyConfig.SaveScale == 1)
             {
                 SaveImage(bmp, data.Name);
             }
             else
             {
-                SaveImage(NearestnaverScale(bmp, scale), data.Name);
+                SaveImage(NearestnaverScale(bmp, MyConfig.SaveScale), data.Name);
             }
             //CroppedBitmapで切り抜いた画像で保存
             //SaveImage(MakeCroppedBitmap(data.Source), data.Name);
@@ -512,7 +658,7 @@ namespace _20190924_pixtrim2
         //ファイル名の重複を回避、拡張子の前に"_"を付け足す
         private string MakeFullPath(string fileName)
         {
-            var dir = System.IO.Path.Combine(SaveDir, fileName);
+            var dir = System.IO.Path.Combine(MyConfig.SavaDir, fileName);
             var ex = "." + ComboBoxSaveImageType.SelectedValue.ToString();
             var fullPath = dir + ex;
 
@@ -550,7 +696,7 @@ namespace _20190924_pixtrim2
                     return new PngBitmapEncoder();
                 case SaveImageType.jpg:
                     var jpeg = new JpegBitmapEncoder();
-                    jpeg.QualityLevel = (int)MyNumericJpegQuality.MyValue2;
+                    jpeg.QualityLevel = (int)MyConfig.JpegQuality;// (int)MyNumericJpegQuality.MyValue2;
                     return jpeg;
                 case SaveImageType.bmp:
                     return new BmpBitmapEncoder();
@@ -601,29 +747,6 @@ namespace _20190924_pixtrim2
         #endregion
 
 
-        private void ButtonTest_Click(object sender, RoutedEventArgs e)
-        {
-            var x = Canvas.GetLeft(MyTrimThumb);
-            var vx = MyNumericX.MyValue;
-            var ty = ComboBoxSaveImageType.SelectedItem;
-            var tv = ComboBoxSaveImageType.SelectedValue;
-            var type = GetEncoder();
-            var aw = window1.MyPreview.ActualWidth;
-
-            //var bmp = MakeCroppedBitmap(ListMyBitmapSource[0].Source);
-            //window1.MyPreview.Source = bmp;
-            //window1.Show();
-            //var im = window1.MyPreview;
-            //var rb = new RenderTargetBitmap(200, 200, 96, 96, PixelFormats.Default);
-            //rb.Render(im);
-            //SaveImage2(rb, GetFileName(ListMyBitmapSource[0]));
-
-            var bmp = MakeCroppedBitmap(ListMyBitmapSource[0].Source);
-            //NearestnaverScaleDown(bmp, 2);
-            bmp = NearestnaverScale(bmp, GetMagnificationScale());
-            SaveImage(bmp, ListMyBitmapSource[0].Name);
-
-        }
 
         private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty,
             FrameworkElement target, DependencyProperty targetProperty)
@@ -686,14 +809,14 @@ namespace _20190924_pixtrim2
                         bitmap = Clipboard.GetImage();
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
-                        string name = TextBox_FileName.Text + GetStringNowTime();
+                        string name = MyConfig.FileName + GetStringNowTime();
                         //画像と名前をリストに追加
                         var source = new MyBitmapAndName(bitmap, name);
                         ListMyBitmapSource.Add(source);
                         MyListBox.SelectedItem = source;
                         MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
                         //音声ファイル再生
-                        if (CheckBoxSoundPlay.IsChecked == true) { PlaySoundFile(); }
+                        if (MyConfig.IsPlaySound == true) { PlaySoundFile(); }
                         if (CheckBoxSaveAuto.IsChecked == true)
                         {
                             SaveImage(MakeCroppedBitmap(bitmap), name);
@@ -731,7 +854,6 @@ namespace _20190924_pixtrim2
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
             ClipboardWatcher = new ClipboardWatcher(
                 new System.Windows.Interop.WindowInteropHelper(this).Handle);
             ClipboardWatcher.DrawClipboard += ClipboardWatcher_DrawClipboard;
@@ -754,8 +876,161 @@ namespace _20190924_pixtrim2
     }
 
     [Serializable]
-    public class Config
+    public class Config : System.ComponentModel.INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        private decimal _Width;
+        public decimal Width
+        {
+            get => _Width;
+            set
+            {
+                if (_Width == value)
+                    return;
+                _Width = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Height;
+        public decimal Height
+        {
+            get => _Height;
+            set
+            {
+                if (_Height == value)
+                    return;
+                _Height = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Left;
+        public decimal Left
+        {
+            get => _Left;
+            set
+            {
+                if (_Left == value)
+                    return;
+                _Left = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Top;
+        public decimal Top
+        {
+            get => _Top;
+            set
+            {
+                if (_Top == value)
+                    return;
+                _Top = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _FileName;
+        public string FileName
+        {
+            get => _FileName;
+            set
+            {
+                if (_FileName == value)
+                    return;
+                _FileName = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _SavaDir;
+        public string SavaDir
+        {
+            get => _SavaDir;
+            set
+            {
+                if (_SavaDir == value)
+                    return;
+                _SavaDir = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
+        private string _SoundDir;
+        public string SoundDir
+        {
+            get => _SoundDir;
+            set
+            {
+                if (_SoundDir == value)
+                    return;
+                _SoundDir = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private SaveImageType _SaveImageType;
+        public SaveImageType SaveImageType
+        {
+            get => _SaveImageType;
+            set
+            {
+                if (_SaveImageType == value)
+                    return;
+                _SaveImageType = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
+        private decimal _JpegQuality;
+        public decimal JpegQuality
+        {
+            get => _JpegQuality;
+            set
+            {
+                if (_JpegQuality == value)
+                    return;
+                _JpegQuality = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _PlaySound;
+        public bool IsPlaySound
+        {
+            get => _PlaySound;
+            set
+            {
+                if (_PlaySound == value)
+                    return;
+                _PlaySound = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _SaveScale;
+        public decimal SaveScale
+        {
+            get => _SaveScale;
+            set
+            {
+                if (_SaveScale == value)
+                    return;
+                _SaveScale = value;
+                RaisePropertyChanged();
+            }
+        }
+
 
     }
 }
