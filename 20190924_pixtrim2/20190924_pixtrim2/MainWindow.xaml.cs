@@ -63,17 +63,18 @@ namespace _20190924_pixtrim2
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string CONFIG_FILE_NAME = "MyConfig.xml";
         private ClipboardWatcher ClipboardWatcher;
         private ObservableCollection<MyBitmapAndName> ListMyBitmapSource;
         private TrimThumb MyTrimThumb;//切り取り範囲
-        private Window1 window1 = new Window1();//プレビュー用        
+        private Window1 window1;//プレビュー用        
         private Config MyConfig;//設定
+        //public bool IsClosing = false;//子ウィンドウを閉じるとき用フラグ
 
         public MainWindow()
         {
             InitializeComponent();
 
-            
 
             ComboBoxConfigs.Items.Add("neko1");
             ComboBoxConfigs.Items.Add("neko2");
@@ -93,7 +94,7 @@ namespace _20190924_pixtrim2
 
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
-            this.Closed += MainWindow_Closed;
+            //this.Closed += MainWindow_Closed;
             CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
             MyListBox.SelectionChanged += MyListBox_SelectionChanged;
 
@@ -118,9 +119,19 @@ namespace _20190924_pixtrim2
             //DockPanelMain.PreviewMouseDown += (o, e) => { IsTrimFocused = false; };
 
 
-            //設定
-            MyConfig = new Config();
+            //            C# で実行ファイルのフォルダを取得
+            //http://var.blog.jp/archives/66978870.html
 
+            //実行ファイルのディレクトリ取得3種
+            //string str = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //str = System.IO.Directory.GetCurrentDirectory();
+            //str = Environment.CurrentDirectory;
+
+            //前回終了時の設定読み込み
+            MyConfig = new Config();
+            LoadConfig(System.IO.Path.GetDirectoryName(
+                System.Reflection.Assembly.GetExecutingAssembly().Location) +
+                "\\" + CONFIG_FILE_NAME);
             MySetBinding();
 
 
@@ -138,23 +149,27 @@ namespace _20190924_pixtrim2
             ButtonSoundSelect.Click += ButtonSoundSelect_Click;
             ButtonSoundPlay.Click += ButtonSoundPlay_Click;
 
-            //Binding終わったあとに初期設定
-            MyConfig.Width = 160; MyConfig.Height = 100;
-            MyConfig.SaveScale = 1;
-            MyConfig.JpegQuality = 97;
-            MyConfig.SaveScale = 1;
+            ////Binding終わったあとに初期設定
+            //MyConfig.Width = 160; MyConfig.Height = 100;
+            //MyConfig.SaveScale = 1;
+            //MyConfig.JpegQuality = 97;
+            //MyConfig.SaveScale = 1;
         }
 
-        private void MainWindow_Closed(object sender, EventArgs e)
-        {
-            
-        }
+        //private void MainWindow_Closed(object sender, EventArgs e)
+        //{
+        //    IsClosing = true;
+        //    window1.Close();
+        //    System.Windows.Application.Current.Shutdown();
+        //}
+
+
 
         //アプリ終了時、設定保存
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            var neko = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            string fullpath = System.IO.Path.Combine(neko + "MyConfig.xml");
+            string fullpath = System.IO.Path.GetDirectoryName(
+                System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\" + CONFIG_FILE_NAME;
             SaveConfig(fullpath);
         }
 
@@ -226,7 +241,7 @@ namespace _20190924_pixtrim2
             }
         }
         private bool SaveConfig(string fullPath)
-        {            
+        {
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Config));
             try
             {
@@ -247,16 +262,32 @@ namespace _20190924_pixtrim2
         //設定の読み込み
         private void ButtonLoadConfig_Click(object sender, RoutedEventArgs e)
         {
-            var temp = new Config();
-            string fullPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "config.config");
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Config));
-            using (var stream = new System.IO.StreamReader(fullPath, new UTF8Encoding(false)))
+            //string fullPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "config.config");
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "*.config|*.config";
+            if (dialog.ShowDialog() == true)
             {
-                temp = (Config)serializer.Deserialize(stream);
+                LoadConfig(dialog.FileName);
             }
-
-            MyConfig = temp;
-            MySetBinding();//再Binding
+        }
+        private bool LoadConfig(string fullPath)
+        {
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Config));
+            try
+            {
+                using (var stream = new System.IO.StreamReader(fullPath, new UTF8Encoding(false)))
+                {
+                    MyConfig = (Config)serializer.Deserialize(stream);
+                }
+                MySetBinding();//再Binding
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"なんかエラーで設定の読み込みできんかったわ\n" +
+                    $"{ex.Message}");
+                return false;
+            }
         }
         #endregion
 
@@ -283,8 +314,8 @@ namespace _20190924_pixtrim2
             }
             catch (Exception)
             {
-                MessageBox.Show($"指定されたファイルは再生できなかったよ\n" +
-                    $"再生できる音声ファイルは、wav形式だけ");
+                //MessageBox.Show($"指定されたファイルは再生できなかったよ\n" +
+                //    $"再生できる音声ファイルは、wav形式だけ");
             }
         }
         private void ButtonSoundSelect_Click(object sender, RoutedEventArgs e)
@@ -358,48 +389,22 @@ namespace _20190924_pixtrim2
             {
                 for (int x = 0; x < ww; x++)
                 {
-
+                    //元の画像の座標は小数点以下切り捨てが正解、四捨五入だとあふれる
                     int motoX = (int)Math.Floor(x * rate);// (int)Math.Round(x * rate) ;
                     int motoY = (int)Math.Floor(y * rate);
                     motoP = motoY * stride + motoX * 4;
 
-
                     pp = y * stride2 + x * 4;
-
                     pixels2[pp] = pixels[motoP];
                     pixels2[pp + 1] = pixels[motoP + 1];
                     pixels2[pp + 2] = pixels[motoP + 2];
                     pixels2[pp + 3] = pixels[motoP + 3];
                 }
             }
-            //for (int y = 0; y < hh; y++)
-            //{
-            //    for (int x = 0; x < ww; x++)
-            //    {
-
-            //        int motoX = (int)Math.Round(x * rate);
-            //        int motoY = (int)Math.Round(y * rate);
-            //        motoP = motoY * stride + motoX * 4;
-            //        pp = (y * stride2) + (x * 4);
-
-            //        pixels2[pp] = pixels[motoP];
-            //        pixels2[pp + 1] = pixels[motoP + 1];
-            //        pixels2[pp + 2] = pixels[motoP + 2];
-            //        pixels2[pp + 3] = pixels[motoP + 3];
-            //    }
-            //}
 
             return BitmapSource.Create(ww, hh, 96, 96, bitmap.Format, null, pixels2, stride2);
         }
 
-        //private void SliderSaveScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        //{
-        //    string str;
-        //    int i = (int)SliderSaveScale.Value;
-        //    if (i < 0) { str = $"1/{-i + 1}"; }
-        //    else { str = $"x{i + 1}"; }
-        //    TextBoxSaveScale.Text = str;
-        //}
 
 
 
@@ -408,46 +413,33 @@ namespace _20190924_pixtrim2
         {
             if (ListMyBitmapSource.Count == 0) return;
             var bs = (MyBitmapAndName)MyListBox.SelectedItem;
-            BitmapSource bmp = MakeCroppedBitmap(bs.Source);
-
-            double rate = (double)MyConfig.SaveScale;
-            var scale = new ScaleTransform(rate, rate);
-
-            window1.MyPreview.RenderTransform = scale;
-            window1.MaxWidth = this.ActualWidth;
-            window1.MaxHeight = this.ActualHeight;
-            window1.MyPreview.Source = bmp;
-            window1.Visibility = Visibility.Visible;
-            //window1.Show();
-            //window1.Owner = this;
-
+            if (CheckCropRect(bs.Source))
+            {
+                //画像を切り抜いて拡大
+                BitmapSource img = NearestnaverScale(MakeCroppedBitmap(bs.Source), MyConfig.SaveScale);
+                //表示ウィンドウの設定して表示
+                window1 = new Window1();
+                window1.MaxWidth = this.ActualWidth;
+                window1.MaxHeight = this.ActualHeight;
+                window1.MyPreview.Source = img;// bmp;            
+                window1.ShowDialog();
+                window1.Owner = this;
+                window1.SizeToContent = SizeToContent.WidthAndHeight;//ウィンドウ自動サイズ
+            }
+            else { MessageBox.Show("切り抜き範囲が画像に収まっていないのでプレビューできない"); };
             //切り抜いた画像を拡縮表示は別ウィンドウに表示して、それをBitmapレンダーで保存？
             //できたけど、別ウィンドウを表示した状態visivleじゃないと画像が更新されない
             //自分で拡縮したほうがいいかも？
         }
-        //拡大率取得
-        //private decimal GetMagnificationScale()
-        //{
-        //    //スライダーの値から生成
-        //    //0 = 1, 1 = 2, 2 = 3,...
-        //    //-1 = 1 / 2, -2 = 1 / 3,...
-        //    int i = (int)SliderSaveScale.Value;
-        //    decimal rate = (i < 0) ? 1.0m / (-i + 1) : i + 1;
-        //    return rate;
-        //}
+
         #endregion
 
 
         #region キーボードで操作
 
-        //private void MyTrimThumb_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        //{
-        //    //フォーカス移動をHandled = trueでキャンセル
-        //    if (IsTrimFocused == true) { e.Handled = true; }
-        //}
+
         private void MyTrimThumb_KeyDown(object sender, KeyEventArgs e)
         {
-            //IsTrimFocused = true;
             //ctrl+Shift、サイズ変更、ラージ
             if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
             {

@@ -19,12 +19,11 @@ namespace _20190924_pixtrim2
     /// </summary>
     public partial class Window1 : Window
     {
+        
         public Window1()
         {
             InitializeComponent();
-
-            this.Visibility = Visibility.Hidden;
-            Closing += Window1_Closing;
+            //Closing += Window1_Closing;
             //            [WPF, xaml] 要素のサイズに合わせてWindowの大きさを自動的にリサイズ調整する方法 │ Web備忘録
             //https://webbibouroku.com/Blog/Article/wpf-auto-resize
 
@@ -37,13 +36,14 @@ namespace _20190924_pixtrim2
 
         }
 
-        private void Window1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-
-
-            //e.Cancel = true;
-            //this.Visibility = Visibility.Hidden;
-
-        }
+        //private void Window1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        //{
+        //    if (MainWindow.IsClosing == false)
+        //    {
+        //        //ウィンドウは閉じないで隠して見えなくする            
+        //        e.Cancel = true;
+        //        this.Hide();
+        //    }
+        //}
     }
 }
