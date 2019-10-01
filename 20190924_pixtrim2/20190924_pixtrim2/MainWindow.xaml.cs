@@ -752,4 +752,10 @@ namespace _20190924_pixtrim2
             Name = name;
         }
     }
+
+    [Serializable]
+    public class Config
+    {
+
+    }
 }
