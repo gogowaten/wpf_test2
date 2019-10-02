@@ -76,8 +76,6 @@ namespace _20190924_pixtrim2
             InitializeComponent();
 
 
-            ComboBoxConfigs.Items.Add("neko1");
-            ComboBoxConfigs.Items.Add("neko2");
 
 
             ButtonTest.Click += ButtonTest_Click;
@@ -89,8 +87,11 @@ namespace _20190924_pixtrim2
             ButtonLoadConfig.Click += ButtonLoadConfig_Click;
             ButtonSaveConfig.Click += ButtonSaveConfig_Click;
 
-            //this.KeyDown += MainWindow_KeyDown;
-            //this.PreviewKeyDown += MainWindow_KeyDown;
+
+            //音声
+            ButtonSoundSelect.Click += ButtonSoundSelect_Click;
+            ButtonSoundPlay.Click += ButtonSoundPlay_Click;
+
 
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
@@ -118,6 +119,9 @@ namespace _20190924_pixtrim2
             MyCanvas.Children.Add(MyTrimThumb);
             //DockPanelMain.PreviewMouseDown += (o, e) => { IsTrimFocused = false; };
 
+            //画像形式コンボボックス初期化
+            ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
+            //ComboBoxSaveImageType.SelectedIndex = 0;
 
             //            C# で実行ファイルのフォルダを取得
             //http://var.blog.jp/archives/66978870.html
@@ -127,41 +131,31 @@ namespace _20190924_pixtrim2
             //str = System.IO.Directory.GetCurrentDirectory();
             //str = Environment.CurrentDirectory;
 
-            //前回終了時の設定読み込み
+            //前回終了時の設定ファイル読み込み
             MyConfig = new Config();
-            LoadConfig(System.IO.Path.GetDirectoryName(
+            string fullPath = System.IO.Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) +
-                "\\" + CONFIG_FILE_NAME);
-            MySetBinding();
+                "\\" + CONFIG_FILE_NAME;
+            if (System.IO.File.Exists(fullPath))
+            {
+                LoadConfig(fullPath);
+            }
+            //初回起動時は設定ファイルがないので初期値を指定する
+            else
+            {
+                MyConfig.Height = 100;
+                MyConfig.JpegQuality = 97;
+                MyConfig.Left = 100;
+                MyConfig.SavaDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                MyConfig.SaveImageType = SaveImageType.png;
+                MyConfig.SaveScale = 1;
+                MyConfig.Top = 100;
+                MyConfig.Width = 100;
+                MySetBinding();
+            }
 
 
-            //画像形式コンボボックス初期化
-            ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
-            ComboBoxSaveImageType.SelectedIndex = 0;
-
-            //プレビューウィンドウ
-            //window1 = new Window1();
-
-            //切り抜き後の拡縮
-            //SliderSaveScale.ValueChanged += SliderSaveScale_ValueChanged;
-
-            //音声
-            ButtonSoundSelect.Click += ButtonSoundSelect_Click;
-            ButtonSoundPlay.Click += ButtonSoundPlay_Click;
-
-            ////Binding終わったあとに初期設定
-            //MyConfig.Width = 160; MyConfig.Height = 100;
-            //MyConfig.SaveScale = 1;
-            //MyConfig.JpegQuality = 97;
-            //MyConfig.SaveScale = 1;
         }
-
-        //private void MainWindow_Closed(object sender, EventArgs e)
-        //{
-        //    IsClosing = true;
-        //    window1.Close();
-        //    System.Windows.Application.Current.Shutdown();
-        //}
 
 
 
@@ -631,7 +625,9 @@ namespace _20190924_pixtrim2
         {
             //CroppedBitmapで切り抜いた画像でBitmapFrame作成して保存
             BitmapEncoder encoder = GetEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+            //メタデータ作成、アプリ名記入
+            BitmapMetadata meta = MakeMetadata();
+            encoder.Frames.Add(BitmapFrame.Create(croppedBitmap, null, meta, null));
             try
             {
                 using (var fs = new System.IO.FileStream(
@@ -645,6 +641,39 @@ namespace _20190924_pixtrim2
                 MessageBox.Show($"ファイル保存できなかったよ\n" +
                     $"{ex.Message}");
             }
+        }
+
+        //メタデータ作成
+        private BitmapMetadata MakeMetadata()
+        {
+            BitmapMetadata data =null;
+            switch (MyConfig.SaveImageType)
+            {
+                case SaveImageType.png:
+                    data = new BitmapMetadata("png");
+                    data.SetQuery("/tEXt/Software", "Pixtrim2");
+                    break;
+                case SaveImageType.jpg:
+                    data = new BitmapMetadata("jpg");
+                    data.SetQuery("/app1/ifd/{ushort=305}", "Pixtrim2");
+                    break;
+                case SaveImageType.bmp:
+                    
+                    break;
+                case SaveImageType.gif:
+                    data = new BitmapMetadata("Gif");
+                    //data.SetQuery("/xmp/xmp:CreatorTool", "Pixtrim2");
+                    //data.SetQuery("/XMP/XMP:CreatorTool", "Pixtrim2");
+                    break;
+                case SaveImageType.tiff:
+                    data = new BitmapMetadata("tiff");
+                    data.ApplicationName = "Pixtrim2";
+                    break;
+                default:
+                    break;
+            }
+            
+            return data;
         }
 
         //ファイル名の重複を回避、拡張子の前に"_"を付け足す
@@ -740,17 +769,17 @@ namespace _20190924_pixtrim2
 
 
 
-        private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty,
-            FrameworkElement target, DependencyProperty targetProperty)
-        {
-            var b = new Binding()
-            {
-                Source = source,
-                Path = new PropertyPath(sourceProperty),
-                Mode = BindingMode.TwoWay
-            };
-            target.SetBinding(targetProperty, b);
-        }
+        //private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty,
+        //    FrameworkElement target, DependencyProperty targetProperty)
+        //{
+        //    var b = new Binding()
+        //    {
+        //        Source = source,
+        //        Path = new PropertyPath(sourceProperty),
+        //        Mode = BindingMode.TwoWay
+        //    };
+        //    target.SetBinding(targetProperty, b);
+        //}
 
         #region リストボックス
         private void MyButtonRemoveSelectedImtem_Click(object sender, RoutedEventArgs e)
@@ -912,6 +941,7 @@ namespace _20190924_pixtrim2
             {
                 if (_Left == value)
                     return;
+                if (value < 0) { value = 0; }
                 _Left = value;
                 RaisePropertyChanged();
             }
@@ -925,6 +955,7 @@ namespace _20190924_pixtrim2
             {
                 if (_Top == value)
                     return;
+                if (value < 0) value = 0;
                 _Top = value;
                 RaisePropertyChanged();
             }

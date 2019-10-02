@@ -37,7 +37,7 @@
         <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="False"/>
         <Button Name="ButtonSaveConfig" Content="設定保存"/>
         <Button Name="ButtonLoadConfig" Content="設定読み込み"/>
-        <ComboBox Name="ComboBoxConfigs"/>
+        <!--<ComboBox Name="ComboBoxConfigs"/>-->
 
         <GroupBox Padding="10" Header="切り取り範囲">
           <StackPanel>
@@ -61,7 +61,7 @@
         
         <GroupBox Header="保存するとき">
           <StackPanel>
-            <TextBlock Text="切り抜き後の拡大率(サイズ変更)0.1~10.0"/>
+            <TextBlock Text="拡大率(サイズ変更)0.1~10.0"/>
             <StackPanel Orientation="Horizontal">
               <nu:MyNumeric x:Name="MyNumericSaveScale" MyMinimum="0.1" MyMaximum="10"
                           MySmallChange="0.1" MyLargeChange="1"
