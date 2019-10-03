@@ -881,7 +881,7 @@ namespace _20190924_pixtrim2
                     {
                         bitmap = Clipboard.GetImage();//ここで取得できない時がある
 
-                        if (IsBitmapEqual(bitmap, PastBitmap)) break;
+                        if (IsBitmapEqual(bitmap, PastBitmap)) return;
                         PastBitmap = bitmap;
 
                         MyCanvas.Width = bitmap.PixelWidth;
