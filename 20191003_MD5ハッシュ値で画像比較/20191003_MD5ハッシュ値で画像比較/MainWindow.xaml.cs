@@ -88,9 +88,13 @@ namespace _20191003_MD5ハッシュ値で画像比較
         }
     }
 }
+//参照したところ
 //MD5やSHA1などでハッシュ値を計算する - .NET Tips(VB.NET, C#...)
 //https://dobon.net/vb/dotnet/string/md5.html
 //C#でBitmapの比較 - blog.kur.jp
 //https://blog.kur.jp/entry/2010/03/03/bitmap-compare/
 
+//ブログ
+//WPF、2つのBitmapSource比較をMD5ハッシュ値で行ってみた - 午後わてんのブログ
+//https://gogowaten.hatenablog.com/entry/2019/10/03/205130
 
