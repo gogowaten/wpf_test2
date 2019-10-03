@@ -331,6 +331,52 @@ namespace _20190924_pixtrim2
         #endregion
 
         #region その他
+
+        //        WPF、2つのBitmapSource比較をMD5ハッシュ値で行ってみた - 午後わてんのブログ
+        //https://gogowaten.hatenablog.com/entry/2019/10/03/205130
+        #region BitmapSourceの比較
+        /// <summary>
+        /// 2つのBitmapSourceが同じ画像(のすべてのピクセルの色)なのか判定する、MD5のハッシュ値を作成して比較
+        /// </summary>
+        /// <param name="bmp1"></param>
+        /// <param name="bmp2"></param>
+        /// <returns></returns>
+        private bool IsBitmapEqual(BitmapSource bmp1, BitmapSource bmp2)
+        {
+            if (bmp1 == null || bmp2 == null) return false;
+            //それぞれのハッシュ値を作成
+            var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            byte[] h1 = md5.ComputeHash(MakeBitmapByte(bmp1));
+            byte[] h2 = md5.ComputeHash(MakeBitmapByte(bmp2));
+            md5.Clear();
+            //ハッシュ値を比較
+            return IsArrayEquals(h1, h2);
+
+        }
+        //2つのハッシュ値を比較
+        private bool IsArrayEquals(byte[] h1, byte[] h2)
+        {
+            for (int i = 0; i < h1.Length; i++)
+            {
+                if (h1[i] != h2[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        //BitmapSourceをbyte配列に変換
+        private byte[] MakeBitmapByte(BitmapSource bitmap)
+        {
+            int w = bitmap.PixelWidth;
+            int h = bitmap.PixelHeight;
+            int stride = w * bitmap.Format.BitsPerPixel / 8;
+            byte[] pixels = new byte[h * stride];
+            bitmap.CopyPixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
+            return pixels;
+        }
+        #endregion
+
         //フォルダの存在確認、なければマイドキュメントのパスを返す
         private string CheckDir(string path)
         {
@@ -835,15 +881,8 @@ namespace _20190924_pixtrim2
                     {
                         bitmap = Clipboard.GetImage();//ここで取得できない時がある
 
-                        //if (bitmap == PastBitmap)
-                        //{
-                        //    return;
-                        //}
-                        //if (PastBitmap.Equals(bitmap))
-                        //{
-                        //    return;
-                        //}
-                        //PastBitmap = bitmap;
+                        if (IsBitmapEqual(bitmap, PastBitmap)) break;
+                        PastBitmap = bitmap;
 
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;

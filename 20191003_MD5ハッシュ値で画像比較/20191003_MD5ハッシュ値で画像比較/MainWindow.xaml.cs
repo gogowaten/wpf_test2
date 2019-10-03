@@ -54,6 +54,7 @@ namespace _20191003_MD5ハッシュ値で画像比較
         /// <returns></returns>
         private bool IsBitmapEqual(BitmapSource bmp1, BitmapSource bmp2)
         {
+            if (bmp1 == null || bmp2 == null) return false;
             //それぞれのハッシュ値を作成
             var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
             byte[] h1 = md5.ComputeHash(MakeBitmapByte(bmp1));
