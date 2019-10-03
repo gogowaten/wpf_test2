@@ -12,12 +12,21 @@ namespace _20190924_pixtrim2
 {
     class ClipboardWatcher
     {
-        [DllImport("user32.dll")]
-        private static extern bool AddClipboardFormatListener(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        private static extern bool RemoveClipboardFormatListener(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool AddClipboardFormatListener(IntPtr hWnd);
+        
+        //[DllImport("user32.dll")]
+        //private static extern bool RemoveClipboardFormatListener(IntPtr hWnd);
 
-        private const int WM_DRAWCLIPBOARD = 0x031D;
+            //別バージョン
+        [DllImport("user32.dll", SetLastError = true)]
+        private extern static void AddClipboardFormatListener(IntPtr hwnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private extern static void RemoveClipboardFormatListener(IntPtr hwnd);
+
+
+        private const int WM_CLIPBOARDUPDATE = 0x031D;
 
         IntPtr handle;
         HwndSource hwndSource = null;
@@ -25,7 +34,7 @@ namespace _20190924_pixtrim2
 
         public event EventHandler DrawClipboard;
         //イベント起動
-        private void raiseDrawClipboard()
+        private void raiseClipboardUpdata()
         {
             DrawClipboard?.Invoke(this, EventArgs.Empty);
         }
@@ -41,9 +50,9 @@ namespace _20190924_pixtrim2
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (msg == WM_DRAWCLIPBOARD)
+            if (msg == WM_CLIPBOARDUPDATE)
             {
-                this.raiseDrawClipboard();
+                this.raiseClipboardUpdata();
                 handled = true;
             }
             return IntPtr.Zero;
@@ -56,6 +65,8 @@ namespace _20190924_pixtrim2
         {
             hwndSource = HwndSource.FromHwnd(handle);
             hwndSource.AddHook(WndProc);
+            //↑でも↓でも変わらない？
+            //hwndSource.AddHook(new HwndSourceHook(WndProc));
             this.handle = handle;
             //AddClipboardFormatListener(handle);
         }

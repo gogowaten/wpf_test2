@@ -69,13 +69,16 @@ namespace _20190924_pixtrim2
         private TrimThumb MyTrimThumb;//切り取り範囲
         private Window1 window1;//プレビュー用        
         private Config MyConfig;//設定
-        //public bool IsClosing = false;//子ウィンドウを閉じるとき用フラグ
+        private BitmapSource PastBitmap;//前回クリップボードから取得した画像、比較用、不具合回避用
 
         public MainWindow()
         {
             InitializeComponent();
 
 
+            string neko = "neko";
+            string inu = "neko";
+            var ore = neko == inu;
 
 
             ButtonTest.Click += ButtonTest_Click;
@@ -159,9 +162,12 @@ namespace _20190924_pixtrim2
 
 
 
-        //アプリ終了時、設定保存
+        //アプリ終了時
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
+            //クリップボード監視を停止
+            ClipboardWatcher.Stop();
+            //今の設定を保存
             string fullpath = System.IO.Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\" + CONFIG_FILE_NAME;
             SaveConfig(fullpath);
@@ -646,7 +652,7 @@ namespace _20190924_pixtrim2
         //メタデータ作成
         private BitmapMetadata MakeMetadata()
         {
-            BitmapMetadata data =null;
+            BitmapMetadata data = null;
             switch (MyConfig.SaveImageType)
             {
                 case SaveImageType.png:
@@ -658,7 +664,7 @@ namespace _20190924_pixtrim2
                     data.SetQuery("/app1/ifd/{ushort=305}", "Pixtrim2");
                     break;
                 case SaveImageType.bmp:
-                    
+
                     break;
                 case SaveImageType.gif:
                     data = new BitmapMetadata("Gif");
@@ -672,7 +678,7 @@ namespace _20190924_pixtrim2
                 default:
                     break;
             }
-            
+
             return data;
         }
 
@@ -827,7 +833,18 @@ namespace _20190924_pixtrim2
                 {
                     try
                     {
-                        bitmap = Clipboard.GetImage();
+                        bitmap = Clipboard.GetImage();//ここで取得できない時がある
+
+                        //if (bitmap == PastBitmap)
+                        //{
+                        //    return;
+                        //}
+                        //if (PastBitmap.Equals(bitmap))
+                        //{
+                        //    return;
+                        //}
+                        //PastBitmap = bitmap;
+
                         MyCanvas.Width = bitmap.PixelWidth;
                         MyCanvas.Height = bitmap.PixelHeight;
                         string name = MyConfig.FileName + GetStringNowTime();
