@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
+/// <summary>
+/// 2つのBitmapSourceが同じ画像(のすべてのピクセルの色)なのか判定する、MD5のハッシュ値を作成して比較
+/// 
+/// それぞれのBitmapSourceのピクセルをbyte配列に変換して
+///     (BitmapSourceクラスのCopyPixels)
+/// それぞれのbyte配列のMD5ハッシュ値を作成して
+///     (System.Security.Cryptography.MD5CryptoServiceProvider())の
+///     ComputeHash関数
+/// 比較
+/// </summary>
 namespace _20191003_MD5ハッシュ値で画像比較
 {
     /// <summary>
@@ -25,23 +24,30 @@ namespace _20191003_MD5ハッシュ値で画像比較
             InitializeComponent();
 
             string fileName;
+            //同じ画像を比較
             fileName = @"D:\ブログ用\チェック用2\WP_20190714_22_18_03_Pro_2019_07_14_午後わてん.jpg";
             Uri uri = new Uri(fileName);
-            BitmapSource bmp1 = new BitmapImage(uri);
-            BitmapSource bmp2 = new BitmapImage(uri);
-            //同じ画像を比較
-            var neko = bmp1 == bmp2;            //false
-            var inu = bmp1.Equals(bmp2);        //false
-            var uma = IsBitmapEqual(bmp1, bmp2);//true
+            BitmapSource bmp10 = new BitmapImage(uri);
+            BitmapSource bmp11 = new BitmapImage(uri);
+
+            bool neko = bmp10 == bmp11;            //false            
+            bool inu = bmp10.Equals(bmp11);        //false
+            //MD5ハッシュ値で比較
+            bool uma = IsBitmapEqual(bmp10, bmp11);//true
+
+            fileName = @"D:\ブログ用\チェック用2\WP_20190714_22_18_03_Pro_2019_07_14_午後わてん - コピー.jpg";
+            BitmapSource bmp20 = new BitmapImage(new Uri(fileName));
+            bool tori = IsBitmapEqual(bmp10, bmp20);//true
 
             //違う画像と比較
             fileName = @"D:\ブログ用\テスト用画像\8x8_100と2002色.png";
-            BitmapSource bmp3 = new BitmapImage(new Uri(fileName));
-            var saru = IsBitmapEqual(bmp1, bmp3);//false
+            BitmapSource bmp30 = new BitmapImage(new Uri(fileName));
+            //MD5ハッシュ値で比較
+            bool saru = IsBitmapEqual(bmp10, bmp30);//false
         }
 
         /// <summary>
-        /// 2つのBitmapSourceが同じ画像なのか判定、MD5のハッシュ値を作成して比較
+        /// 2つのBitmapSourceが同じ画像(のすべてのピクセルの色)なのか判定する、MD5のハッシュ値を作成して比較
         /// </summary>
         /// <param name="bmp1"></param>
         /// <param name="bmp2"></param>
