@@ -76,9 +76,6 @@ namespace _20190924_pixtrim2
             InitializeComponent();
 
 
-            string neko = "neko";
-            string inu = "neko";
-            var ore = neko == inu;
 
 
             ButtonTest.Click += ButtonTest_Click;
@@ -111,16 +108,12 @@ namespace _20190924_pixtrim2
 
             //切り取り範囲Thumb初期化
             MyTrimThumb = new TrimThumb(MyCanvas, 20, (int)MyNumericX.MyValue2, 100, 100, 100);
-            //MyTrimThumb.Focusable = true;//重要！！！
-            //MyTrimThumb.PreviewLostKeyboardFocus += MyTrimThumb_PreviewLostKeyboardFocus;
-            //MyTrimThumb.PreviewMouseDown += (o, e) => { IsTrimFocused = true;TextBoxDammy.Focus(); Keyboard.Focus(TextBoxDammy); };
             TextBoxDammy.PreviewKeyDown += MyTrimThumb_KeyDown;
             MyTrimThumb.PreviewMouseDown += (o, e) => { TextBoxDammy.Focus(); Keyboard.Focus(TextBoxDammy); };
             MyTrimThumb.MouseDown += (o, e) => { TextBoxDammy.Focus(); };
-            //MyTrimThumb.KeyDown += MyTrimThumb_KeyDown;
             MyTrimThumb.SetBackGroundColor(Color.FromArgb(100, 0, 0, 0));
             MyCanvas.Children.Add(MyTrimThumb);
-            //DockPanelMain.PreviewMouseDown += (o, e) => { IsTrimFocused = false; };
+
 
             //画像形式コンボボックス初期化
             ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
@@ -128,17 +121,17 @@ namespace _20190924_pixtrim2
 
             //            C# で実行ファイルのフォルダを取得
             //http://var.blog.jp/archives/66978870.html
-
             //実行ファイルのディレクトリ取得3種
             //string str = System.Reflection.Assembly.GetExecutingAssembly().Location;
             //str = System.IO.Directory.GetCurrentDirectory();
             //str = Environment.CurrentDirectory;
 
-            //前回終了時の設定ファイル読み込み
+            //前回終了時の設定ファイル読み込み、ファイルの場所はアプリと同じフォルダ
             MyConfig = new Config();
             string fullPath = System.IO.Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) +
                 "\\" + CONFIG_FILE_NAME;
+            //ファイルの存在確認して読み込み
             if (System.IO.File.Exists(fullPath))
             {
                 LoadConfig(fullPath);
@@ -167,7 +160,7 @@ namespace _20190924_pixtrim2
         {
             //クリップボード監視を停止
             ClipboardWatcher.Stop();
-            //今の設定を保存
+            //今の設定をファイルに保存
             string fullpath = System.IO.Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\" + CONFIG_FILE_NAME;
             SaveConfig(fullpath);
@@ -650,51 +643,74 @@ namespace _20190924_pixtrim2
             //リストの画像全部を保存
             for (int i = 0; i < ListMyBitmapSource.Count; i++)
             {
-                SaveImage(ListMyBitmapSource[i]);
+                SaveBitmap(ListMyBitmapSource[i]);
             }
         }
 
 
-        //画像保存処理
-        private void SaveImage(MyBitmapAndName data)
+
+
+        
+        /// <summary>
+        /// 画像保存の前段階、切り抜きとスケールを行う
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <returns></returns>
+        private BitmapSource MakeSaveBitmap(BitmapSource bitmap)
         {
-            //
-            BitmapSource bmp = MakeCroppedBitmap(data.Source);
-            if (MyConfig.SaveScale == 1)
+            //切り抜き
+            bitmap = MakeCroppedBitmap(bitmap);
+            //スケール
+            if (MyConfig.SaveScale != 1)
             {
-                SaveImage(bmp, data.Name);
+                bitmap = NearestnaverScale(bitmap, MyConfig.SaveScale);
             }
-            else
-            {
-                SaveImage(NearestnaverScale(bmp, MyConfig.SaveScale), data.Name);
-            }
-            //CroppedBitmapで切り抜いた画像で保存
-            //SaveImage(MakeCroppedBitmap(data.Source), data.Name);
+            return bitmap;
         }
 
-        //Bitmapをファイルに保存
-        private void SaveImage(BitmapSource croppedBitmap, string fileName)
+        /// <summary>
+        /// リストの画像を保存
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private bool SaveBitmap(MyBitmapAndName data)
+        {
+            return SaveBitmap(MakeSaveBitmap(data.Source), data.Name);
+        }
+        
+        /// <summary>
+        /// 切り抜きとスケール済みのBitmapをファイルに保存
+        /// </summary>
+        /// <param name="bitmap">切り抜きとスケール済のBitmap</param>
+        /// <param name="fileName">拡張子付きのファイル名</param>
+        /// <returns></returns>
+        private bool SaveBitmap(BitmapSource bitmap, string fileName)
         {
             //CroppedBitmapで切り抜いた画像でBitmapFrame作成して保存
             BitmapEncoder encoder = GetEncoder();
             //メタデータ作成、アプリ名記入
             BitmapMetadata meta = MakeMetadata();
-            encoder.Frames.Add(BitmapFrame.Create(croppedBitmap, null, meta, null));
+            encoder.Frames.Add(BitmapFrame.Create(bitmap, null, meta, null));
             try
             {
                 using (var fs = new System.IO.FileStream(
                     MakeFullPath(fileName), System.IO.FileMode.Create, System.IO.FileAccess.Write))
                 {
                     encoder.Save(fs);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"ファイル保存できなかったよ\n" +
                     $"{ex.Message}");
+                return false;
             }
+
         }
 
+        
+        
         //メタデータ作成
         private BitmapMetadata MakeMetadata()
         {
@@ -821,17 +837,6 @@ namespace _20190924_pixtrim2
 
 
 
-        //private void MyBinding(FrameworkElement source, DependencyProperty sourceProperty,
-        //    FrameworkElement target, DependencyProperty targetProperty)
-        //{
-        //    var b = new Binding()
-        //    {
-        //        Source = source,
-        //        Path = new PropertyPath(sourceProperty),
-        //        Mode = BindingMode.TwoWay
-        //    };
-        //    target.SetBinding(targetProperty, b);
-        //}
 
         #region リストボックス
         private void MyButtonRemoveSelectedImtem_Click(object sender, RoutedEventArgs e)
@@ -868,6 +873,7 @@ namespace _20190924_pixtrim2
 
         //クリップボード更新時に画像取得してリストに追加、名前もつける
         //画像取得時に失敗することがあるので指定回数連続トライしている
+        //なぜか更新がなくても5分間隔で通知が来るので、前回の画像と比較してから追加している
         private void ClipboardWatcher_DrawClipboard(object sender, EventArgs e)
         {
             if (Clipboard.ContainsImage())
@@ -881,6 +887,7 @@ namespace _20190924_pixtrim2
                     {
                         bitmap = Clipboard.GetImage();//ここで取得できない時がある
 
+                        //画像比較、同じなら何もしないでreturn、違ったらリストに追加
                         if (IsBitmapEqual(bitmap, PastBitmap)) return;
                         PastBitmap = bitmap;
 
@@ -894,9 +901,10 @@ namespace _20190924_pixtrim2
                         MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
                         //音声ファイル再生
                         if (MyConfig.IsPlaySound == true) { PlaySoundFile(); }
+                        //自動保存
                         if (CheckBoxSaveAuto.IsChecked == true)
                         {
-                            SaveImage(MakeCroppedBitmap(bitmap), name);
+                            SaveBitmap(MakeSaveBitmap(bitmap), name);
                         }
                     }
                     catch (Exception ex)
