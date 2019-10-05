@@ -70,12 +70,18 @@ namespace _20190924_pixtrim2
         private Window1 window1;//プレビュー用        
         private Config MyConfig;//設定
         private BitmapSource PastBitmap;//前回クリップボードから取得した画像、比較用、不具合回避用
+        private ContextMenu MyListBoxContextMenu;
+        private System.Media.SoundPlayer MySound;//画像取得時の音
+
 
         public MainWindow()
         {
             InitializeComponent();
 
-
+            IDataObject data = Clipboard.GetDataObject();
+            string[] tako = data.GetFormats();
+            //System.IO.MemoryStream stream = data.GetData("PNG");
+            var neko = data.GetData("PNG");
 
 
             ButtonTest.Click += ButtonTest_Click;
@@ -96,15 +102,20 @@ namespace _20190924_pixtrim2
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
             //this.Closed += MainWindow_Closed;
-            CheckBox_ClipCheck.Click += CheckBox_ClipCheck_Click;
+            CheckBoxIsClipboardWatch.Click += CheckBox_ClipCheck_Click;
             MyListBox.SelectionChanged += MyListBox_SelectionChanged;
 
             //ListBitmap = new List<BitmapSource>();
 
             ListMyBitmapSource = new ObservableCollection<MyBitmapAndName>();
 
+            //リストボックス
             MyButtonRemoveSelectedImtem.Click += MyButtonRemoveSelectedImtem_Click;
+            ButtonRemoveAllItems.Click += (s, e) => { ListMyBitmapSource.Clear(); };
+            ButtonAddItemFromClipboard.Click += ButtonAddItemFromClipboard_Click;
             MyListBox.DataContext = ListMyBitmapSource;
+            MakeContextMenu();
+
 
             //切り取り範囲Thumb初期化
             MyTrimThumb = new TrimThumb(MyCanvas, 20, (int)MyNumericX.MyValue2, 100, 100, 100);
@@ -135,6 +146,8 @@ namespace _20190924_pixtrim2
             if (System.IO.File.Exists(fullPath))
             {
                 LoadConfig(fullPath);
+                //音声ファイルの読み込み
+                MySound = new System.Media.SoundPlayer(MyConfig.SoundDir);
             }
             //初回起動時は設定ファイルがないので初期値を指定する
             else
@@ -147,11 +160,87 @@ namespace _20190924_pixtrim2
                 MyConfig.SaveScale = 1;
                 MyConfig.Top = 100;
                 MyConfig.Width = 100;
+                MyConfig.IsAutoRemoveSavedItem = false;
+                MyConfig.IsClipboardWatch = false;
+                MyConfig.IsPlaySound = false;
+                MyConfig.IsAutoSave = false;
+
                 MySetBinding();
             }
 
 
         }
+
+        //今のクリップボードから画像を追加
+        private void ButtonAddItemFromClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            BitmapSource bitmap = GetBitmapSource();
+            if (bitmap == null) return;
+            AddBitmapToList(bitmap);
+        }
+
+
+
+        #region 右クリックメニュー
+        //リストボックスの右クリックメニュー
+        //削除
+        //保存
+        //切り抜かないで保存
+
+        private void MakeContextMenu()
+        {
+            MyListBoxContextMenu = new ContextMenu();
+            MyListBox.ContextMenu = MyListBoxContextMenu;
+            var item = new MenuItem();
+            item.Header = "削除(_D)";
+            item.Click += Item_Click;
+            MyListBoxContextMenu.Items.Add(item);
+            //メニューを表示するとき、アイテムがなければ直前でキャンセルして表示しない
+            MyListBox.ContextMenuOpening += (s, e) => { if (MyListBox.Items.Count == 0) e.Handled = true; };
+
+
+            //
+            var cm = new ContextMenu();
+
+            MyCanvas.ContextMenu = cm;
+            item = new MenuItem();
+            item.Header = "レイアウト1";
+            item.Click += (s, e) => { Column0.Width = new GridLength(250); };
+            cm.Items.Add(item);
+            item = new MenuItem();
+            item.Header = "レイアウト2";
+            item.Click += (s, e) => { Column0.Width = new GridLength(0); };
+            cm.Items.Add(item);
+
+            item = new MenuItem();
+            cm.Items.Add(item);
+            item.Header = "切り抜いてクリップボードにコピー";
+            item.Click += Item_Click1;
+
+        }
+
+
+        //クリップボードへ切り抜き画像をコピー、スケールも反映される
+        private void Item_Click1(object sender, RoutedEventArgs e)
+        {
+            MyBitmapAndName item = (MyBitmapAndName)MyListBox.SelectedItem;
+            if (item == null) return;
+            ClipboardWatcher.Stop();//監視を停止
+            BitmapSource bitmap = MakeSaveBitmap(item.Source);
+            Clipboard.Clear();//クリップボードクリア
+            Clipboard.SetImage(bitmap);//コピー
+            //Clipboard.SetDataObject(item.Source);//コレだとなぜかコピーされない
+            MessageBox.Show("コピーしました");
+            ClipboardWatcher.Start();//監視を再開
+        }
+
+        private void Item_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveSelectedListItem();
+        }
+
+
+        #endregion
 
 
 
@@ -201,6 +290,12 @@ namespace _20190924_pixtrim2
             TextBoxFileName.SetBinding(TextBox.TextProperty, MakeBinding(nameof(Config.FileName)));
             //MyConfig.SavaDir;
             TextBoxSaveDir.SetBinding(TextBox.TextProperty, MakeBinding(nameof(Config.SavaDir)));
+            //MyConfig.IsAutoRemoveSavedItem;
+            CheckBoxIsAutoRemoveSavedItem.SetBinding(CheckBox.IsCheckedProperty, MakeBinding(nameof(Config.IsAutoRemoveSavedItem)));
+            //MyConfig.IsClipboardWatch;
+            CheckBoxIsClipboardWatch.SetBinding(CheckBox.IsCheckedProperty, MakeBinding(nameof(Config.IsClipboardWatch)));
+            //MyConfig.IsAutoSave;
+            CheckBoxIsAutoSave.SetBinding(CheckBox.IsCheckedProperty, MakeBinding(nameof(Config.IsAutoSave)));
 
             //SliderSaveScale.Value = 1;
 
@@ -286,7 +381,6 @@ namespace _20190924_pixtrim2
 
         private void ButtonTest_Click(object sender, RoutedEventArgs e)
         {
-            var neko = MyConfig;
 
 
         }
@@ -302,8 +396,9 @@ namespace _20190924_pixtrim2
         {
             try
             {
-                var so = new System.Media.SoundPlayer(MyConfig.SoundDir);
-                so.Play();
+                //var so = new System.Media.SoundPlayer(MyConfig.SoundDir);
+                //so.Play();
+                MySound.Play();
             }
             catch (Exception)
             {
@@ -311,6 +406,7 @@ namespace _20190924_pixtrim2
                 //    $"再生できる音声ファイルは、wav形式だけ");
             }
         }
+        //音声ファイルの選択
         private void ButtonSoundSelect_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
@@ -319,6 +415,7 @@ namespace _20190924_pixtrim2
             {
                 //TextBoxSoundDir.Text = dialog.FileName;//これだとBindingが解けてしまうので
                 MyConfig.SoundDir = dialog.FileName;
+                MySound = new System.Media.SoundPlayer(dialog.FileName);
             }
         }
         #endregion
@@ -640,17 +737,28 @@ namespace _20190924_pixtrim2
             //切り抜き範囲チェック
             if (CheckCropRect() == false) { return; }
 
+            var savedItems = new List<MyBitmapAndName>();
             //リストの画像全部を保存
             for (int i = 0; i < ListMyBitmapSource.Count; i++)
             {
-                SaveBitmap(ListMyBitmapSource[i]);
+                //保存と自動削除モードなら成功したアイテムをリスト化
+                if (SaveBitmap(ListMyBitmapSource[i]) && MyConfig.IsAutoRemoveSavedItem)
+                {
+                    savedItems.Add(ListMyBitmapSource[i]);
+                }
             }
+            //自動削除
+            foreach (var item in savedItems)
+            {
+                ListMyBitmapSource.Remove(item);
+            }
+            MessageBox.Show("保存完了");
         }
 
 
 
 
-        
+
         /// <summary>
         /// 画像保存の前段階、切り抜きとスケールを行う
         /// </summary>
@@ -677,7 +785,7 @@ namespace _20190924_pixtrim2
         {
             return SaveBitmap(MakeSaveBitmap(data.Source), data.Name);
         }
-        
+
         /// <summary>
         /// 切り抜きとスケール済みのBitmapをファイルに保存
         /// </summary>
@@ -697,20 +805,20 @@ namespace _20190924_pixtrim2
                     MakeFullPath(fileName), System.IO.FileMode.Create, System.IO.FileAccess.Write))
                 {
                     encoder.Save(fs);
-                    return true;
                 }
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"ファイル保存できなかったよ\n" +
+                MessageBox.Show($"{fileName}はファイル保存できなかったよ\n" +
                     $"{ex.Message}");
                 return false;
             }
 
         }
 
-        
-        
+
+
         //メタデータ作成
         private BitmapMetadata MakeMetadata()
         {
@@ -837,21 +945,29 @@ namespace _20190924_pixtrim2
 
 
 
-
         #region リストボックス
+
+
+
+
+
         private void MyButtonRemoveSelectedImtem_Click(object sender, RoutedEventArgs e)
         {
-            //選択アイテム削除
-            var cc = new ObservableCollection<MyBitmapAndName>();
+            RemoveSelectedListItem();
+        }
+        //選択アイテム削除
+        private void RemoveSelectedListItem()
+        {
+            var items = new List<MyBitmapAndName>();
+
             foreach (MyBitmapAndName item in MyListBox.SelectedItems)
             {
-                cc.Add(item);
+                items.Add(item);
             }
-            foreach (MyBitmapAndName item in cc)
+            foreach (var item in items)
             {
                 ListMyBitmapSource.Remove(item);
             }
-
         }
 
 
@@ -871,41 +987,97 @@ namespace _20190924_pixtrim2
         #endregion
 
 
+
+        #region クリップボードから画像取得
         //クリップボード更新時に画像取得してリストに追加、名前もつける
-        //画像取得時に失敗することがあるので指定回数連続トライしている
         //なぜか更新がなくても5分間隔で通知が来るので、前回の画像と比較してから追加している
         private void ClipboardWatcher_DrawClipboard(object sender, EventArgs e)
         {
+            //if (Clipboard.ContainsImage())
+            //{
+            //    BitmapSource bitmap = null;
+            //    int count = 1;
+            //    int limit = 5;
+            //    do
+            //    {
+            //        try
+            //        {
+            //            bitmap = Clipboard.GetImage();//ここで取得できない時がある
+
+            //            //エクセルコピーテストここから
+            //            //var data = Clipboard.GetDataObject();
+            //            //var mStream = (System.IO.MemoryStream)data.GetData("PNG");//これがいい
+            //            ////png = (System.IO.MemoryStream)data.GetData("PNG+Office Art");//null
+            //            ////png = (System.IO.MemoryStream)data.GetData("GIF");//少し劣化
+            //            ////mStream = (System.IO.MemoryStream)data.GetData("JFIF");//jpgになる？劣化
+            //            ////png = (System.IO.MemoryStream)data.GetData("BMP");//null
+
+            //            //var em = data.GetData(DataFormats.EnhancedMetafile);//system.drawing.imaging.metafile、参照が必要
+            //            //var bitm = data.GetData(DataFormats.Bitmap);//system.windows.interop.interopBitmap、普通に取得した場合と同じ
+            //            //var dib = data.GetData(DataFormats.Dib);//memoryStreamだけどBitmapFrame.Createでエラー
+            //            ////sa = data.GetData(DataFormats.Tiff);//null
+            //            ////sa = data.GetData(DataFormats.MetafilePicture);//error or null
+            //            //bitmap = (BitmapSource)bitm;
+
+            //            //if (mStream != null)
+            //            //{
+            //            //    BitmapSource bmp = BitmapFrame.Create(mStream);
+            //            //    bitmap = bmp;
+            //            //}
+            //            //エクセルコピーテストここまで
+
+
+            BitmapSource bitmap = GetBitmapSource();
+            if (bitmap == null) return;
+            AddBitmapToList(bitmap);
+        }
+
+        //Bitmapを管理用リストに追加
+        private void AddBitmapToList(BitmapSource bitmap)
+        {
+            //画像比較、同じなら何もしないでreturn、違ったらリストに追加
+            if (IsBitmapEqual(bitmap, PastBitmap)) return;
+            PastBitmap = bitmap;
+
+            string name = MyConfig.FileName + GetStringNowTime();
+
+            //自動保存モードなら
+            if (CheckBoxIsAutoSave.IsChecked == true)
+            {
+                SaveBitmap(MakeSaveBitmap(bitmap), name);
+            }
+            //音声ファイル再生
+            if (MyConfig.IsPlaySound == true) { PlaySoundFile(); }
+
+            //自動保存and自動削除モードならここまで
+            if (MyConfig.IsAutoSave && MyConfig.IsAutoRemoveSavedItem) return;
+
+            //画像と名前をリストに追加
+            var source = new MyBitmapAndName(bitmap, name);
+            ListMyBitmapSource.Add(source);
+            MyListBox.SelectedItem = source;
+            MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
+
+            //Canvasのサイズを画像のサイズに合わせる、これがないとスクロールバーが出ない
+            MyCanvas.Width = bitmap.PixelWidth;
+            MyCanvas.Height = bitmap.PixelHeight;
+
+        }
+
+        //クリップボードから画像取得
+        //画像取得時に失敗することがあるので指定回数連続トライしている
+        private BitmapSource GetBitmapSource()
+        {
+            BitmapSource bitmap = null;
             if (Clipboard.ContainsImage())
             {
-                BitmapSource bitmap = null;
                 int count = 1;
-                int limit = 5;
+                int limit = 5;//試行回数、5あれば十分だけど、失敗するようなら10とかにする
                 do
                 {
                     try
                     {
-                        bitmap = Clipboard.GetImage();//ここで取得できない時がある
-
-                        //画像比較、同じなら何もしないでreturn、違ったらリストに追加
-                        if (IsBitmapEqual(bitmap, PastBitmap)) return;
-                        PastBitmap = bitmap;
-
-                        MyCanvas.Width = bitmap.PixelWidth;
-                        MyCanvas.Height = bitmap.PixelHeight;
-                        string name = MyConfig.FileName + GetStringNowTime();
-                        //画像と名前をリストに追加
-                        var source = new MyBitmapAndName(bitmap, name);
-                        ListMyBitmapSource.Add(source);
-                        MyListBox.SelectedItem = source;
-                        MyListBox.ScrollIntoView(source);//選択アイテムまでスクロール
-                        //音声ファイル再生
-                        if (MyConfig.IsPlaySound == true) { PlaySoundFile(); }
-                        //自動保存
-                        if (CheckBoxSaveAuto.IsChecked == true)
-                        {
-                            SaveBitmap(MakeSaveBitmap(bitmap), name);
-                        }
+                        bitmap = Clipboard.GetImage();//ここで取得できない時がある                      
                     }
                     catch (Exception ex)
                     {
@@ -918,7 +1090,11 @@ namespace _20190924_pixtrim2
                     finally { count++; }
                 } while (limit >= count && bitmap == null);
             }
+            return bitmap;
         }
+
+        #endregion
+
 
         //        【C#入門】現在時刻を取得する方法(DateTime.Now/UtcNow) | 侍エンジニア塾ブログ（Samurai Blog） - プログラミング入門者向けサイト
         //https://www.sejuku.net/blog/51208
@@ -933,7 +1109,7 @@ namespace _20190924_pixtrim2
 
         private void CheckBox_ClipCheck_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckBox_ClipCheck.IsChecked == true) { ClipboardWatcher.Start(); }
+            if (CheckBoxIsClipboardWatch.IsChecked == true) { ClipboardWatcher.Start(); }
             else ClipboardWatcher.Stop();
         }
 
@@ -942,7 +1118,7 @@ namespace _20190924_pixtrim2
             ClipboardWatcher = new ClipboardWatcher(
                 new System.Windows.Interop.WindowInteropHelper(this).Handle);
             ClipboardWatcher.DrawClipboard += ClipboardWatcher_DrawClipboard;
-            if (CheckBox_ClipCheck.IsChecked == true) ClipboardWatcher.Start();
+            if (CheckBoxIsClipboardWatch.IsChecked == true) ClipboardWatcher.Start();
         }
 
 
@@ -1118,6 +1294,47 @@ namespace _20190924_pixtrim2
             }
         }
 
+        private bool _IsClipboardWatch;
+        public bool IsClipboardWatch
+        {
+            get => _IsClipboardWatch;
+            set
+            {
+                if (_IsClipboardWatch == value)
+                    return;
+                _IsClipboardWatch = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _IsAutoRemoveSavedItem;
+        public bool IsAutoRemoveSavedItem
+        {
+            get => _IsAutoRemoveSavedItem;
+            set
+            {
+                if (_IsAutoRemoveSavedItem == value)
+                    return;
+                _IsAutoRemoveSavedItem = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _IsAutoSave;
+        public bool IsAutoSave
+        {
+            get => _IsAutoSave;
+            set
+            {
+                if (_IsAutoSave == value)
+                    return;
+                _IsAutoSave = value;
+                RaisePropertyChanged();
+            }
+        }
+
 
     }
 }
+//効果音メーカー : WEBブラウザ上で効果音を作成できる無料ツール - PEKO STEP
+//https://www.peko-step.com/tool/soundeffect/#pInTopMenu

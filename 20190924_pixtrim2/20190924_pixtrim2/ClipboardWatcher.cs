@@ -27,6 +27,7 @@ namespace _20190924_pixtrim2
 
 
         private const int WM_CLIPBOARDUPDATE = 0x031D;
+        //private const int WM_DRAWCLIPBOARD = 0x308;
 
         IntPtr handle;
         HwndSource hwndSource = null;

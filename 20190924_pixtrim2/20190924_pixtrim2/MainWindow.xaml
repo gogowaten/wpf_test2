@@ -16,7 +16,7 @@
 
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="250" Name="GridLeft"/>
+      <ColumnDefinition Width="250" Name="Column0"/>
       <ColumnDefinition/>
     </Grid.ColumnDefinitions>
     <DockPanel Name="DockPanelMain">
@@ -29,17 +29,22 @@
           <ComboBox Name="ComboBoxSaveImageType" VerticalAlignment="Center"/>
           <TextBlock Text="jpeg画質="/>
           <nu:MyNumeric x:Name="MyNumericJpegQuality" MyMinimum="1" MyMaximum="100" MyValue="97" MyDigitsInteger="3"/>
-
         </StackPanel>
-        <Button Content="保存場所変更" Name="ButtonSaveDirSelect"/>
-        <Button Content="保存場所を開く" Name="ButtonSaveDirOpen"/>
-        <Button Content="貼り付け" Name="ButtonSaveDirPaste"/>
-        <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="False"/>
+
+        <GroupBox Header="保存">
+          <WrapPanel>
+            <Button Content="保存場所変更" Name="ButtonSaveDirSelect"/>
+            <Button Content="保存場所を開く" Name="ButtonSaveDirOpen"/>
+            <Button Content="貼り付け" Name="ButtonSaveDirPaste"/>
+            <TextBox Text="保存場所" Name="TextBoxSaveDir" TextWrapping="Wrap" IsEnabled="False"/>
+          </WrapPanel>
+        </GroupBox>
+
         <Button Name="ButtonSaveConfig" Content="設定保存"/>
         <Button Name="ButtonLoadConfig" Content="設定読み込み"/>
         <!--<ComboBox Name="ComboBoxConfigs"/>-->
 
-        <GroupBox Padding="10" Header="切り取り範囲">
+        <GroupBox Padding="6" Header="切り取り範囲">
           <StackPanel>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="サイズ"/>
@@ -58,7 +63,7 @@
             </StackPanel>
           </StackPanel>
         </GroupBox>
-        
+
         <GroupBox Header="保存するとき">
           <StackPanel>
             <TextBlock Text="拡大率(サイズ変更)0.1~10.0"/>
@@ -70,11 +75,11 @@
             </StackPanel>
           </StackPanel>
         </GroupBox>
-        
+
         <TextBox Name="TextBoxDammy" Text="dammy" Height="0"/>
-        <GroupBox Padding="10" Header="クリップボード">
+        <GroupBox Padding="6" Header="クリップボード">
           <StackPanel>
-            <CheckBox Name="CheckBox_ClipCheck" Content="クリップボード監視" IsChecked="True"/>
+            <CheckBox Name="CheckBoxIsClipboardWatch" Content="クリップボード監視" IsChecked="True"/>
             <StackPanel Orientation="Horizontal">
               <!--<nu:MyNumeric x:Name="MyNumericSerial" MyMinimum="0" MyMaximum="1000000" MyValue="1"/>-->
             </StackPanel>
@@ -82,19 +87,25 @@
               <TextBlock Text="ファイル名"/>
               <TextBox Text="ファイル名_" Name="TextBoxFileName" MinWidth="100"/>
             </StackPanel>
-            <CheckBox Content="自動保存" Name="CheckBoxSaveAuto"/>
+            <CheckBox Content="自動保存" Name="CheckBoxIsAutoSave"/>
           </StackPanel>
         </GroupBox>
         <GroupBox Header="音" IsEnabled="True">
-          <StackPanel>
-            <CheckBox Content="画像取り込み時に再生する" Name="CheckBoxSoundPlay"/>
+          <WrapPanel>
+
             <Button Content="音声ファイル選択" Name="ButtonSoundSelect"/>
             <Button Content="音の確認" Name="ButtonSoundPlay"/>
             <TextBox Text="音声ファイル" Name="TextBoxSoundDir" TextWrapping="Wrap" IsEnabled="False"/>
-          </StackPanel>
+            <CheckBox Content="画像取り込み時に再生する" Name="CheckBoxSoundPlay"/>
+          </WrapPanel>
         </GroupBox>
 
-        <Button Content="選択アイテム削除" Name="MyButtonRemoveSelectedImtem"/>
+        <WrapPanel>
+          <Button Content="全アイテム削除" Name="ButtonRemoveAllItems"/>
+          <Button Content="選択アイテム削除" Name="MyButtonRemoveSelectedImtem"/>
+          <Button Content="クリップボードから追加" Name="ButtonAddItemFromClipboard"/>
+          <CheckBox Content="保存したアイテムは削除する" x:Name="CheckBoxIsAutoRemoveSavedItem"/>
+        </WrapPanel>
       </StackPanel>
       <ListBox DockPanel.Dock="Top" Name="MyListBox" ItemsSource="{Binding}" SelectionMode="Extended">
         <ListBox.ItemTemplate>
