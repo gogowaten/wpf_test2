@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:_20190924_pixtrim2"
         xmlns:nu="clr-namespace:_20190925_NumericDecimal"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="800">
+        Title="MainWindow" Height="800" Width="800">
   <Window.Resources>
     <Style TargetType="TextBlock">
       <Setter Property="VerticalAlignment" Value="Center"/>
@@ -44,8 +44,10 @@
         <Button Name="ButtonLoadConfig" Content="設定読み込み"/>
         <!--<ComboBox Name="ComboBoxConfigs"/>-->
 
-        <GroupBox Padding="6" Header="切り取り範囲">
+        <GroupBox Padding="6" Header="切り抜き範囲">
           <StackPanel>
+            <ComboBox Name="ComboBoxTrimSetting"/>
+            <Button Content="今の設定を名前をつけてリストに追加" Name="ButtonAddTrimSetting"/>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="サイズ"/>
               <nu:MyNumeric x:Name="MyNumericW" MyMinimum="1" MyMaximum="100000" MyValue="100"/>
