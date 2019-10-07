@@ -219,6 +219,8 @@ namespace _20190924_pixtrim2
                 //リストに追加
                 MyConfig.TrimConfigList.Add(trimConfig);
                 //MyComboBoxTrimSetting.Items.Add(trimConfig);//コレだとエラーになる
+                //追加したあとにリフレッシュするとリストに表示される
+                MyComboBoxTrimSetting.Items.Refresh();
                 MyComboBoxTrimSetting.SelectedItem = trimConfig;
 
             }
@@ -504,6 +506,9 @@ namespace _20190924_pixtrim2
             var neko = MyComboBoxTrimSetting.SelectedItem;
             var index = MyComboBoxTrimSetting.SelectedIndex;
             var con = MyConfig;
+            var items = MyComboBoxTrimSetting.Items;
+            var sc = MyComboBoxTrimSetting.Items.SourceCollection;
+            MyComboBoxTrimSetting.Items.Refresh();
 
         }
 
@@ -856,7 +861,7 @@ namespace _20190924_pixtrim2
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
             if (ListMyBitmapSource.Count == 0) return;
-            //切り抜き範囲チェック            
+            //切り抜き範囲チェック、一つでも範囲外なら保存しない
             foreach (var item in ListMyBitmapSource)
             {
                 if (CheckCropRect(item.Source) == false)
@@ -869,7 +874,7 @@ namespace _20190924_pixtrim2
                     return;
                 }
             }
-
+            
             var savedItems = new List<MyBitmapAndName>();
             //リストの画像全部を保存
             for (int i = 0; i < ListMyBitmapSource.Count; i++)
