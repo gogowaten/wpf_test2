@@ -54,6 +54,7 @@
               </ComboBox.ItemTemplate>
             </ComboBox>
             <Button Content="今の設定を名前をつけてリストに追加" Name="ButtonAddTrimSetting"/>
+            <Button Content="選択項目をリストから削除" Name="ButtonRemoveTrimSetting"/>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="サイズ"/>
               <nu:MyNumeric x:Name="MyNumericW" MyMinimum="1" MyMaximum="100000" MyValue="100"/>

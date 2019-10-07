@@ -93,6 +93,7 @@ namespace _20190924_pixtrim2
             ButtonLoadConfig.Click += ButtonLoadConfig_Click;
             ButtonSaveConfig.Click += ButtonSaveConfig_Click;
             ButtonAddTrimSetting.Click += ButtonAddTrimSetting_Click;
+            ButtonRemoveTrimSetting.Click += ButtonRemoveTrimSetting_Click;
 
             //音声
             ButtonSoundSelect.Click += ButtonSoundSelect_Click;
@@ -174,21 +175,22 @@ namespace _20190924_pixtrim2
 
         }
 
-        //切り抜き範囲コンボボックスの選択項目変更時
-        //設定を反映
-        private void MyComboBoxTrimSetting_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            SetTrimConfig(MyConfig.TrimConfigList[MyComboBoxTrimSetting.SelectedIndex]);
-        }
-        private void SetTrimConfig(TrimConfig config)
-        {
-            MyConfig.Top = config.Top;
-            MyConfig.Left = config.Left;
-            MyConfig.Width = config.Width;
-            MyConfig.Height = config.Height;
-            MyConfig.SaveScale = config.SaveScale;
 
+        //切り抜き範囲コンボボックスから選択項目削除
+        private void ButtonRemoveTrimSetting_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveTrimSetting();
         }
+        private void RemoveTrimSetting()
+        {
+            var config = MyComboBoxTrimSetting.SelectedItem;
+            if (config == null) return;
+            MyConfig.TrimConfigList.Remove((TrimConfig)config);
+            //コンボボックスをリフレッシュ、これで削除が反映される
+            MyComboBoxTrimSetting.Items.Refresh();
+            //MyComboBoxTrimSetting.SelectedIndex = 0;
+        }
+
 
         //切り抜き範囲の設定をコンボボックスに追加
         private void ButtonAddTrimSetting_Click(object sender, RoutedEventArgs e)
@@ -216,11 +218,27 @@ namespace _20190924_pixtrim2
                 };
                 //リストに追加
                 MyConfig.TrimConfigList.Add(trimConfig);
-                //MyComboBoxTrimSetting.Items.Add(trimConfig);
-                //MyComboBoxTrimSetting.SelectedIndex = MyConfig.TrimConfigList.Count-1;
+                //MyComboBoxTrimSetting.Items.Add(trimConfig);//コレだとエラーになる
                 MyComboBoxTrimSetting.SelectedItem = trimConfig;
 
             }
+        }
+
+        //切り抜き範囲コンボボックスの選択項目変更時
+        //設定を反映
+        private void MyComboBoxTrimSetting_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MyComboBoxTrimSetting.SelectedIndex < 0) return;
+            SetTrimConfig(MyConfig.TrimConfigList[MyComboBoxTrimSetting.SelectedIndex]);
+        }
+        private void SetTrimConfig(TrimConfig config)
+        {
+            MyConfig.Top = config.Top;
+            MyConfig.Left = config.Left;
+            MyConfig.Width = config.Width;
+            MyConfig.Height = config.Height;
+            MyConfig.SaveScale = config.SaveScale;
+
         }
 
         //今のクリップボードから画像を追加
@@ -229,12 +247,13 @@ namespace _20190924_pixtrim2
         {
             BitmapSource bitmap = GetBitmapSource();
             if (bitmap == null) return;
-            if (MyConfig.IsAutoSave)
-            {
-                //MyConfig.IsAutoSave = false;
-                AddBitmapToList(bitmap);
-                //MyConfig.IsAutoSave = true;
-            }
+            //if (MyConfig.IsAutoSave)
+            //{
+            //    MyConfig.IsAutoSave = false;
+            //    AddBitmapToList(bitmap);
+            //    MyConfig.IsAutoSave = true;
+            //}
+            AddBitmapToList(bitmap);
         }
 
 
@@ -314,7 +333,7 @@ namespace _20190924_pixtrim2
             {
                 try
                 {
-                    MySleep(10);//10ミリ秒アプリを停止、コレがあると成功率が上がる気がする
+                    //MySleep(10);//10ミリ秒アプリを停止、コレがあると成功率が上がる気がする
                     Clipboard.SetImage(bitmap);//ここで取得できない時がある
                     return true;
                 }
@@ -482,7 +501,9 @@ namespace _20190924_pixtrim2
 
         private void ButtonTest_Click(object sender, RoutedEventArgs e)
         {
-            var neko = MyConfig;
+            var neko = MyComboBoxTrimSetting.SelectedItem;
+            var index = MyComboBoxTrimSetting.SelectedIndex;
+            var con = MyConfig;
 
         }
 
