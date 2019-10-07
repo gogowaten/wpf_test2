@@ -26,7 +26,7 @@
         <Button Content="プレビュー" Name="ButtonPreview"/>
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="保存形式"/>
-          <ComboBox Name="ComboBoxSaveImageType" VerticalAlignment="Center"/>
+          <ComboBox Name="MyComboBoxSaveImageType" VerticalAlignment="Center"/>
           <TextBlock Text="jpeg画質="/>
           <nu:MyNumeric x:Name="MyNumericJpegQuality" MyMinimum="1" MyMaximum="100" MyValue="97" MyDigitsInteger="3"/>
         </StackPanel>
@@ -46,7 +46,13 @@
 
         <GroupBox Padding="6" Header="切り抜き範囲">
           <StackPanel>
-            <ComboBox Name="ComboBoxTrimSetting"/>
+            <ComboBox Name="MyComboBoxTrimSetting">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=Name}"/>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
             <Button Content="今の設定を名前をつけてリストに追加" Name="ButtonAddTrimSetting"/>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="サイズ"/>

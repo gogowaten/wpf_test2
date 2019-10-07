@@ -127,8 +127,11 @@ namespace _20190924_pixtrim2
 
 
             //画像形式コンボボックス初期化
-            ComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
+            MyComboBoxSaveImageType.ItemsSource = Enum.GetValues(typeof(SaveImageType));
             //ComboBoxSaveImageType.SelectedIndex = 0;
+
+            //切り抜き範囲コンボボックス初期化
+            MyComboBoxTrimSetting.SelectionChanged += MyComboBoxTrimSetting_SelectionChanged;
 
             //            C# で実行ファイルのフォルダを取得
             //http://var.blog.jp/archives/66978870.html
@@ -171,10 +174,53 @@ namespace _20190924_pixtrim2
 
         }
 
+        //切り抜き範囲コンボボックスの選択項目変更時
+        //設定を反映
+        private void MyComboBoxTrimSetting_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SetTrimConfig(MyConfig.TrimConfigList[MyComboBoxTrimSetting.SelectedIndex]);
+        }
+        private void SetTrimConfig(TrimConfig config)
+        {
+            MyConfig.Top = config.Top;
+            MyConfig.Left = config.Left;
+            MyConfig.Width = config.Width;
+            MyConfig.Height = config.Height;
+            MyConfig.SaveScale = config.SaveScale;
+
+        }
+
         //切り抜き範囲の設定をコンボボックスに追加
         private void ButtonAddTrimSetting_Click(object sender, RoutedEventArgs e)
         {
-            
+            AddTrimSetting();
+        }
+        private void AddTrimSetting()
+        {
+            //名前入力ダイアログボックス表示
+            MyDialogWindow dialog = new MyDialogWindow();
+            dialog.ShowDialog();
+
+            if (dialog.DialogResult == true)
+            {
+                if (dialog.Answer == "") return;
+                //設定作成
+                TrimConfig trimConfig = new TrimConfig
+                {
+                    Name = dialog.Answer,
+                    Top = MyConfig.Top,
+                    Left = MyConfig.Left,
+                    Width = MyConfig.Width,
+                    Height = MyConfig.Height,
+                    SaveScale = MyConfig.SaveScale,
+                };
+                //リストに追加
+                MyConfig.TrimConfigList.Add(trimConfig);
+                //MyComboBoxTrimSetting.Items.Add(trimConfig);
+                //MyComboBoxTrimSetting.SelectedIndex = MyConfig.TrimConfigList.Count-1;
+                MyComboBoxTrimSetting.SelectedItem = trimConfig;
+
+            }
         }
 
         //今のクリップボードから画像を追加
@@ -336,7 +382,7 @@ namespace _20190924_pixtrim2
             //MyConfig.IsPlaySound;
             CheckBoxSoundPlay.SetBinding(CheckBox.IsCheckedProperty, MakeBinding(nameof(Config.IsPlaySound)));
             //MyConfig.SaveImageType;
-            ComboBoxSaveImageType.SetBinding(ComboBox.SelectedValueProperty, MakeBinding(nameof(Config.SaveImageType)));
+            MyComboBoxSaveImageType.SetBinding(ComboBox.SelectedValueProperty, MakeBinding(nameof(Config.SaveImageType)));
             //MyConfig.SoundDir;
             TextBoxSoundDir.SetBinding(TextBox.TextProperty, MakeBinding(nameof(Config.SoundDir)));
             //MyConfig.FileName;
@@ -350,7 +396,9 @@ namespace _20190924_pixtrim2
             //MyConfig.IsAutoSave;
             CheckBoxIsAutoSave.SetBinding(CheckBox.IsCheckedProperty, MakeBinding(nameof(Config.IsAutoSave)));
 
-            //SliderSaveScale.Value = 1;
+            //切り抜き範囲設定リスト
+            MyComboBoxTrimSetting.ItemsSource = MyConfig.TrimConfigList;
+            var neko = MyConfig.TrimConfigList[0];
 
             //this.DataContext = MyConfig;//要らないみたい
         }
@@ -434,7 +482,7 @@ namespace _20190924_pixtrim2
 
         private void ButtonTest_Click(object sender, RoutedEventArgs e)
         {
-
+            var neko = MyConfig;
 
         }
 
@@ -925,7 +973,7 @@ namespace _20190924_pixtrim2
         private string MakeFullPath(string fileName)
         {
             var dir = System.IO.Path.Combine(MyConfig.SavaDir, fileName);
-            var ex = "." + ComboBoxSaveImageType.SelectedValue.ToString();
+            var ex = "." + MyComboBoxSaveImageType.SelectedValue.ToString();
             var fullPath = dir + ex;
 
             string bar = "";
@@ -974,7 +1022,7 @@ namespace _20190924_pixtrim2
         //画像ファイル形式によるEncoder取得
         private BitmapEncoder GetEncoder()
         {
-            var type = ComboBoxSaveImageType.SelectedItem;
+            var type = MyComboBoxSaveImageType.SelectedItem;
 
             switch (type)
             {
@@ -1234,6 +1282,101 @@ namespace _20190924_pixtrim2
         }
     }
 
+    /// <summary>
+    /// 切り抜き範囲の設定データ用、アプリの設定ファイルにリストとして追加する
+    /// 項目は設定名、位置、サイズ、保存時の拡大率
+    /// </summary>
+    [Serializable]
+    public class TrimConfig : System.ComponentModel.INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        //設定の名前
+        private string _Name;
+        public string Name
+        {
+            get => _Name;
+            set
+            {
+                if (_Name == value)
+                    return;
+                _Name = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Width;
+        public decimal Width
+        {
+            get => _Width;
+            set
+            {
+                if (_Width == value)
+                    return;
+                _Width = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Height;
+        public decimal Height
+        {
+            get => _Height;
+            set
+            {
+                if (_Height == value)
+                    return;
+                _Height = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Left;
+        public decimal Left
+        {
+            get => _Left;
+            set
+            {
+                if (_Left == value)
+                    return;
+                if (value < 0) { value = 0; }
+                _Left = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private decimal _Top;
+        public decimal Top
+        {
+            get => _Top;
+            set
+            {
+                if (_Top == value)
+                    return;
+                if (value < 0) value = 0;
+                _Top = value;
+                RaisePropertyChanged();
+            }
+        }
+        private decimal _SaveScale;
+        public decimal SaveScale
+        {
+            get => _SaveScale;
+            set
+            {
+                if (_SaveScale == value)
+                    return;
+                _SaveScale = value;
+                RaisePropertyChanged();
+            }
+        }
+
+    }
+
     [Serializable]
     public class Config : System.ComponentModel.INotifyPropertyChanged
     {
@@ -1427,6 +1570,20 @@ namespace _20190924_pixtrim2
                 if (_IsAutoSave == value)
                     return;
                 _IsAutoSave = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        //切り抜き範囲の設定リスト
+        private List<TrimConfig> _TrimConfigList;
+        public List<TrimConfig> TrimConfigList
+        {
+            get => _TrimConfigList;
+            set
+            {
+                if (_TrimConfigList == value)
+                    return;
+                _TrimConfigList = value;
                 RaisePropertyChanged();
             }
         }
