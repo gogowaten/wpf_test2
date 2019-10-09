@@ -42,7 +42,8 @@ namespace _20191009_TreeViwe2
 
 
             //D:\ブログ用
-            var rootInfo = new System.IO.DirectoryInfo(@"D:\ブログ用");
+            //var rootInfo = new System.IO.DirectoryInfo(@"D:\ブログ用");
+            var rootInfo = new System.IO.DirectoryInfo(@"D:");
             var rootItem = new DirTreeItem(rootInfo);
             //root = new DirTreeItem(new System.IO.DirectoryInfo(@"D:\ブログ用"));
             rootItem.Header = rootInfo.Name;
@@ -54,12 +55,15 @@ namespace _20191009_TreeViwe2
         {
             var neko = (DirTreeItem)MyRoot.Items[0];
             var inu = (TreeViewItem)neko.Items[0];
+            var item = (DirTreeItem)MyRoot.SelectedItem;
+            string str = item.ToString();
+            string dir = item.DirectoryInfo.FullName;
         }
     }
 
     public class DirTreeItem : TreeViewItem
     {
-        public System.IO.DirectoryInfo DirectoryInfo;
+        public readonly System.IO.DirectoryInfo DirectoryInfo;
         private bool IsAdd;//サブフォルダを作成済みかどうか
         private TreeViewItem Dummy;//ダミーアイテム
 
@@ -111,7 +115,7 @@ namespace _20191009_TreeViwe2
 
         public override string ToString()
         {
-            return Header.ToString();
+            return DirectoryInfo.FullName;            
         }
     }
 }
