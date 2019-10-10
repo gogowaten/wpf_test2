@@ -45,7 +45,7 @@ namespace _20191010_TreeView3
 
             //サブフォルダが1つでもあれば
             if (info.GetDirectories().Length > 0)
-            //展開できることを示す▼を表示するためにダミーのTreeViewItemを追加する
+            //展開できることを示す▷を表示するためにダミーのTreeViewItemを追加する
             {
                 Dummy = new TreeViewItem();
                 Items.Add(Dummy);
@@ -79,7 +79,7 @@ namespace _20191010_TreeView3
                 //追加
                 Items.Add(new DirectoryTreeItem(directories[i]));
             }
-            IsAdd = true;//サブフォルダ使い済みフラグ
+            IsAdd = true;//サブフォルダ作成済みフラグ
         }
 
 
@@ -93,3 +93,10 @@ namespace _20191010_TreeView3
 //https://dobon.net/vb/dotnet/file/fileattributes.html
 //WPF4.5入門 その26 「TreeViewコントロール その2」 - かずきのBlog @hatena
 //https://blog.okazuki.jp/entry/20130409/1365479109
+//WPF TreeViewを使ってみた(2) - Qiita
+//https://qiita.com/kuro4/items/552b780bb2832a8de5a6
+
+
+//ブログ記事
+//WPFでフォルダ選択のダイアログボックスみたいなの作りたい - 午後わてんのブログ
+//https://gogowaten.hatenablog.com/entry/2019/10/10/122459
