@@ -5,17 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20101010_フォルダダイアログ"
         mc:Ignorable="d"
-        Title="FolderDialog" Height="450" Width="400">
+        Title="FolderDialog" Height="450" Width="400" 
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow">
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition/>
-      <RowDefinition Height="40"/>
+      <RowDefinition Height="60"/>
     </Grid.RowDefinitions>
 
     <TreeView Name="Root"/>
     
     <StackPanel Grid.Row="1" Orientation="Horizontal" FlowDirection="RightToLeft">
-      <Button Name="ButtonCancel" Content="Cancel" Width="100" Margin="10" Click="ButtonCancel_Click"/>
+      <Button Name="ButtonCancel" Content="Cancel" Width="100" Margin="40,10,10,10" Click="ButtonCancel_Click"/>
       <Button Name="ButtonOk" Content="Ok" Width="100" Margin="10" Click="ButtonOk_Click"/>
       <Button Name="ButtonTest" Content="test" Click="ButtonTest_Click"/>
     </StackPanel>

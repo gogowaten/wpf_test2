@@ -27,17 +27,20 @@ namespace _20101010_フォルダダイアログ
 
         private void ButtonOpenFolderDialog_Click(object sender, RoutedEventArgs e)
         {
-            FolderDialog dialog;
-            //FolderDialog dialog = new FolderDialog(new System.IO.DirectoryInfo(@"C:\"));
-            dialog = new FolderDialog(new System.IO.DirectoryInfo(@"E:\アプリ\動画キャプチャ\AGデスクトップレコーダー\AGDRec_131F"));
-            //dialog = new FolderDialog(new System.IO.DirectoryInfo(@"E:\オレ\携帯\2018\douga"));
+            string folderPath;
+            folderPath = @"E:\";
+            folderPath = @"C:\Users\waten\Source\Repos\wpf_test2\20101010_フォルダダイアログ";
+            //folderPath = @"E:\オレ\携帯\2018\";
 
-            dialog = new FolderDialog();
+            FolderDialog dialog = new FolderDialog(folderPath, this);
+            //dialog = new FolderDialog(this);
+
             dialog.ShowDialog();
             if (dialog.DialogResult == true)
             {
                 TextBlockFullName.Text = dialog.GetFullPath();
             }
+            //else { TextBlockFullName.Text = ""; }
         }
     }
 }

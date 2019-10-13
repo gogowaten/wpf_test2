@@ -22,11 +22,10 @@ namespace _20101010_フォルダダイアログ
     /// </summary>
     public partial class FolderDialog : Window
     {
-
-        public FolderDialog(DirectoryInfo directoryInfo)
+        public FolderDialog(string folderPath, Window owner)
         {
             InitializeComponent();
-
+            this.Owner = owner;//確実に閉じるため、複数のdialogが作られると1個しか閉じられない
             this.KeyDown += FolderDialog_KeyDown;
 
             //ドライブ全部を表示
@@ -36,23 +35,17 @@ namespace _20101010_フォルダダイアログ
                 AddNode(new DirectoryInfo(drives[i]));
             }
 
-            if (directoryInfo != null)
+            //指定フォルダが在るときは、そこまで作成して展開
+            if (folderPath != null)
             {
-                ExpandAll(directoryInfo);
+                if (Directory.Exists(folderPath))
+                {
+                    ExpandAll(new DirectoryInfo(folderPath));
+                }
             }
 
         }
-
-        //エンターキーでResult
-        private void FolderDialog_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && Root.SelectedItem != null)
-            {
-                DialogResult = true;
-            }
-        }
-
-        public FolderDialog() : this(null)
+        public FolderDialog(Window owner) : this(null, owner)
         {
 
         }
@@ -66,71 +59,20 @@ namespace _20101010_フォルダダイアログ
                 Root.Items.Add(new DirectoryTreeItem(info));
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
         }
 
-
-
-        private void ButtonCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = false;
-        }
-
-        private void ButtonOk_Click(object sender, RoutedEventArgs e)
-        {
-            if (Root.SelectedItem == null)
-            {
-                this.DialogResult = false;
-            }
-            else
-            {
-                this.DialogResult = true;
-            }
-        }
-
-        public string GetFullPath()
-        {
-            return Root.SelectedItem.ToString();
-        }
-
-        private void ButtonTest_Click(object sender, RoutedEventArgs e)
-        {
-            //////サブフォルダを順番に展開
-            //ObservableCollection<DirectoryTreeItem> subTrees = GetDrives();
-
-            ////フォルダをさかのぼってすべてのフォルダ取得
-            //List<DirectoryInfo> dirInfos = GetAllDirectoryInfo(OriginalInfo);
-            ////上から順番に展開していく
-            //DirectoryTreeItem subTree = null;
-            //for (int i = dirInfos.Count - 1; i >= 0; i--)
-            //{
-            //    for (int ii = 0; ii < subTrees.Count; ii++)
-            //    {
-            //        if (subTrees[ii].DirectoryInfo.Name == dirInfos[i].Name)
-            //        {
-            //            subTree = subTrees[ii];
-            //            subTree.IsExpanded = true;//ツリー展開、これでサブフォルダが追加される
-            //            subTree.IsSelected = true;
-            //            subTree.BringIntoView();//見えるところまでスクロール
-            //            subTree.Focus();
-            //            subTrees = subTree.SubDirectorys;
-            //            break;
-            //        }
-            //    }
-            //}
-            //if (subTree != null) { subTree.IsExpanded = false; }
-        }
-
+        #region 指定フォルダまで作成して展開
         //指定フォルダまですべて展開
         private void ExpandAll(DirectoryInfo info)
         {
             //ルートドライブ群取得
             ObservableCollection<DirectoryTreeItem> subTrees = GetDrives();
 
-            //フォルダをさかのぼってすべてのフォルダ取得
+            //フォルダをさかのぼってすべてのフォルダ名取得
             List<DirectoryInfo> dirInfos = GetAllDirectoryInfo(info);
             //上から順番に展開していく
             DirectoryTreeItem subTree = null;
@@ -138,22 +80,24 @@ namespace _20101010_フォルダダイアログ
             {
                 for (int ii = 0; ii < subTrees.Count; ii++)
                 {
+                    //名前一致で、そのツリーを展開
                     if (subTrees[ii].DirectoryInfo.Name == dirInfos[i].Name)
                     {
                         subTree = subTrees[ii];
-                        subTree.IsExpanded = true;//ツリー展開、これでサブフォルダが追加される
+                        subTree.IsExpanded = true;//ツリー展開、ここでサブフォルダが追加される
                         subTree.IsSelected = true;
                         subTree.BringIntoView();//見えるところまでスクロール
                         subTree.Focus();
-                        subTrees = subTree.SubDirectorys;
+                        subTrees = subTree.SubDirectorys;//次のサブフォルダ群
                         break;
                     }
                 }
             }
+            //指定フォルダのサブフォルダは展開しない(どっちでもいい)
             if (subTree != null) { subTree.IsExpanded = false; }
         }
 
-        //ルート直下ドライブ群のTreeItemを取得
+        //ルート直下のTreeItemを取得
         private ObservableCollection<DirectoryTreeItem> GetDrives()
         {
             var subTrees = new ObservableCollection<DirectoryTreeItem>();
@@ -179,13 +123,54 @@ namespace _20101010_フォルダダイアログ
             }
             return dir;
         }
+        public string GetFullPath()
+        {
+            return Root.SelectedItem.ToString();
+        }
         private string[] GetDir(DirectoryInfo info)
         {
             return info.FullName.Split(Char.Parse("\\"));
         }
 
+        #endregion
 
 
+        #region イベント
+        //エンターキーでResult
+        private void FolderDialog_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && Root.SelectedItem != null)
+            {
+                DialogResult = true;
+            }
+        }
+        //キャンセルボタン
+        private void ButtonCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+        }
+        //okボタン
+        private void ButtonOk_Click(object sender, RoutedEventArgs e)
+        {
+            if (Root.SelectedItem == null)
+            {
+                this.DialogResult = false;
+            }
+            else
+            {
+                this.DialogResult = true;
+            }
+        }
+
+
+        private void ButtonTest_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
+        #endregion
+      
 
 
 
@@ -194,8 +179,7 @@ namespace _20101010_フォルダダイアログ
             public readonly System.IO.DirectoryInfo DirectoryInfo;
             private bool IsAdd;//サブフォルダを作成済みかどうか
             private TreeViewItem Dummy;//ダミーアイテム
-                                       //public ObservableCollection<DirectoryInfo> SubDirectoryInfos;
-            public ObservableCollection<DirectoryTreeItem> SubDirectorys;
+            public ObservableCollection<DirectoryTreeItem> SubDirectorys;//サブフォルダ用
 
             public DirectoryTreeItem(System.IO.DirectoryInfo info)
             {
@@ -245,23 +229,21 @@ namespace _20101010_フォルダダイアログ
                 for (int i = 0; i < directories.Length; i++)
                 {
                     ////隠しフォルダ、システムフォルダは除外する
-                    //var fileAttributes = directories[i].Attributes;
-                    //if ((fileAttributes & System.IO.FileAttributes.Hidden) == System.IO.FileAttributes.Hidden ||
-                    //        (fileAttributes & System.IO.FileAttributes.System) == System.IO.FileAttributes.System)
-                    //{
-                    //    continue;
-                    //}
-                    ////追加
-                    //Items.Add(new DirectoryTreeItem(directories[i]));
+                    var fileAttributes = directories[i].Attributes;
+                    if ((fileAttributes & System.IO.FileAttributes.Hidden) == System.IO.FileAttributes.Hidden ||
+                            (fileAttributes & System.IO.FileAttributes.System) == System.IO.FileAttributes.System)
+                    {
+                        continue;
+                    }
 
                     //サブフォルダにもアクセスできるフォルダのみItem追加
                     try
                     {
-                        directories[i].GetDirectories();//これが通ればok
-                                                        //追加
+                        //これが通れば
+                        directories[i].GetDirectories();
+                        //追加
                         var item = new DirectoryTreeItem(directories[i]);
                         Items.Add(item);
-                        //SubDirectoryInfos.Add(new DirectoryInfo(directories[i].FullName));
                         SubDirectorys.Add(item);
                     }
                     catch (Exception)
