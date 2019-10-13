@@ -29,7 +29,7 @@ namespace _20191010_フォルダダイアログ
         {
             string folderPath;
             folderPath = @"E:\";
-            folderPath = @"C:\Users\waten\Source\Repos\wpf_test2\20101010_フォルダダイアログ";
+            folderPath = @"C:\Users\waten\Source\Repos\wpf_test2\20191010_フォルダダイアログ";
             //folderPath = @"E:\オレ\携帯\2018\";
 
             FolderDialog dialog = new FolderDialog(folderPath, this);
