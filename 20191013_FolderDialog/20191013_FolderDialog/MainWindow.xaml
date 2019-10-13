@@ -5,8 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20191013_FolderDialog"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="200" Width="600">
+    <Grid Margin="20">
+    <StackPanel>
+      <Button Content="フォルダ選択" Name="ButtonOpenFolderDialog"/>
+      <TextBlock Name="TextBlockFullName"/>
+    </StackPanel>
+  </Grid>
 </Window>

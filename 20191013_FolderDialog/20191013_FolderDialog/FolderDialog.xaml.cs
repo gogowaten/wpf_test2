@@ -11,11 +11,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+
 using System.IO;
 using System.Collections.ObjectModel;
 
 
-namespace _20191010_フォルダダイアログ
+namespace _20191013_FolderDialog
 {
     /// <summary>
     /// FolderDialog.xaml の相互作用ロジック
@@ -27,6 +28,8 @@ namespace _20191010_フォルダダイアログ
             InitializeComponent();
             this.Owner = owner;//確実に閉じるため、複数のdialogが作られると1個しか閉じられない
             this.KeyDown += FolderDialog_KeyDown;
+            ButtonCancel.Click += ButtonCancel_Click;
+            ButtonOk.Click += ButtonOk_Click;
 
             //ドライブ全部を表示
             string[] drives = Environment.GetLogicalDrives();
@@ -45,6 +48,7 @@ namespace _20191010_フォルダダイアログ
             }
 
         }
+
         public FolderDialog(Window owner) : this(null, owner)
         {
 
@@ -170,7 +174,7 @@ namespace _20191010_フォルダダイアログ
 
 
         #endregion
-      
+
 
 
 

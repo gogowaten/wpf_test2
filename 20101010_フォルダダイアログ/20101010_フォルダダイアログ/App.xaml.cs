@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace _20101010_フォルダダイアログ
+namespace _20191010_フォルダダイアログ
 {
     /// <summary>
     /// App.xaml の相互作用ロジック

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "20101010_フォルダダイアログ", "20101010_フォルダダイアログ\20101010_フォルダダイアログ.csproj", "{EF4D0B8D-E982-46B8-B3CB-A0FC2F52610D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "20191010_フォルダダイアログ", "20101010_フォルダダイアログ\20191010_フォルダダイアログ.csproj", "{EF4D0B8D-E982-46B8-B3CB-A0FC2F52610D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

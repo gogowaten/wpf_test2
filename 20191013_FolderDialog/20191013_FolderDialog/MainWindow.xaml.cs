@@ -23,6 +23,25 @@ namespace _20191013_FolderDialog
         public MainWindow()
         {
             InitializeComponent();
+            ButtonOpenFolderDialog.Click += ButtonOpenFolderDialog_Click;
+        }
+
+        private void ButtonOpenFolderDialog_Click(object sender, RoutedEventArgs e)
+        {
+            //フォルダ指定あり
+            string folderPath;
+            folderPath = @"C:\Users\waten\Source\Repos\wpf_test2\20191010_TreeView3";
+            FolderDialog dialog = new FolderDialog(folderPath, this);
+
+            //フォルダ指定なし
+            //dialog = new FolderDialog(this);
+
+            dialog.ShowDialog();
+            if (dialog.DialogResult == true)
+            {
+                TextBlockFullName.Text = dialog.GetFullPath();
+            }
+            
         }
     }
 }

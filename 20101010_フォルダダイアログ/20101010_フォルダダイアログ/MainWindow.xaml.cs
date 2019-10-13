@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace _20101010_フォルダダイアログ
+namespace _20191010_フォルダダイアログ
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
