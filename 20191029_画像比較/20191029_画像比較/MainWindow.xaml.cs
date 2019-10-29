@@ -69,7 +69,7 @@ namespace _20191029_画像比較
 
         //判定ボタンクリック時
         private void Button_Click(object sender, RoutedEventArgs e)
-        {         
+        {
             if (IsBitmapEqual(MyBitmapSource1, MyBitmapSource2))
             {
                 MessageBox.Show("同じ");
@@ -83,9 +83,22 @@ namespace _20191029_画像比較
         //クリップボードから画像取得して表示
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            BitmapSource bitmap = Clipboard.GetImage();
-            if (bitmap == null) return;
-            MyBitmapSource1 = bitmap;
+            var image = System.Windows.Clipboard.GetImage();
+            var encoder = new BmpBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(image));
+            using (var stream = new System.IO.MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+                var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                image = decoder.Frames[0];
+            }
+
+            var neko = Clipboard.GetImage();
+            BitmapSource source = Clipboard.GetImage();
+            if (source == null) return;
+            var bmp = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+            MyBitmapSource1 = image;
             MyImage1.Source = MyBitmapSource1;
             MyDir1.Text = "FromClipboard";
         }
@@ -156,7 +169,7 @@ namespace _20191029_画像比較
         {
             int w = bitmap.PixelWidth;
             int h = bitmap.PixelHeight;
-            int stride = w * bitmap.Format.BitsPerPixel / 8;
+            int stride = ((w * bitmap.Format.BitsPerPixel) + 7) / 8;
             byte[] pixels = new byte[h * stride];
             bitmap.CopyPixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
             return pixels;
@@ -184,8 +197,13 @@ namespace _20191029_画像比較
                     var convertedBitmap = new FormatConvertedBitmap(bf, pixelFormat, null, 0);
                     int w = convertedBitmap.PixelWidth;
                     int h = convertedBitmap.PixelHeight;
-                    int stride = (w * pixelFormat.BitsPerPixel + 7) / 8;
+                    int stride = ((w * pixelFormat.BitsPerPixel) + 7) / 8;
                     byte[] pixels = new byte[h * stride];
+
+                    var img = new BitmapImage(new Uri(filePath));
+                    img.CopyPixels(pixels, stride, 0);
+                    source = BitmapSource.Create(w, h, dpiX, dpiY, pixelFormat, bf.Palette, pixels, stride);
+
                     convertedBitmap.CopyPixels(pixels, stride, 0);
                     //dpi指定がなければ元の画像と同じdpiにする
                     if (dpiX == 0) { dpiX = bf.DpiX; }
@@ -201,9 +219,10 @@ namespace _20191029_画像比較
             {
 
             }
-
             return source;
         }
+
+
 
     }
 }
