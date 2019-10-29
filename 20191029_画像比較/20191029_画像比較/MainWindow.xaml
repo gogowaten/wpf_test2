@@ -1,0 +1,40 @@
+﻿<Window x:Class="_20191029_画像比較.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:_20191029_画像比較"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+  <Grid UseLayoutRounding="True">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+
+    <StackPanel Name="MyStackPanel1" AllowDrop="True" Background="Transparent">
+      <Button Content="判定" Click="Button_Click"/>
+      <Button Content="クリップボードから追加" Click="Button_Click_1"/>
+      
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+          <RadioButton Content="ウィンドウに合わせて表示" IsChecked="True" Click="RadioButton_Click"/>
+          <RadioButton Content="もとの大きさで表示" Margin="0,0,30,0" Click="RadioButton_Click_1"/>
+        </StackPanel>
+      
+      <TextBlock Name="MyDir1" Text="dir"/>
+      <Image Name="MyImage1" Stretch="Uniform"/>
+    </StackPanel>
+
+    <StackPanel Name="MyStackPanel2" AllowDrop="True" Background="Transparent" Grid.Column="1">
+      <Button Content="判定" Click="Button_Click"/>
+      <Button Content="クリップボードから追加" Click="Button_Click_2"/>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <RadioButton Content="ウィンドウに合わせて表示" IsChecked="True" Click="RadioButton_Click_2"/>
+        <RadioButton Content="もとの大きさで表示" Margin="0,0,30,0" Click="RadioButton_Click_3"/>
+      </StackPanel>
+      <TextBlock Name="MyDir2" Text="dir"/>
+      <Image Name="MyImage2" Stretch="Uniform"/>
+    </StackPanel>
+
+  </Grid>
+</Window>
