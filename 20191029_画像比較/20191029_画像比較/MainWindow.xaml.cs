@@ -36,6 +36,28 @@ namespace _20191029_画像比較
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop) == false) { return; }
             string[] filePath = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            //var bmp = GetBitmapSourceWithCangePixelFormat2(filePath[0], PixelFormats.Pbgra32);
+            //var pp = MakeBitmapByte(bmp);
+
+            //var bitmap = new BitmapImage();//new Uri(filePath[0]));
+            //bitmap.BeginInit();
+            //bitmap.UriSource = new Uri(filePath[0]);
+            //bitmap.EndInit();
+            //var pixels = MakeBitmapByte(bitmap);
+
+            //var bitmapFrame = BitmapFrame.Create(new Uri(filePath[0]));
+            //pixels = MakeBitmapByte(bitmapFrame);
+
+            //using (var ms = new System.IO.FileStream(filePath[0], System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            //{
+            //    bitmapFrame = BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            //}
+            //pixels = MakeBitmapByte(bitmapFrame);
+
+            TransformedBitmap tb;
+            
+
             //Bgra32に変換して読み込む
             MyBitmapSource2 = GetBitmapSourceWithCangePixelFormat2(filePath[0], PixelFormats.Bgra32, 96, 96);
             if (MyBitmapSource2 == null)
@@ -83,22 +105,23 @@ namespace _20191029_画像比較
         //クリップボードから画像取得して表示
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            var image = System.Windows.Clipboard.GetImage();
-            var encoder = new BmpBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(image));
-            using (var stream = new System.IO.MemoryStream())
-            {
-                encoder.Save(stream);
-                stream.Seek(0, System.IO.SeekOrigin.Begin);
-                var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
-                image = decoder.Frames[0];
-            }
+            //var image = System.Windows.Clipboard.GetImage();
+            //var encoder = new BmpBitmapEncoder();
+            //encoder.Frames.Add(BitmapFrame.Create(image));
+            //using (var stream = new System.IO.MemoryStream())
+            //{
+            //    encoder.Save(stream);
+            //    stream.Seek(0, System.IO.SeekOrigin.Begin);
+            //    var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            //    image = decoder.Frames[0];
+            //}
 
-            var neko = Clipboard.GetImage();
+            //var neko = Clipboard.GetImage();
+
             BitmapSource source = Clipboard.GetImage();
             if (source == null) return;
             var bmp = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
-            MyBitmapSource1 = image;
+            MyBitmapSource1 = source;
             MyImage1.Source = MyBitmapSource1;
             MyDir1.Text = "FromClipboard";
         }
@@ -167,6 +190,7 @@ namespace _20191029_画像比較
         //BitmapSourceをbyte配列に変換
         private byte[] MakeBitmapByte(BitmapSource bitmap)
         {
+            if (bitmap == null) return null;
             int w = bitmap.PixelWidth;
             int h = bitmap.PixelHeight;
             int stride = ((w * bitmap.Format.BitsPerPixel) + 7) / 8;
@@ -175,6 +199,7 @@ namespace _20191029_画像比較
             return pixels;
         }
 
+      
 
 
         /// <summary>
@@ -195,14 +220,11 @@ namespace _20191029_画像比較
                 {
                     var bf = BitmapFrame.Create(fs);
                     var convertedBitmap = new FormatConvertedBitmap(bf, pixelFormat, null, 0);
+
                     int w = convertedBitmap.PixelWidth;
                     int h = convertedBitmap.PixelHeight;
                     int stride = ((w * pixelFormat.BitsPerPixel) + 7) / 8;
                     byte[] pixels = new byte[h * stride];
-
-                    var img = new BitmapImage(new Uri(filePath));
-                    img.CopyPixels(pixels, stride, 0);
-                    source = BitmapSource.Create(w, h, dpiX, dpiY, pixelFormat, bf.Palette, pixels, stride);
 
                     convertedBitmap.CopyPixels(pixels, stride, 0);
                     //dpi指定がなければ元の画像と同じdpiにする
@@ -215,9 +237,9 @@ namespace _20191029_画像比較
                         convertedBitmap.Palette, pixels, stride);
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
             return source;
         }
