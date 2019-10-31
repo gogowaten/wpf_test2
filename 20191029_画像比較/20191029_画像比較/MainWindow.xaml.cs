@@ -54,9 +54,7 @@ namespace _20191029_画像比較
             //    bitmapFrame = BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             //}
             //pixels = MakeBitmapByte(bitmapFrame);
-
-            TransformedBitmap tb;
-            
+                        
 
             //Bgra32に変換して読み込む
             MyBitmapSource2 = GetBitmapSourceWithCangePixelFormat2(filePath[0], PixelFormats.Bgra32, 96, 96);
@@ -117,10 +115,10 @@ namespace _20191029_画像比較
             //}
 
             //var neko = Clipboard.GetImage();
+            //var bmp = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
 
             BitmapSource source = Clipboard.GetImage();
             if (source == null) return;
-            var bmp = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
             MyBitmapSource1 = source;
             MyImage1.Source = MyBitmapSource1;
             MyDir1.Text = "FromClipboard";
