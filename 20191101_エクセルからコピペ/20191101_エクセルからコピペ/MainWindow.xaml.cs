@@ -20,7 +20,7 @@ namespace _20191101_エクセルからコピペ
     /// </summary>
     public partial class MainWindow : Window
     {
-        BitmapSource MyBitmapSource;
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -36,7 +36,7 @@ namespace _20191101_エクセルからコピペ
         }
 
         private BitmapSource GetClipboardImage1()
-        {            
+        {
             return Clipboard.GetImage();
         }
 
@@ -70,7 +70,7 @@ namespace _20191101_エクセルからコピペ
             return source;
         }
         private BitmapSource GetClipboardImage4()
-        {            
+        {
             var data = Clipboard.GetDataObject();
             var stream = (System.IO.MemoryStream)data.GetData("PNG");
             //var stream = (System.IO.MemoryStream)data.GetData("PNG+Office Art");
@@ -80,14 +80,38 @@ namespace _20191101_エクセルからコピペ
         private BitmapSource GetClipboardImage5()
         {
             var data = Clipboard.GetDataObject();
-            data.GetData(DataFormats.Bitmap);
-            data.GetDataPresent("",)
+            string[] fmt = data.GetFormats();
+            List<object> obj = new List<object>();
+            List<BitmapSource> listBmp = new List<BitmapSource>();
+            List<string> notStreamBmp = new List<string>();
+            List<string> isStreamBmp = new List<string>();
+            foreach (var item in data.GetFormats())
+            {
+                if (item != DataFormats.MetafilePicture)
+                {
+                    try
+                    {
+                        obj.Add(data.GetData(item));
+                        var ms = (System.IO.MemoryStream)data.GetData(item);
+                        listBmp.Add(BitmapFrame.Create(ms));
+                        isStreamBmp.Add(item);
+                    }
+                    catch (Exception)
+                    {
+                        notStreamBmp.Add(item);
+                    }
+
+                }
+            }
             var stream = (System.IO.MemoryStream)data.GetData("PNG");
             //var stream = (System.IO.MemoryStream)data.GetData("PNG+Office Art");
             return BitmapFrame.Create(stream);
         }
 
-
+        private BitmapSource GetClipboardImage6()
+        {   
+            return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgra32, null, 0);
+        }
 
 
 
@@ -122,12 +146,14 @@ namespace _20191101_エクセルからコピペ
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-
+            //if (Clipboard.GetImage() == null) return;
+            SetImageSource(GetClipboardImage5());
         }
 
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-
+            if (Clipboard.GetImage() == null) return;
+            SetImageSource(GetClipboardImage6());
         }
 
         private void ButtonClear_Click(object sender, RoutedEventArgs e)
@@ -142,3 +168,5 @@ namespace _20191101_エクセルからコピペ
         }
     }
 }
+//WPFのClipboard.GetImage() のバグ？ (ソフトウェア ) - Simple is best - Yahoo!ブログ
+//https://blogs.yahoo.co.jp/elku_simple/35320048.html

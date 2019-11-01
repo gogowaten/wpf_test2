@@ -14,12 +14,12 @@
     <StackPanel>
       <Button Content="クリア" Click="ButtonClear_Click"/>
       <Button Content="DaraFormats" Click="Button_Click_6"/>
-      <Button Content="クリップボードから画像取得StreamBmp" Click="Button_Click"/>
-      <Button Content="クリップボードから画像取得StreamPng" Click="Button_Click_1"/>
-      <Button Content="クリップボードから画像取得PixelFormat" Click="Button_Click_2"/>
-      <Button Content="クリップボードから画像取得Png" Click="Button_Click_3"/>
-      <Button Content="クリップボードから画像取得emf" Click="Button_Click_4"/>
-      <Button Content="クリップボードから画像取得emf2" Click="Button_Click_5"/>
+      <Button Content="GetImage()" Click="Button_Click"/>
+      <Button Content="PngBitmapEncoder" Click="Button_Click_1"/>
+      <Button Content="BmpBitmapEndoder" Click="Button_Click_2"/>
+      <Button Content="GetDataPNG" Click="Button_Click_3"/>
+      <Button Content="GetFormats_GetData_test" Click="Button_Click_4"/>
+      <Button Content="" Click="Button_Click_5"/>
     </StackPanel>
     <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Canvas Name="MyCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
