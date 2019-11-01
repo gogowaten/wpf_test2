@@ -5,27 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20191029_画像比較"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600">
   <Grid UseLayoutRounding="True">
     <Grid.ColumnDefinitions>
       <ColumnDefinition/>
       <ColumnDefinition/>
     </Grid.ColumnDefinitions>
 
-    <StackPanel Name="MyStackPanel1" AllowDrop="True" Background="Transparent">
+    <StackPanel Name="MyStackPanel1" AllowDrop="True" Background="Transparent" Margin="2">
       <Button Content="判定" Click="Button_Click"/>
       <Button Content="クリップボードから追加" Click="Button_Click_1"/>
-      
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
           <RadioButton Content="ウィンドウに合わせて表示" IsChecked="True" Click="RadioButton_Click"/>
           <RadioButton Content="もとの大きさで表示" Margin="0,0,30,0" Click="RadioButton_Click_1"/>
         </StackPanel>
-      
       <TextBlock Name="MyDir1" Text="dir"/>
       <Image Name="MyImage1" Stretch="Uniform"/>
     </StackPanel>
 
-    <StackPanel Name="MyStackPanel2" AllowDrop="True" Background="Transparent" Grid.Column="1">
+    <StackPanel Name="MyStackPanel2" AllowDrop="True" Background="Transparent" Grid.Column="1" Margin="2">
       <Button Content="判定" Click="Button_Click"/>
       <Button Content="クリップボードから追加" Click="Button_Click_2"/>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

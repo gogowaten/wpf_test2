@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace _20191029_画像比較
 {
@@ -36,25 +26,6 @@ namespace _20191029_画像比較
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop) == false) { return; }
             string[] filePath = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-            //var bmp = GetBitmapSourceWithCangePixelFormat2(filePath[0], PixelFormats.Pbgra32);
-            //var pp = MakeBitmapByte(bmp);
-
-            //var bitmap = new BitmapImage();//new Uri(filePath[0]));
-            //bitmap.BeginInit();
-            //bitmap.UriSource = new Uri(filePath[0]);
-            //bitmap.EndInit();
-            //var pixels = MakeBitmapByte(bitmap);
-
-            //var bitmapFrame = BitmapFrame.Create(new Uri(filePath[0]));
-            //pixels = MakeBitmapByte(bitmapFrame);
-
-            //using (var ms = new System.IO.FileStream(filePath[0], System.IO.FileMode.Open, System.IO.FileAccess.Read))
-            //{
-            //    bitmapFrame = BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
-            //}
-            //pixels = MakeBitmapByte(bitmapFrame);
-                        
 
             //Bgra32に変換して読み込む
             MyBitmapSource2 = GetBitmapSourceWithCangePixelFormat2(filePath[0], PixelFormats.Bgra32, 96, 96);
@@ -102,21 +73,7 @@ namespace _20191029_画像比較
 
         //クリップボードから画像取得して表示
         private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            //var image = System.Windows.Clipboard.GetImage();
-            //var encoder = new BmpBitmapEncoder();
-            //encoder.Frames.Add(BitmapFrame.Create(image));
-            //using (var stream = new System.IO.MemoryStream())
-            //{
-            //    encoder.Save(stream);
-            //    stream.Seek(0, System.IO.SeekOrigin.Begin);
-            //    var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
-            //    image = decoder.Frames[0];
-            //}
-
-            //var neko = Clipboard.GetImage();
-            //var bmp = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
-
+        { 
             BitmapSource source = Clipboard.GetImage();
             if (source == null) return;
             MyBitmapSource1 = source;
