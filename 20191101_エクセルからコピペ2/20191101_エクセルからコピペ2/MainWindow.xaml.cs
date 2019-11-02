@@ -51,7 +51,10 @@ namespace _20191101_エクセルからコピペ2
                         {
                             MyBitmaps.Add(new MyBitmap(BitmapFrame.Create(ms), item));
                         }
-                        catch (Exception) { }
+                        catch (Exception)
+                        {
+                            MyBitmaps.Add(new MyBitmap(null, item));
+                        }
                     }
                     if (bmp != null)
                     {
@@ -59,7 +62,10 @@ namespace _20191101_エクセルからコピペ2
                         {
                             MyBitmaps.Add(new MyBitmap(bmp, item));
                         }
-                        catch (Exception) { }
+                        catch (Exception)
+                        {
+                            MyBitmaps.Add(new MyBitmap(null, item));
+                        }
                     }
                     if (ms == null && bmp == null)
                     {
@@ -78,11 +84,21 @@ namespace _20191101_エクセルからコピペ2
     {
         public BitmapSource BitmapSource { get; set; }
         public string DataFormatName { get; set; }
+        public string Dpi { get; set; }
 
         public MyBitmap(BitmapSource source, string name)
         {
             BitmapSource = source;
             DataFormatName = name;
+            if (source != null)
+            {
+                Dpi = "dpi = " + source.DpiX.ToString();
+            }
+            else
+            {
+                Dpi = "none";
+            }
+
         }
     }
 }
