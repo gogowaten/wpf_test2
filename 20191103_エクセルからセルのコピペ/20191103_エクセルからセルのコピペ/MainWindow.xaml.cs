@@ -37,7 +37,13 @@ namespace _20191103_エクセルからセルのコピペ
             if (item != null && item.BitmapSource != null)
             {
                 Clipboard.Clear();
-                Clipboard.SetImage(item.BitmapSource);
+                Clipboard.SetImage(item.BitmapSource);//おk、これが一番いい
+                //Clipboard.SetDataObject(item.BitmapSource);//なぜかセットされない
+                //Clipboard.SetData("Bitmap", item.BitmapSource);//おk、たぶんSetImageと同じ
+                //Clipboard.SetData("BitmapSource", item.BitmapSource);//セットされない
+
+                //これも動作がおかしい、他のアプリには画像がないとされるけど、このアプリには貼り付けできるけど、それも変色している
+                //Clipboard.SetData("System.Windows.Media.Imaging.BitmapSource", item.BitmapSource);
             }
         }
 
@@ -49,11 +55,13 @@ namespace _20191103_エクセルからセルのコピペ
             var data = Clipboard.GetDataObject();
             var neko = data.GetFormats();
             var bmp = data.GetData("Bitmap") as BitmapSource;
-            MyBitmaps.Add(new MyBitmap(bmp, "GetDataObject.Bitmap"));
+            MyBitmaps.Add(new MyBitmap(bmp, "GetData\"Bitmap\""));
+
             bmp = data.GetData("System.Windows.Media.Imaging.BitmapSource") as BitmapSource;
-            MyBitmaps.Add(new MyBitmap(bmp, "GetDataObject.BitmapSource"));
+            MyBitmaps.Add(new MyBitmap(bmp, "GetData\"BitmapSource\""));
+
             bmp = Clipboard.GetImage();
-            MyBitmaps.Add(new MyBitmap(bmp, "GetImage"));
+            MyBitmaps.Add(new MyBitmap(bmp, "GetImage()"));
 
         }
 
