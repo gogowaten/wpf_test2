@@ -78,7 +78,7 @@ namespace _20191029_画像比較
             if (source == null) return;
             MyBitmapSource1 = source;
             MyImage1.Source = MyBitmapSource1;
-            MyDir1.Text = "FromClipboard";
+            MyDir1.Text = "FromClipboard" + " " + GetStringNowTime();
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -87,7 +87,16 @@ namespace _20191029_画像比較
             if (bitmap == null) return;
             MyBitmapSource2 = bitmap;
             MyImage2.Source = MyBitmapSource2;
-            MyDir2.Text = "FromClipboard";
+            MyDir2.Text = "FromClipboard" + " " + GetStringNowTime();
+        }
+
+        //今の日時をStringで作成
+        private string GetStringNowTime()
+        {
+            DateTime dt = DateTime.Now;
+            //string str = dt.ToString("yyyyMMdd" + "_" + "HHmmss" + "_" + dt.Millisecond.ToString("000"));
+            string str = dt.ToString("yyyyMMdd" + "_" + "HHmmss");
+            return str;
         }
 
         //画像のストレッチ表示法変更
