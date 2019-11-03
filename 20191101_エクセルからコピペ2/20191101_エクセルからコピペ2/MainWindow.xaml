@@ -13,6 +13,8 @@
     </Grid.ColumnDefinitions>
     <StackPanel>
       <Button Content="button1" Click="Button_Click"/>
+      <Button Content="Button2" Click="Button_Click_1"/>
+      
     </StackPanel>
     <ScrollViewer Grid.Column="1">
       <ListBox Name="MyListBox" ItemsSource="{Binding}" Background="LightCyan">
