@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20191105_最近傍補間法"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600">
     <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="100"/>
@@ -16,12 +16,14 @@
       <Button Content="reset" Click="ButtonReset_Click"/>
       <Button Content="x2" Click="ButtonUp_Click" Tag="2"/>
       <Button Content="x3" Click="ButtonUp_Click" Tag="3"/>
+      <Button Content="x1.5" Click="ButtonUp_Click" Tag="1.5"/>
       <Button Content="1/2" Click="ButtonDown_Click_1" Tag="2"/>
       <Button Content="1/3" Click="ButtonDown_Click_1" Tag="3"/>
       <Button Content="1/2 ScaleTransform" Click="ButtonDownScaleTransform_Click" Tag="2"/>
       <Button Content="copy" Click="ButtonCopy_Click"/>
+      <Button Content="x16(確認用)" Click="Button16_Click"/>
     </StackPanel>
-    <ScrollViewer Grid.Column="1" UseLayoutRounding="True">
+    <ScrollViewer Grid.Column="1" UseLayoutRounding="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Image Name="MyImage" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
     </ScrollViewer>
     </Grid>
