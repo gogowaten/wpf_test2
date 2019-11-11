@@ -72,7 +72,7 @@ namespace _20191029_画像比較
         }
 
         //クリップボードから画像取得して表示
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void ButtonFromClip1_Click(object sender, RoutedEventArgs e)
         { 
             BitmapSource source = Clipboard.GetImage();
             if (source == null) return;
@@ -81,7 +81,7 @@ namespace _20191029_画像比較
             MyDir1.Text = "FromClipboard" + " " + GetStringNowTime();
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private void ButtonFromClip2_Click(object sender, RoutedEventArgs e)
         {
             BitmapSource bitmap = Clipboard.GetImage();
             if (bitmap == null) return;
@@ -208,8 +208,25 @@ namespace _20191029_画像比較
             return source;
         }
 
+        private void ButtonFromClipBgr32_Click_1(object sender, RoutedEventArgs e)
+        {
+            BitmapSource source = Clipboard.GetImage();
+            if (source == null) return;
+            source = new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
+            MyBitmapSource1 = source;
+            MyImage1.Source = MyBitmapSource1;
+            MyDir1.Text = "FromClipboard" + " " + GetStringNowTime();
+        }
 
-
+        private void ButtonFromClipBgr32_Click_2(object sender, RoutedEventArgs e)
+        {
+            BitmapSource source = Clipboard.GetImage();
+            if (source == null) return;
+            source = new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
+            MyBitmapSource2 = source;
+            MyImage2.Source = MyBitmapSource2;
+            MyDir2.Text = "FromClipboard" + " " + GetStringNowTime();
+        }
     }
 }
 //2つの画像が同じなのか簡易判定するアプリ作ったけど、なんか違う - 午後わてんのブログ
