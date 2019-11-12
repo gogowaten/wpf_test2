@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 
 //エクセルからのコピーはFormatConvertedBitmapでBgr32へ変換で決め打ち
@@ -35,9 +25,6 @@ namespace _20191111_クリップボードからの画像が透明
     /// </summary>
     public partial class MainWindow : Window
     {
-        //private BitmapSource MySource1;
-        //private BitmapSource MySource2;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -57,7 +44,8 @@ namespace _20191111_クリップボードからの画像が透明
         private void ButtonGetImage_Click(object sender, RoutedEventArgs e)
         {
             BitmapSource source = Clipboard.GetImage();
-            SetImageSource(source);            
+            //var neko = GetPixels(source);
+            SetImageSource(source);
         }
 
         private void ButtonGetDataBitmap_Click(object sender, RoutedEventArgs e)
@@ -68,45 +56,129 @@ namespace _20191111_クリップボードからの画像が透明
 
         private void ButtonGetDataBitmapSource_Click(object sender, RoutedEventArgs e)
         {
-            //BitmapSource source = Clipboard.GetData("System.Windows.Media.Imaging.BitmapSource") as BitmapSource;
+            //var source = Clipboard.GetData("System.Windows.Media.Imaging.BitmapSource") as BitmapSource;
             var source = Clipboard.GetDataObject().GetData("System.Windows.Media.Imaging.BitmapSource") as BitmapSource;
             SetImageSource(source);
+        }
+
+        private void ButtonEncDec_Click(object sender, RoutedEventArgs e)
+        {
+            //Streamに一時保存方式、BmpBitmapのエンコーダーとデコーダーを使う
+            SetImageSource(GetClipboardBitmapEncDec());
+        }
+
+        //Streamに一時保存方式、BmpBitmapのエンコーダーとデコーダーを使う
+        private BitmapSource GetClipboardBitmapEncDec()
+        {
+            BitmapSource source = Clipboard.GetImage();
+            if (source == null)
+            {
+                return null;
+            }
+
+            var encoder = new BmpBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(source));
+            using (var stream = new System.IO.MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+                var decoder = new BmpBitmapDecoder(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                source = decoder.Frames[0];
+            }
+            return source;
+        }
+
+        private void ButtonBgr32_Click(object sender, RoutedEventArgs e)
+        {
+            SetImageSource(GetClipboarBitmapBgr32());
+        }
+        private BitmapSource GetClipboarBitmapBgr32()
+        {
+            BitmapSource source = Clipboard.GetImage();
+            if (source == null) return null;
+            return new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
         }
 
 
         private void ButtonDeviceIndependentBitmap_Click(object sender, RoutedEventArgs e)
         {
-            var stream = Clipboard.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
-            BitmapSource source = null;
-            if (stream == null)
+            //bppが32未満ならBgr32、それ以外はBgra32のまま
+            SetImageSource(GetClipboardBitmapDIB());
+        }
+
+        /// <summary>
+        /// 透明画像にならないようにクリップボードの画像取得、DeviceIndependentBitmapでToArrayの15番目がbpp、32未満ならBgr32へ変換
+        /// </summary>
+        /// <returns></returns>
+        private BitmapSource GetClipboardBitmapDIB()
+        {
+            var data = Clipboard.GetDataObject();
+            if (data == null) return null;
+            
+            var ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
+            if (ms == null) return null;
+
+            //DeviceIndependentBitmapのbyte配列の15番目がbpp、
+            //これが32未満ならBgr32へ変換、これでアルファの値が255になる
+            byte[] dib = ms.ToArray();
+            if (dib[14] < 32)
             {
-                SetImageSource(source);
+                return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
             }
             else
             {
-                var data = stream.ToArray();
-                if (data[14] < 32)
-                {
-                    source = new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
-                    SetImageSource(source);
-                    //MyTextBlock.Text = "bpp = " + data[14].ToString();
-                }
-                else
-                {                    
-                    SetImageSource(Clipboard.GetImage());
-                    //MyTextBlock.Text = "bpp = " + data[14].ToString();
-                }
+                return Clipboard.GetImage();
             }
-            
         }
 
+        //エクセル判定追加
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            SetImageSource(GetClipboadBitmapDIBExcel());
+        }
+        private BitmapSource GetClipboadBitmapDIBExcel()
+        {
+            var data = Clipboard.GetDataObject();
+            if (data == null) return null;
+
+            var ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
+            if (ms == null) return null;
+
+            //DeviceIndependentBitmapのbyte配列の15番目がbpp、
+            //これが32未満ならBgr32へ変換、これでアルファの値が255になる
+            //エクセルからのコピーなのかも判定、そうならBgr32へ変換
+            byte[] dib = ms.ToArray();
+            if (dib[14] < 32 || IsExcel())
+            {
+                return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
+            }
+            else
+            {
+                return Clipboard.GetImage();
+            }
+        }
+
+        //エクセルからのコピーなのかを判定、フォーマット形式にEnhancedMetafileがあればエクセル判定
+        private bool IsExcel()
+        {
+            string[] formats = Clipboard.GetDataObject().GetFormats();
+            foreach (var item in formats)
+            {
+                if(item == "EnhancedMetafile")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        //画像を表示と画像のピクセルフォーマットとdpi表示するだけ
         private void SetImageSource(BitmapSource source)
         {
             if (source != null)
             {
                 MyImage.Source = source;
-                MyTextBlock.Text = "PixelFormats = "+ source.Format.ToString() + Environment.NewLine+
-                    "DpiX = "+source.DpiX;
+                MyTextBlock.Text = "PixelFormats = " + source.Format.ToString() + Environment.NewLine +
+                    "DpiX = " + source.DpiX;
             }
             else
             {
@@ -115,6 +187,7 @@ namespace _20191111_クリップボードからの画像が透明
             }
         }
 
+        //bitmapSourceのCopyPixels取得
         private byte[] GetPixels(BitmapSource source)
         {
             int w = source.PixelWidth;
@@ -125,27 +198,8 @@ namespace _20191111_クリップボードからの画像が透明
             return pixels;
         }
 
+    
 
-        private BitmapSource GetClipboardBitmap()
-        {
-            var data = Clipboard.GetDataObject();
-            if (data == null) return null;
-
-            var ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
-            if (ms == null) return null;
-
-            byte[] dib = ms.ToArray();
-            if (dib[14] < 32)
-            {
-                return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
-            }
-            else
-            {
-                return Clipboard.GetImage();
-            }
-
-
-        }
 
 
         //private BitmapSource PngAndOfficeArt()
@@ -214,3 +268,5 @@ namespace _20191111_クリップボードからの画像が透明
         //}
     }
 }
+//クリップボードの中にある画像をWPFで取得してみた、Clipboard.GetImage() だけだと透明になる - 午後わてんのブログ
+// https://gogowaten.hatenablog.com/entry/2019/11/12/201852

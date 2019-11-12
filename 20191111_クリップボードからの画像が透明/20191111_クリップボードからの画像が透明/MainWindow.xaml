@@ -5,15 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_20191111_クリップボードからの画像が透明"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600">
     <Grid>
-    <StackPanel Background="LightGray">
+    <StackPanel Background="Gray">
       <Button Content="クリップボードのデータ形式一覧表示" Click="ButtonViewFormats_Click"/>
       <Button Content="GetImage()" Click="ButtonGetImage_Click"/>
-      <Button Content="GetDataBitmap" Click="ButtonGetDataBitmap_Click"/>
-      <Button Content="GetDataBitmapSource" Click="ButtonGetDataBitmapSource_Click"/>
-      <Button Content="DeviceIndependentBitmapのbppで判定" Click="ButtonDeviceIndependentBitmap_Click"/>
-      <TextBlock Name="MyTextBlock" Text="textblock"/>
+      <Button Content="GetData(Bitmap)" Click="ButtonGetDataBitmap_Click"/>
+      <Button Content="GetData(BitmapSource)" Click="ButtonGetDataBitmapSource_Click"/>
+      <Button Content="Streamに一時保存方式、BmpBitmapのエンコーダーとデコーダーを使う" Click="ButtonEncDec_Click"/>
+      <Button Content="Bgr32へ変換" Click="ButtonBgr32_Click"/>
+      <Button Content="GetData(DeviceIndependentBitmap)のbppで判定、32未満ならBgr32へ変換" Click="ButtonDeviceIndependentBitmap_Click"/>
+      <Button Content="GetData(DeviceIndependentBitmap)のbppとエクセル？で判定、32未満ならBgr32へ変換" Click="Button_Click"/>
+      <TextBlock Name="MyTextBlock" Text="クリップボードに画像をコピーした状態で上の各ボタンを押す"/>
       <ScrollViewer UseLayoutRounding="True">
         <Image Name="MyImage" Stretch="None"/>
       </ScrollViewer>
