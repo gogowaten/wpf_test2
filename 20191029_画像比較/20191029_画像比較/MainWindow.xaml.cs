@@ -71,10 +71,11 @@ namespace _20191029_画像比較
             }
         }
 
+        #region クリップボードの画像を追加
         //クリップボードから画像取得して表示
         private void ButtonFromClip1_Click(object sender, RoutedEventArgs e)
-        { 
-            BitmapSource source = Clipboard.GetImage();
+        {
+            BitmapSource source = GetClipboadBitmapDIBExcel();
             if (source == null) return;
             MyBitmapSource1 = source;
             MyImage1.Source = MyBitmapSource1;
@@ -83,12 +84,55 @@ namespace _20191029_画像比較
 
         private void ButtonFromClip2_Click(object sender, RoutedEventArgs e)
         {
-            BitmapSource bitmap = Clipboard.GetImage();
+            BitmapSource bitmap = GetClipboadBitmapDIBExcel();
             if (bitmap == null) return;
             MyBitmapSource2 = bitmap;
             MyImage2.Source = MyBitmapSource2;
             MyDir2.Text = "FromClipboard" + " " + GetStringNowTime();
         }
+
+        //       クリップボードの中にある画像をWPFで取得してみた、Clipboard.GetImage() だけだと透明になる - 午後わてんのブログ
+        //https://gogowaten.hatenablog.com/entry/2019/11/12/201852
+
+        //エクセル判定追加
+        private BitmapSource GetClipboadBitmapDIBExcel()
+        {
+            var data = Clipboard.GetDataObject();
+            if (data == null) return null;
+
+            var ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
+            if (ms == null) return null;
+
+            //DeviceIndependentBitmapのbyte配列の15番目がbpp、
+            //これが32未満ならBgr32へ変換、これでアルファの値が255になる
+            //エクセルからのコピーなのかも判定、そうならBgr32へ変換
+            byte[] dib = ms.ToArray();
+            if (dib[14] < 32 || IsExcel())
+            {
+                return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
+            }
+            else
+            {
+                return Clipboard.GetImage();
+            }
+        }
+
+        //エクセルからのコピーなのかを判定、フォーマット形式にEnhancedMetafileがあればエクセル判定
+        private bool IsExcel()
+        {
+            string[] formats = Clipboard.GetDataObject().GetFormats();
+            foreach (var item in formats)
+            {
+                if (item == "EnhancedMetafile")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        #endregion
+
 
         //今の日時をStringで作成
         private string GetStringNowTime()
@@ -163,7 +207,7 @@ namespace _20191029_画像比較
             return pixels;
         }
 
-      
+
 
 
         /// <summary>
