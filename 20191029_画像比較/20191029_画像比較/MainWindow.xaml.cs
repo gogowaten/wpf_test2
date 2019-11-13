@@ -76,7 +76,10 @@ namespace _20191029_画像比較
         private void ButtonFromClip1_Click(object sender, RoutedEventArgs e)
         {
             BitmapSource source = GetClipboadBitmapDIBExcel();
-            if (source == null) return;
+            //if (source == null)
+            //{
+            //    return;
+            //};
             MyBitmapSource1 = source;
             MyImage1.Source = MyBitmapSource1;
             MyDir1.Text = "FromClipboard" + " " + GetStringNowTime();
@@ -85,7 +88,7 @@ namespace _20191029_画像比較
         private void ButtonFromClip2_Click(object sender, RoutedEventArgs e)
         {
             BitmapSource bitmap = GetClipboadBitmapDIBExcel();
-            if (bitmap == null) return;
+            //if (bitmap == null) return;
             MyBitmapSource2 = bitmap;
             MyImage2.Source = MyBitmapSource2;
             MyDir2.Text = "FromClipboard" + " " + GetStringNowTime();
@@ -109,7 +112,8 @@ namespace _20191029_画像比較
             byte[] dib = ms.ToArray();
             if (dib[14] < 32 || IsExcel())
             {
-                return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
+                //return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
+                return Alpha255(Clipboard.GetImage());
             }
             else
             {
@@ -131,6 +135,24 @@ namespace _20191029_画像比較
             return false;
         }
 
+        /// <summary>
+        /// ピクセルフォーマットBgra32の画像専用、アルファの値を255にする
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        private BitmapSource Alpha255(BitmapSource source)
+        {
+            int w = source.PixelWidth;
+            int h = source.PixelHeight;
+            int stride = ((w * source.Format.BitsPerPixel) + 7) / 8;
+            byte[] pixels = new byte[h * stride];
+            source.CopyPixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
+            for (int i = 3; i < pixels.Length; i += 4)
+            {
+                pixels[i] = 255;
+            }
+            return BitmapSource.Create(w, h, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
+        }
         #endregion
 
 
@@ -252,25 +274,25 @@ namespace _20191029_画像比較
             return source;
         }
 
-        private void ButtonFromClipBgr32_Click_1(object sender, RoutedEventArgs e)
-        {
-            BitmapSource source = Clipboard.GetImage();
-            if (source == null) return;
-            source = new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
-            MyBitmapSource1 = source;
-            MyImage1.Source = MyBitmapSource1;
-            MyDir1.Text = "FromClipboard" + " " + GetStringNowTime();
-        }
+        //private void ButtonFromClipBgr32_Click_1(object sender, RoutedEventArgs e)
+        //{
+        //    BitmapSource source = Clipboard.GetImage();
+        //    if (source == null) return;
+        //    source = new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
+        //    MyBitmapSource1 = source;
+        //    MyImage1.Source = MyBitmapSource1;
+        //    MyDir1.Text = "FromClipboard" + " " + GetStringNowTime();
+        //}
 
-        private void ButtonFromClipBgr32_Click_2(object sender, RoutedEventArgs e)
-        {
-            BitmapSource source = Clipboard.GetImage();
-            if (source == null) return;
-            source = new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
-            MyBitmapSource2 = source;
-            MyImage2.Source = MyBitmapSource2;
-            MyDir2.Text = "FromClipboard" + " " + GetStringNowTime();
-        }
+        //private void ButtonFromClipBgr32_Click_2(object sender, RoutedEventArgs e)
+        //{
+        //    BitmapSource source = Clipboard.GetImage();
+        //    if (source == null) return;
+        //    source = new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
+        //    MyBitmapSource2 = source;
+        //    MyImage2.Source = MyBitmapSource2;
+        //    MyDir2.Text = "FromClipboard" + " " + GetStringNowTime();
+        //}
     }
 }
 //2つの画像が同じなのか簡易判定するアプリ作ったけど、なんか違う - 午後わてんのブログ

@@ -15,7 +15,7 @@
     <StackPanel Name="MyStackPanel1" AllowDrop="True" Background="Transparent" Margin="2">
       <Button Content="判定" Click="Button_Click"/>
       <Button Content="クリップボードから追加" Click="ButtonFromClip1_Click"/>
-      <Button Content="クリップボードから追加Bgr32" Click="ButtonFromClipBgr32_Click_1"/>
+      <!--<Button Content="クリップボードから追加Bgr32" Click="ButtonFromClipBgr32_Click_1"/>-->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
           <RadioButton Content="ウィンドウに合わせて表示" IsChecked="True" Click="RadioButton_Click"/>
           <RadioButton Content="もとの大きさで表示" Margin="0,0,30,0" Click="RadioButton_Click_1"/>
@@ -27,7 +27,7 @@
     <StackPanel Name="MyStackPanel2" AllowDrop="True" Background="Transparent" Grid.Column="1" Margin="2">
       <Button Content="判定" Click="Button_Click"/>
       <Button Content="クリップボードから追加" Click="ButtonFromClip2_Click"/>
-      <Button Content="クリップボードから追加Bgr32" Click="ButtonFromClipBgr32_Click_2"/>
+      <!--<Button Content="クリップボードから追加Bgr32" Click="ButtonFromClipBgr32_Click_2"/>-->
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
         <RadioButton Content="ウィンドウに合わせて表示" IsChecked="True" Click="RadioButton_Click_2"/>
         <RadioButton Content="もとの大きさで表示" Margin="0,0,30,0" Click="RadioButton_Click_3"/>

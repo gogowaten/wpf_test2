@@ -119,7 +119,7 @@ namespace _20191111_クリップボードからの画像が透明
             if (ms == null) return null;
 
             //DeviceIndependentBitmapのbyte配列の15番目がbpp、
-            //これが32未満ならBgr32へ変換、これでアルファの値が255になる
+            //これが32未満ならBgr32へ変換、これでアルファの値が0でも255扱いになって表示される
             byte[] dib = ms.ToArray();
             if (dib[14] < 32)
             {
@@ -145,7 +145,7 @@ namespace _20191111_クリップボードからの画像が透明
             if (ms == null) return null;
 
             //DeviceIndependentBitmapのbyte配列の15番目がbpp、
-            //これが32未満ならBgr32へ変換、これでアルファの値が255になる
+            //これが32未満ならBgr32へ変換、これでアルファの値が0でも255扱いになって表示される
             //エクセルからのコピーなのかも判定、そうならBgr32へ変換
             byte[] dib = ms.ToArray();
             if (dib[14] < 32 || IsExcel())
