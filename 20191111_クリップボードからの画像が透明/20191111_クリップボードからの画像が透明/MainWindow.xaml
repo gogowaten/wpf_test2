@@ -16,6 +16,7 @@
       <Button Content="Bgr32へ変換" Click="ButtonBgr32_Click"/>
       <Button Content="GetData(DeviceIndependentBitmap)のbppで判定、32未満ならBgr32へ変換" Click="ButtonDeviceIndependentBitmap_Click"/>
       <Button Content="GetData(DeviceIndependentBitmap)のbppとエクセル？で判定、32未満ならBgr32へ変換" Click="Button_Click"/>
+      <Button Content="すべてのピクセルのアルファの値を見て判定" Click="Button_Click_1"/>
       <TextBlock Name="MyTextBlock" Text="クリップボードに画像をコピーした状態で上の各ボタンを押す"/>
       <ScrollViewer UseLayoutRounding="True">
         <Image Name="MyImage" Stretch="None"/>

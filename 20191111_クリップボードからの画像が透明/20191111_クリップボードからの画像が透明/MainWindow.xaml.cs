@@ -114,7 +114,7 @@ namespace _20191111_クリップボードからの画像が透明
         {
             var data = Clipboard.GetDataObject();
             if (data == null) return null;
-            
+
             var ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
             if (ms == null) return null;
 
@@ -164,7 +164,7 @@ namespace _20191111_クリップボードからの画像が透明
             string[] formats = Clipboard.GetDataObject().GetFormats();
             foreach (var item in formats)
             {
-                if(item == "EnhancedMetafile")
+                if (item == "EnhancedMetafile")
                 {
                     return true;
                 }
@@ -198,7 +198,56 @@ namespace _20191111_クリップボードからの画像が透明
             return pixels;
         }
 
-    
+
+        /// <summary>
+        /// すべてのピクセルのアルファ値を見て、完全透明な画像ならtrueを返す、ピクセルフォーマットBgra32専用
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        private bool IsTransparent(BitmapSource source)
+        {
+            var pixels = GetPixels(source);
+
+            if (pixels[3] != 0)
+            {
+                return false;
+            }
+            ulong alpha = 0;
+            for (int i = 3; i < pixels.Length; i += 4)
+            {
+                alpha += pixels[i];
+            }
+            if (alpha == 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            SetImageSource(ClipboardGetImageFix());
+        }
+        private BitmapSource ClipboardGetImageFix()
+        {
+            var data = Clipboard.GetDataObject();
+            if (data == null) return null;
+
+            BitmapSource source = Clipboard.GetImage();
+            if (source == null) return null;
+
+            if (IsTransparent(source))
+            {
+                return new FormatConvertedBitmap(source, PixelFormats.Bgr32, null, 0);
+            }
+            else
+            {
+                return source;
+            }
+        }
 
 
 
