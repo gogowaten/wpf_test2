@@ -108,11 +108,15 @@ namespace _20191029_画像比較
 
             //DeviceIndependentBitmapのbyte配列の15番目がbpp、
             //これが32未満ならBgr32へ変換、これでアルファの値が255になる
-            //エクセルからのコピーなのかも判定、そうならBgr32へ変換
+            //→255になっていなかった0のままだった
+            //なのでピクセルフォーマットはBgra32のままでアルファの値を255にする
+            //エクセルからのコピーなのかも判定、エクセルならこれもアルファの値を255にする
             byte[] dib = ms.ToArray();
             if (dib[14] < 32 || IsExcel())
             {
+                //Bgr32へ変換は中止
                 //return new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0);
+                //アルファの値を255にする
                 return Alpha255(Clipboard.GetImage());
             }
             else
