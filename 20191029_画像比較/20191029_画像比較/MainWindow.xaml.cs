@@ -148,7 +148,7 @@ namespace _20191029_画像比較
         {
             int w = source.PixelWidth;
             int h = source.PixelHeight;
-            int stride = ((w * source.Format.BitsPerPixel) + 7) / 8;
+            int stride = w * 4;
             byte[] pixels = new byte[h * stride];
             source.CopyPixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
             for (int i = 3; i < pixels.Length; i += 4)
