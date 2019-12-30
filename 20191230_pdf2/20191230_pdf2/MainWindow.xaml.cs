@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 
+//C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Dynamic.Runtime.dll
+
 
 /*パラレル処理がうまくできない
  *pdfのページをレンダーする RenderToStreamAsync これがawaitなせいか
@@ -35,8 +37,7 @@ namespace _20191230_pdf2
 
             string path;
             path = @"D:\ブログ用\1708_04.pdf";
-            path = @"E:\アプリ\ダウンロード\JDownloader\JDownloader\downloads\MSXFAN HYDLIDE3 (Feb 1988).pdf";
-            path = @"M:\小説ラノベ\(pc雑誌) MSXFAN\MSXFAN198704.pdf";
+            
             LoadPdf(path);
         }
 
