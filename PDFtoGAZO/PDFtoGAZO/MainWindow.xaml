@@ -24,10 +24,12 @@
       <Button x:Name="ButtonSave" Content="保存" Click="ButtonSave_Click"/>
       <Button Name="ButtonDpi96" Content="96" Click="ButtonDpi96_Click"/>
       <Button Name="ButtonDpi150" Content="150" Click="ButtonDpi150_Click"/>
-      <Button Name="ButtonDpi300" Content="300" Click="ButtonDpi300_Click"/>      
+      <Button Name="ButtonDpi300" Content="300" Click="ButtonDpi300_Click"/>
+      <Button Name="ButtonDpi600" Content="600" Click="ButtonDpi600_Click"/>
       <TextBlock Name="tbDpi" Text="今のdpi"/>
       <TextBlock Name="tbHeight" Text="縦ピクセル"/>
       <TextBlock Name="tbPageCount" Text="ページ総数"/>
+      <Button Name="Button2" Content="hozon2" Click="Button2_Click"/>
     </StackPanel>
     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Image Name="MyImage" Stretch="None" UseLayoutRounding="True"/>
