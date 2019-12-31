@@ -27,6 +27,10 @@ using Windows.Data.Pdf;
 //    [UWP][PDF] PDFファイルを表示する | HIROs.NET Blog
 //http://blog.hiros-dot.net/?p=7346
 
+//C# Taskの待ちかた集 - Qiita
+//https://qiita.com/takutoy/items/d45aa736ced25a8158b3
+
+
 //農林水産省 トマトの種類と見分け方
 //http://www.maff.go.jp/j/pr/aff/1708/pdf/1708_04.pdf
 
