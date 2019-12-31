@@ -29,8 +29,6 @@ using Windows.Data.Pdf;
 
 //農林水産省 トマトの種類と見分け方
 //http://www.maff.go.jp/j/pr/aff/1708/pdf/1708_04.pdf
-//TUF B450-PLUS GAMING Manual | マザーボード | ASUS 日本
-//https://www.asus.com/jp/Motherboards/TUF-B450-PLUS-GAMING/HelpDesk_Manual/
 
 
 namespace PDFtoJPEG
