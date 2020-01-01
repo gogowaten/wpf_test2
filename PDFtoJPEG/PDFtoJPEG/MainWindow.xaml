@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PDFtoJPEG"
+        xmlns:gogo="clr-namespace:MyNumericUpDownInteger;assembly=MyNumericUpDownInteger"
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="600">
   <Window.Resources>
@@ -20,18 +21,35 @@
       <RowDefinition Height="auto"/>
       <RowDefinition/>
     </Grid.RowDefinitions>
-    <StackPanel Orientation="Horizontal">
-      <Button x:Name="ButtonSave" Content="保存" Click="ButtonSave_Click"/>
+    <StackPanel Orientation="Horizontal" Name="MyStackPanel">
       <Button Name="ButtonDpi96" Content="96" Click="ButtonDpi96_Click"/>
       <Button Name="ButtonDpi150" Content="150" Click="ButtonDpi150_Click"/>
       <Button Name="ButtonDpi300" Content="300" Click="ButtonDpi300_Click"/>
       <Button Name="ButtonDpi600" Content="600" Click="ButtonDpi600_Click"/>
-      <TextBlock Name="tbDpi" Text="今のdpi"/>
-      <TextBlock Name="tbHeight" Text="縦ピクセル"/>
-      <TextBlock Name="tbPageCount" Text="ページ総数"/>
+      <Border Width="1" Height="auto" Background="LightGray" Margin="4"/>
+      <StackPanel Margin="10,5,0,5">
+        <TextBlock Text="Jpeg品質" Margin="0"/>
+        <gogo:NumericUDInteger Name="NumeJpegQuality" Min="20" Max="100" Value="20" Margin="0,5,0,5" Width="50" LargeChange="10"/>
+      </StackPanel>
+      <Button Name="ButtonPreviweRenew" Content="更新" Click="ButtonPreviweRenew_Click"/>
+      <StackPanel Margin="10,5,0,5">
+        <gogo:NumericUDInteger Name="NumePageIndex" Min="1" Width="60" LargeChange="10"/>
+        <Border Height="1" Background="Black" Margin="2,2,0,2"/>
+        <TextBlock Name="tbPageCount" Text="ページ" Margin="0" HorizontalAlignment="Center"/>
+      </StackPanel>
+      <Border Width="1" Height="auto" Background="LightGray" Margin="14,4"/>
+      <StackPanel>
+        <TextBlock Name="tbDpi" Text="今のdpi" Margin="10,5,0,0" HorizontalAlignment="Right"/>
+        <TextBlock Name="tbHeight" Text="縦ピクセル" Margin="10,5,0,0" HorizontalAlignment="Right"/>
+        <TextBlock Name="tbFileSize" Text="filesize" HorizontalAlignment="Right"/>
+      </StackPanel>
+      <Button x:Name="ButtonSave" Content="保存" Click="ButtonSave_Click" FontWeight="Bold" Margin="10,5,0,5"/>
     </StackPanel>
-    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-      <Image Name="MyImage" Stretch="None" UseLayoutRounding="True"/>
+    <ScrollViewer Name="MyScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+      <Grid>
+        <Image Name="MyImage" Stretch="None" UseLayoutRounding="True"/>
+        <Image Name="MyImagePreviwer" Stretch="None" UseLayoutRounding="True"/>
+      </Grid>
     </ScrollViewer>
   </Grid>
 </Window>

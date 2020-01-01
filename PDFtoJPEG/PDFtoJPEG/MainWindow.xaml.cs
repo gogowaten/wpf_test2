@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 
 using System.IO;//必須
 using Windows.Data.Pdf;
+using MyNumericUpDownInteger;
 
 //下の2つを参照に追加する必要がある
 //"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral\Annotated\Windows.winmd"
@@ -56,7 +57,23 @@ namespace PDFtoJPEG
             this.AllowDrop = true;
             this.Drop += MainWindow_Drop;
 
+
+            MyScrollViewer.PreviewMouseLeftButtonDown += (s, e) => { Panel.SetZIndex(MyImage, 1); };
+            MyScrollViewer.PreviewMouseLeftButtonUp += (s, e) => { Panel.SetZIndex(MyImage, -1); };
+
         }
+
+        //private void MyScrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        //{
+        //    Panel.SetZIndex(MyImage, -1);
+        //}
+
+        //private void MyScrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{            
+        //    Panel.SetZIndex(MyImage, 1);
+        //}
+
+
 
         //ファイルがドロップされたとき
         private void MainWindow_Drop(object sender, DragEventArgs e)
@@ -77,8 +94,12 @@ namespace PDFtoJPEG
                 MyPdfDirectory = System.IO.Path.GetDirectoryName(filePath);
                 MyPdfName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                 MyDpi = 96;
-                DisplayImage(0, 96);
-                tbPageCount.Text = $"ページ数 : {MyPdfDocument.PageCount.ToString()}";
+                DisplayImage(0, 96);//表示
+                NumePageIndex.Value = 1;
+
+                var pageCount = MyPdfDocument.PageCount;
+                tbPageCount.Text = $"{pageCount.ToString()} ページ";
+                NumePageIndex.Max = (int)pageCount;
             }
             catch (Exception)
             { }
@@ -88,14 +109,19 @@ namespace PDFtoJPEG
         private async void DisplayImage(int pageIndex, double dpi)
         {
             if (MyPdfDocument == null) { return; }
+            int c = (int)MyPdfDocument.PageCount - 1;
+            if (pageIndex > c)
+            {
+                pageIndex = c;
+            }
             MyDpi = dpi;
             using (PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
                 double h = page.Size.Height;
                 var options = new PdfPageRenderOptions();
                 options.DestinationHeight = (uint)Math.Round(page.Size.Height * (dpi / 96.0), MidpointRounding.AwayFromZero);
-                tbDpi.Text = $"dpi : {dpi.ToString()}";
-                tbHeight.Text = $"縦ピクセル : {options.DestinationHeight.ToString()}";
+                tbDpi.Text = $"{dpi.ToString()} dpi";
+                tbHeight.Text = $"縦{options.DestinationHeight.ToString()} px";
 
                 using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
                 {
@@ -109,32 +135,67 @@ namespace PDFtoJPEG
                     MyImage.Source = image;
                     MyImage.Width = image.PixelWidth;
                     MyImage.Height = image.PixelHeight;
+                    //プレビュー用のjpeg画像表示
+                    MyImagePreviwer.Source = MakeJpegPreviewImage(image, NumeJpegQuality.Value);
                 }
             }
+        }
+
+        //プレビュー用のjpeg画像作成
+        private BitmapSource MakeJpegPreviewImage(BitmapSource source, int quality)
+        {
+            if (source == null) { return null; }
+            var encoder = new JpegBitmapEncoder();
+            JpegBitmapDecoder decoder;
+            encoder.QualityLevel = quality;
+            encoder.Frames.Add(BitmapFrame.Create(source));
+            using (var stream = new MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                decoder = new JpegBitmapDecoder(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                var fileSize = stream.Length / 1000;
+                if (fileSize > 1000)
+                {
+                    tbFileSize.Text = $"{(stream.Length / 1000 / 1000.0).ToString(".0")} MB";
+                }
+                else
+                {
+                    tbFileSize.Text = $"{stream.Length / 1000} KB";
+                }
+            }
+            return decoder.Frames[0];
         }
 
 
         //DPI指定ボタンクリック時
         private void ButtonDpi96_Click(object sender, RoutedEventArgs e)
         {
-            DisplayImage(0, 96);
+            DisplayImage(NumePageIndex.Value - 1, 96);
         }
 
         private void ButtonDpi150_Click(object sender, RoutedEventArgs e)
         {
-            DisplayImage(0, 150);
+            DisplayImage(NumePageIndex.Value - 1, 150);
         }
 
         private void ButtonDpi300_Click(object sender, RoutedEventArgs e)
         {
-            DisplayImage(0, 300);
+            DisplayImage(NumePageIndex.Value - 1, 300);
         }
 
         private void ButtonDpi600_Click(object sender, RoutedEventArgs e)
         {
-            DisplayImage(0, 600);
+            DisplayImage(NumePageIndex.Value - 1, 600);
         }
 
+        //プレビュー画像の更新
+        private void ButtonPreviweRenew_Click(object sender, RoutedEventArgs e)
+        {
+            if (MyImage.Source == null) { return; }
+            DisplayImage(NumePageIndex.Value - 1, MyDpi);
+            //MyImagePreviwer.Source = MakeJpegPreviewImage((BitmapSource)MyImage.Source, NumeJpegQuality.Value);
+        }
 
 
 
@@ -198,7 +259,7 @@ namespace PDFtoJPEG
                 var MyTasks = new List<Task>();
                 for (int i = 0; i < MyPdfDocument.PageCount; i++)
                 {
-                    MyTasks.Add(SaveSub2(MyPdfDocument, MyDpi, MyPdfDirectory, MyPdfName, i, 85, keta));
+                    MyTasks.Add(SaveSub2(MyPdfDocument, MyDpi, MyPdfDirectory, MyPdfName, i, NumeJpegQuality.Value, keta));
                 }
 
                 //各タスク実行
@@ -214,6 +275,8 @@ namespace PDFtoJPEG
             finally { this.IsEnabled = true; }
 
         }
+
+
     }
 
 }
