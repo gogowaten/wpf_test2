@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 
 using System.IO;//必須
 using Windows.Data.Pdf;
-using MyNumericUpDownInteger;
+
 
 //下の2つを参照に追加する必要がある
 //"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral\Annotated\Windows.winmd"
@@ -57,21 +57,12 @@ namespace PDFtoJPEG
             this.AllowDrop = true;
             this.Drop += MainWindow_Drop;
 
-
+            //左クリックで元画像とプレビュー画像の切り替え
             MyScrollViewer.PreviewMouseLeftButtonDown += (s, e) => { Panel.SetZIndex(MyImage, 1); };
             MyScrollViewer.PreviewMouseLeftButtonUp += (s, e) => { Panel.SetZIndex(MyImage, -1); };
 
         }
 
-        //private void MyScrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    Panel.SetZIndex(MyImage, -1);
-        //}
-
-        //private void MyScrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        //{            
-        //    Panel.SetZIndex(MyImage, 1);
-        //}
 
 
 
@@ -105,27 +96,33 @@ namespace PDFtoJPEG
             { }
         }
 
+
+
         //PDFファイルを画像に変換して表示
         private async void DisplayImage(int pageIndex, double dpi)
         {
             if (MyPdfDocument == null) { return; }
+
             int c = (int)MyPdfDocument.PageCount - 1;
             if (pageIndex > c)
             {
                 pageIndex = c;
             }
+            if (pageIndex < 0) pageIndex = 0;
+
             MyDpi = dpi;
             using (PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
-                double h = page.Size.Height;
+                //作成する画像の縦ピクセル数を指定されたdpiから決める
                 var options = new PdfPageRenderOptions();
                 options.DestinationHeight = (uint)Math.Round(page.Size.Height * (dpi / 96.0), MidpointRounding.AwayFromZero);
                 tbDpi.Text = $"{dpi.ToString()} dpi";
                 tbHeight.Text = $"縦{options.DestinationHeight.ToString()} px";
 
+                //画像に変換
                 using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
                 {
-                    await page.RenderToStreamAsync(stream, options);
+                    await page.RenderToStreamAsync(stream, options);//画像に変換はstreamへ
 
                     BitmapImage image = new BitmapImage();
                     image.BeginInit();
@@ -136,24 +133,31 @@ namespace PDFtoJPEG
                     MyImage.Width = image.PixelWidth;
                     MyImage.Height = image.PixelHeight;
                     //プレビュー用のjpeg画像表示
-                    MyImagePreviwer.Source = MakeJpegPreviewImage(image, NumeJpegQuality.Value);
+                    int quality = NumeJpegQuality.Value;
+                    if (quality < NumeJpegQuality.Min) { quality = NumeJpegQuality.Min; }
+                    if (quality > NumeJpegQuality.Max) { quality = NumeJpegQuality.Max; }
+                    MyImagePreviwer.Source = MakeJpegPreviewImage(image, quality);
                 }
             }
         }
 
-        //プレビュー用のjpeg画像作成
+        //プレビュー用のjpeg画像作成は
+        //BitmapSourceをEncoderでstreamにSaveして、それをDecoderで取得？する
         private BitmapSource MakeJpegPreviewImage(BitmapSource source, int quality)
         {
             if (source == null) { return null; }
+            
             var encoder = new JpegBitmapEncoder();
             JpegBitmapDecoder decoder;
             encoder.QualityLevel = quality;
             encoder.Frames.Add(BitmapFrame.Create(source));
             using (var stream = new MemoryStream())
             {
+                //jpeg画像をSaveしてから取り出す
                 encoder.Save(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 decoder = new JpegBitmapDecoder(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                //このときのstreamのlengthがjpeg画像のサイズになるみたいなので取得、表示
                 var fileSize = stream.Length / 1000;
                 if (fileSize > 1000)
                 {
@@ -169,6 +173,12 @@ namespace PDFtoJPEG
 
 
         //DPI指定ボタンクリック時
+        //-1しているのはPDFのページは0から数えるけど、見る方は1から数えるから
+
+        private void ButtonDpi48_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayImage(NumePageIndex.Value - 1, 48);
+        }
         private void ButtonDpi96_Click(object sender, RoutedEventArgs e)
         {
             DisplayImage(NumePageIndex.Value - 1, 96);
@@ -194,7 +204,6 @@ namespace PDFtoJPEG
         {
             if (MyImage.Source == null) { return; }
             DisplayImage(NumePageIndex.Value - 1, MyDpi);
-            //MyImagePreviwer.Source = MakeJpegPreviewImage((BitmapSource)MyImage.Source, NumeJpegQuality.Value);
         }
 
 
@@ -223,17 +232,14 @@ namespace PDFtoJPEG
 
                 using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
                 {
-                    await page.RenderToStreamAsync(stream, options);
-
-                    BitmapImage image = new BitmapImage();
-                    image.BeginInit();
-                    image.CacheOption = BitmapCacheOption.OnLoad;
-                    image.StreamSource = stream.AsStream();
-                    image.EndInit();
+                    await page.RenderToStreamAsync(stream, options);//画像に変換したのはstreamへ
 
                     JpegBitmapEncoder encoder = new JpegBitmapEncoder();
                     encoder.QualityLevel = quality;
-                    encoder.Frames.Add(BitmapFrame.Create(image));
+
+                    //streamから直接BitmapFrameを作成することができた                    
+                    encoder.Frames.Add(BitmapFrame.Create(stream.AsStream()));
+                    //連番ファイル名を作成して保存
                     pageIndex++;
                     string renban = pageIndex.ToString("d" + keta);
                     using (var fileStream = new FileStream(
@@ -251,6 +257,9 @@ namespace PDFtoJPEG
             if (MyPdfDocument == null) { return; }
 
             this.IsEnabled = false;
+            int quality = NumeJpegQuality.Value;
+            if (quality < NumeJpegQuality.Min) { quality = NumeJpegQuality.Min; }
+            if (quality > NumeJpegQuality.Max) { quality = NumeJpegQuality.Max; }
             try
             {
                 int keta = MyPdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
@@ -259,7 +268,7 @@ namespace PDFtoJPEG
                 var MyTasks = new List<Task>();
                 for (int i = 0; i < MyPdfDocument.PageCount; i++)
                 {
-                    MyTasks.Add(SaveSub2(MyPdfDocument, MyDpi, MyPdfDirectory, MyPdfName, i, NumeJpegQuality.Value, keta));
+                    MyTasks.Add(SaveSub2(MyPdfDocument, MyDpi, MyPdfDirectory, MyPdfName, i, quality, keta));
                 }
 
                 //各タスク実行
@@ -275,7 +284,6 @@ namespace PDFtoJPEG
             finally { this.IsEnabled = true; }
 
         }
-
 
     }
 

@@ -22,14 +22,15 @@
       <RowDefinition/>
     </Grid.RowDefinitions>
     <StackPanel Orientation="Horizontal" Name="MyStackPanel">
+      <Button Name="ButtonDpi48" Content="48" Click="ButtonDpi48_Click"/>
       <Button Name="ButtonDpi96" Content="96" Click="ButtonDpi96_Click"/>
       <Button Name="ButtonDpi150" Content="150" Click="ButtonDpi150_Click"/>
       <Button Name="ButtonDpi300" Content="300" Click="ButtonDpi300_Click"/>
       <Button Name="ButtonDpi600" Content="600" Click="ButtonDpi600_Click"/>
-      <Border Width="1" Height="auto" Background="LightGray" Margin="4"/>
+      <Border Width="1" Height="auto" Background="LightGray" Margin="14,4"/>
       <StackPanel Margin="10,5,0,5">
         <TextBlock Text="Jpeg品質" Margin="0"/>
-        <gogo:NumericUDInteger Name="NumeJpegQuality" Min="20" Max="100" Value="20" Margin="0,5,0,5" Width="50" LargeChange="10"/>
+        <gogo:NumericUDInteger Name="NumeJpegQuality" Min="10" Max="100" Value="85" Margin="0,5,0,5" Width="50" LargeChange="10"/>
       </StackPanel>
       <Button Name="ButtonPreviweRenew" Content="更新" Click="ButtonPreviweRenew_Click"/>
       <StackPanel Margin="10,5,0,5">
