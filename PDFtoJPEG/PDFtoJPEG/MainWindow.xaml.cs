@@ -78,6 +78,7 @@ namespace PDFtoJPEG
         //PDFファイルを読み込んで最初のページを表示
         private async void LoadPdf(string filePath)
         {
+
             var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
             try
             {
@@ -92,8 +93,10 @@ namespace PDFtoJPEG
                 tbPageCount.Text = $"{pageCount.ToString()} ページ";
                 NumePageIndex.Max = (int)pageCount;
             }
-            catch (Exception)
-            { }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"開くことができなかった、PDFファイルじゃないかも \n \n {ex.ToString()}");
+            }
         }
 
 
@@ -146,7 +149,7 @@ namespace PDFtoJPEG
         private BitmapSource MakeJpegPreviewImage(BitmapSource source, int quality)
         {
             if (source == null) { return null; }
-            
+
             var encoder = new JpegBitmapEncoder();
             JpegBitmapDecoder decoder;
             encoder.QualityLevel = quality;
@@ -285,6 +288,67 @@ namespace PDFtoJPEG
 
         }
 
-    }
+        private async void ButtonTest_Click(object sender, RoutedEventArgs e)
+        {
+            string filePath;
+            filePath = @"D:\ブログ用\1708_04.pdf";
 
+            Windows.Storage.StorageFile sf = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
+            using (Windows.Storage.Streams.IRandomAccessStream RAStream = await sf.OpenAsync(Windows.Storage.FileAccessMode.Read))
+            {
+                MyPdfDocument = await PdfDocument.LoadFromStreamAsync(RAStream);
+                using (PdfPage neko = MyPdfDocument.GetPage(0))
+                {
+
+                    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                    {
+                        await neko.RenderToStreamAsync(stream);
+                        var img = new BitmapImage();
+                        img.BeginInit();
+                        img.CacheOption = BitmapCacheOption.OnLoad;
+                        img.StreamSource = stream.AsStream();
+                        img.EndInit();
+                        MyImage.Source = img;
+                    }
+                }
+            }
+
+
+
+            using (var raStream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            {
+                var mm = await PdfDocument.LoadFromStreamAsync(raStream);
+            }
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                var neko = await PdfDocument.LoadFromStreamAsync(stream);
+
+            };
+            var ff = await sf.OpenAsync(Windows.Storage.FileAccessMode.Read);
+
+
+
+            //Windows.Storage.StorageFile file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
+            //MyPdfDocument = await PdfDocument.LoadFromFileAsync(file);
+
+            //using (PdfPage page = MyPdfDocument.GetPage(0))
+            //{
+            //    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            //    {
+            //        await page.RenderToStreamAsync(stream);//画像に変換はstreamへ
+
+            //        BitmapImage image = new BitmapImage();
+            //        image.BeginInit();
+            //        image.CacheOption = BitmapCacheOption.OnLoad;
+            //        image.StreamSource = stream.AsStream();//using System.IOがないとエラーになる
+            //        image.EndInit();
+            //        MyImage.Source = image;
+            //        MyImage.Width = image.PixelWidth;
+            //        MyImage.Height = image.PixelHeight;
+
+            //    }
+
+            //}
+        }
+    }
 }
