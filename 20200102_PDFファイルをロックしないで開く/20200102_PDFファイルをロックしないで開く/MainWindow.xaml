@@ -10,6 +10,7 @@
     <StackPanel>
       <Button Content="Free" Click="ButtonFree_Click"/>
       <Button Content="Lock" Click="ButtonLock_Click"/>
+      <Button Content="toNull" Click="Button_Click"/>
       <Image Name="MyImage"/>
     </StackPanel>
   </Grid>
