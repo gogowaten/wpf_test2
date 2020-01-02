@@ -6,7 +6,17 @@
         xmlns:local="clr-namespace:_20200102_atmarkitより_PDF表示"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <StackPanel>
+      <Button Content="open" Click="Button_Click"/>
+    </StackPanel>
+    <Grid Grid.Row="1" Background="LightGray">
+      <local:PdfView x:Name="pdfView1"/>
     </Grid>
+
+  </Grid>
 </Window>
