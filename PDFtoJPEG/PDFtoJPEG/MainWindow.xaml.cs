@@ -82,16 +82,20 @@ namespace PDFtoJPEG
             var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
             try
             {
-                MyPdfDocument = await PdfDocument.LoadFromFileAsync(file);
-                MyPdfDirectory = System.IO.Path.GetDirectoryName(filePath);
-                MyPdfName = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                MyDpi = 96;
-                DisplayImage(0, 96);//表示
-                NumePageIndex.Value = 1;
+                using (var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read))
+                {
 
-                var pageCount = MyPdfDocument.PageCount;
-                tbPageCount.Text = $"{pageCount.ToString()} ページ";
-                NumePageIndex.Max = (int)pageCount;
+                    MyPdfDocument = await PdfDocument.LoadFromStreamAsync(stream);
+                    MyPdfDirectory = System.IO.Path.GetDirectoryName(filePath);
+                    MyPdfName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                    MyDpi = 96;
+                    DisplayImage(0, 96);//表示
+                    NumePageIndex.Value = 1;
+
+                    var pageCount = MyPdfDocument.PageCount;
+                    tbPageCount.Text = $"{pageCount.ToString()} ページ";
+                    NumePageIndex.Max = (int)pageCount;
+                }
             }
             catch (Exception ex)
             {
@@ -321,7 +325,7 @@ namespace PDFtoJPEG
             }
             using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                var neko = await PdfDocument.LoadFromStreamAsync(stream);
+                //var neko = await PdfDocument.LoadFromStreamAsync(stream);
 
             };
             var ff = await sf.OpenAsync(Windows.Storage.FileAccessMode.Read);

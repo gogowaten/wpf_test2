@@ -45,7 +45,7 @@
         <TextBlock Name="tbFileSize" Text="filesize" HorizontalAlignment="Right"/>
       </StackPanel>
       <Button x:Name="ButtonSave" Content="保存" Click="ButtonSave_Click" FontWeight="Bold" Margin="10,5,0,5"/>
-      <Button Name="ButtonTest" Content="test" Click="ButtonTest_Click"/>
+      <!--<Button Name="ButtonTest" Content="test" Click="ButtonTest_Click"/>-->
     </StackPanel>
     <ScrollViewer Name="MyScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Grid>
