@@ -1,17 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 //Windows 8.1の新機能、PDFを表示するには？［Windows 8.1ストア・アプリ開発］：WinRT／Metro TIPS - ＠IT
 //https://www.atmarkit.co.jp/ait/articles/1310/24/news070.html
