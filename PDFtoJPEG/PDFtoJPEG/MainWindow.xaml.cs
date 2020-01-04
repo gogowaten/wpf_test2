@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 
 using System.IO;//必須
 using Windows.Data.Pdf;
+using System.IO.Compression;
 
 
 //下の2つを参照に追加する必要がある
@@ -292,67 +293,140 @@ namespace PDFtoJPEG
 
         }
 
-        private async void ButtonTest_Click(object sender, RoutedEventArgs e)
+        //zipで
+        private async void ButtonToZip_Click(object sender, RoutedEventArgs e)
         {
-            string filePath;
-            filePath = @"D:\ブログ用\1708_04.pdf";
+            if (MyPdfDocument == null) return;
+            this.IsEnabled = false;
 
-            Windows.Storage.StorageFile sf = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
-            using (Windows.Storage.Streams.IRandomAccessStream RAStream = await sf.OpenAsync(Windows.Storage.FileAccessMode.Read))
+            int quality = NumeJpegQuality.Value;
+            if (quality < NumeJpegQuality.Min) { quality = NumeJpegQuality.Min; }
+            if (quality > NumeJpegQuality.Max) { quality = NumeJpegQuality.Max; }
+            try
             {
-                MyPdfDocument = await PdfDocument.LoadFromStreamAsync(RAStream);
-                using (PdfPage neko = MyPdfDocument.GetPage(0))
+                int keta = MyPdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
+                await SaveSub3(MyPdfDocument, MyDpi, MyPdfDirectory, MyPdfName, quality, keta);
+                //await Save5(MyPdfDocument, MakeZipArchive(MyPdfDirectory, MyPdfName), keta, 85, 96);
+                MessageBox.Show("処理完了");
+            }
+            catch (Exception ex) { MessageBox.Show($"なんかエラー出たわ \n {ex.Message} \n {ex.ToString()}"); }
+
+            finally { this.IsEnabled = true; }
+
+        }
+
+
+
+        /// <summary>
+        /// PdfDocumentをjpegにして、1つのzipファイルにする
+        /// </summary>
+        /// <param name="pdfDocument">Windows.Data.Pdf</param>
+        /// <param name="dpi">PDFを画像にするときに使う</param>
+        /// <param name="directory">保存フォルダ</param>
+        /// <param name="fileName">zipファイル名とjpegファイル名に使う</param>
+        /// <param name="quality">jpeg品質</param>
+        /// <param name="keta">0埋め連番の桁数、jpegファイル名に使う</param>
+        /// <returns></returns>
+        private async Task SaveSub3(PdfDocument pdfDocument, double dpi, string directory, string fileName, int quality, int keta)
+        {
+            string zipName = System.IO.Path.Combine(directory, fileName) + ".zip";
+            using (var zipstream = File.Create(zipName))
+            {
+                using (ZipArchive archive = new ZipArchive(zipstream, ZipArchiveMode.Create))
                 {
 
-                    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                    for (int i = 0; i < MyPdfDocument.PageCount; i++)
                     {
-                        await neko.RenderToStreamAsync(stream);
-                        var img = new BitmapImage();
-                        img.BeginInit();
-                        img.CacheOption = BitmapCacheOption.OnLoad;
-                        img.StreamSource = stream.AsStream();
-                        img.EndInit();
-                        MyImage.Source = img;
+                        int renban = i + 1;
+                        string jpegName = MyPdfName + "_" + renban.ToString("d" + keta) + ".jpg";
+
+                        using (PdfPage page = pdfDocument.GetPage((uint)i))
+                        {
+                            var options = new PdfPageRenderOptions();
+                            options.DestinationHeight = (uint)Math.Round(page.Size.Height * (dpi / 96.0), MidpointRounding.AwayFromZero);
+
+                            using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                            {
+                                await page.RenderToStreamAsync(stream, options);//画像に変換したのはstreamへ
+                                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                                encoder.QualityLevel = quality;
+                                encoder.Frames.Add(BitmapFrame.Create(stream.AsStream()));
+
+                                var entry = archive.CreateEntry(jpegName);
+                                //open
+                                using (var entryStream = entry.Open())
+                                {
+                                    using (var jpegStream = new MemoryStream())
+                                    {
+                                        encoder.Save(jpegStream);
+                                        jpegStream.Position = 0;
+                                        jpegStream.CopyTo(entryStream);
+                                    }
+                                }
+                            }
+                        }
+                    }//for
+                }
+            }
+        }
+
+        #region 失敗
+        private async Task Save6()
+        {
+            var archive = MakeZipArchive(MyPdfDirectory, MyPdfName);
+            int keta = MyPdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
+            await Save5(MyPdfDocument, archive, keta, 85, 96);
+        }
+        private ZipArchive MakeZipArchive(string directory, string fileName)
+        {
+            string zipName = System.IO.Path.Combine(directory, fileName) + ".zip";
+            using (var ms = new MemoryStream())
+            {
+                using (var zipstream = File.Create(zipName))
+                {
+                    using (ZipArchive archive = new ZipArchive(zipstream, ZipArchiveMode.Create))
+                    {
+                        return archive;
                     }
                 }
             }
-
-
-
-            using (var raStream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
-            {
-                var mm = await PdfDocument.LoadFromStreamAsync(raStream);
-            }
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                //var neko = await PdfDocument.LoadFromStreamAsync(stream);
-
-            };
-            var ff = await sf.OpenAsync(Windows.Storage.FileAccessMode.Read);
-
-
-
-            //Windows.Storage.StorageFile file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
-            //MyPdfDocument = await PdfDocument.LoadFromFileAsync(file);
-
-            //using (PdfPage page = MyPdfDocument.GetPage(0))
-            //{
-            //    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
-            //    {
-            //        await page.RenderToStreamAsync(stream);//画像に変換はstreamへ
-
-            //        BitmapImage image = new BitmapImage();
-            //        image.BeginInit();
-            //        image.CacheOption = BitmapCacheOption.OnLoad;
-            //        image.StreamSource = stream.AsStream();//using System.IOがないとエラーになる
-            //        image.EndInit();
-            //        MyImage.Source = image;
-            //        MyImage.Width = image.PixelWidth;
-            //        MyImage.Height = image.PixelHeight;
-
-            //    }
-
-            //}
         }
+
+        private async Task Save5(PdfDocument pdfDocument, ZipArchive archive, int keta, int quality, double dpi)
+        {
+            for (int i = 0; i < MyPdfDocument.PageCount; i++)
+            {
+                int renban = i + 1;
+                string jpegName = MyPdfName + "_" + renban.ToString("d" + keta) + ".jpg";
+
+                using (PdfPage page = pdfDocument.GetPage((uint)i))
+                {
+                    var options = new PdfPageRenderOptions();
+                    options.DestinationHeight = (uint)Math.Round(page.Size.Height * (dpi / 96.0), MidpointRounding.AwayFromZero);
+
+                    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                    {
+                        await page.RenderToStreamAsync(stream, options);//画像に変換したのはstreamへ
+                        JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                        encoder.QualityLevel = quality;
+                        encoder.Frames.Add(BitmapFrame.Create(stream.AsStream()));
+
+                        var entry = archive.CreateEntry(jpegName);
+                        //open
+                        using (var entryStream = entry.Open())
+                        {
+                            using (var jpegStream = new MemoryStream())
+                            {
+                                encoder.Save(jpegStream);
+                                jpegStream.Position = 0;
+                                jpegStream.CopyTo(entryStream);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+
     }
 }

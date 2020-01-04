@@ -38,14 +38,14 @@
         <Border Height="1" Background="Black" Margin="2,2,0,2"/>
         <TextBlock Name="tbPageCount" Text="ページ" Margin="0" HorizontalAlignment="Center"/>
       </StackPanel>
-      <Border Width="1" Height="auto" Background="LightGray" Margin="14,4"/>
       <StackPanel>
         <TextBlock Name="tbDpi" Text="今のdpi" Margin="10,5,0,0" HorizontalAlignment="Right"/>
         <TextBlock Name="tbHeight" Text="縦ピクセル" Margin="10,5,0,0" HorizontalAlignment="Right"/>
         <TextBlock Name="tbFileSize" Text="filesize" HorizontalAlignment="Right"/>
       </StackPanel>
+      <Border Width="1" Height="auto" Background="LightGray" Margin="14,4"/>
       <Button x:Name="ButtonSave" Content="保存" Click="ButtonSave_Click" FontWeight="Bold" Margin="10,5,0,5"/>
-      <!--<Button Name="ButtonTest" Content="test" Click="ButtonTest_Click"/>-->
+      <Button Name="ButtonTest" Content="zip" Click="ButtonToZip_Click" FontWeight="Bold"/>
     </StackPanel>
     <ScrollViewer Name="MyScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
       <Grid>
