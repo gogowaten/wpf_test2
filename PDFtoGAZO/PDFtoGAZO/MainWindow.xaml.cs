@@ -49,6 +49,7 @@ namespace PDFtoGAZO
 
 
             MyPdfPath = @"D:\ブログ用\1708_04.pdf";
+            MyPdfPath = @"M:\小説ラノベ\test\Neorude 2 (Manual)(JP)(PlayStation)(PSX).pdf";
             MyDpi = 96;
 
             LoadPdf(MyPdfPath);
@@ -233,21 +234,61 @@ namespace PDFtoGAZO
 
             this.IsEnabled = false;
             try
-            {                
+            {
                 int keta = PdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
 
                 //各ページの保存処理のタスクのリスト作成
                 var MyTasks = new List<Task>();
                 for (int i = 0; i < PdfDocument.PageCount; i++)
                 {
-                    MyTasks.Add(SaveSub2(MyDpi, MyPdfDirectory, MyPdfName, i, 85, keta));
+                    //MyTasks.Add(SaveSub2(MyDpi, MyPdfDirectory, MyPdfName, i, 85, keta));
                 }
 
                 //各タスク実行
                 for (int i = 0; i < MyTasks.Count; i++)
                 {
-                    await MyTasks[i];
+                    //await MyTasks[i];//今まで、シングルスレッド
+                    //MyTasks[i].RunSynchronously();//エラー出るけど処理される
+                    //MyTasks[i];//エラー
+                    //_ = MyTasks[i];//処理前にループを抜けてしまう
+                    //var neko = MyTasks[i];//処理前にループを抜けてしまう
+                    //Task.WaitAll(MyTasks[i]);//デッドロック
+                    //MyTasks[i].Start();//エラー出るけど処理される
+
+
                 }
+                
+                List<BitmapImage> imgList = new List<BitmapImage>();
+                List<Task<BitmapImage>> imgTaskList = new List<Task<BitmapImage>>();
+                for (int i = 0; i < PdfDocument.PageCount; i++)
+                {
+                    //imgList.Add(RenderPage(85, i));//エラーになる
+                    imgTaskList.Add(RenderPageAsync(88, i));//Taskのリストが作成されるだけで実行はされない
+                    //imgList.Add(await RenderPageAsync(88, i));//シングルスレッドOK
+                }
+                foreach (var item in imgTaskList)
+                {
+                    item.Start();
+                }
+                BitmapImage neko;
+                System.Collections.Concurrent.ConcurrentBag<BitmapImage> inu = new System.Collections.Concurrent.ConcurrentBag<BitmapImage>();
+                Parallel.For(0, PdfDocument.PageCount, async i =>
+                 {
+                     //inu.Add(await RenderPageAsync(88,(int) i));//別スレッドが所有しているエラー
+                     //neko = await RenderPageAsync(88, (int)i);//別スレッドが所有しているエラー
+                 });
+
+                //BitmapImage neko = await RenderPageAsync(88, 0);
+                //BitmapImage inu = await RenderPageAsync(88, 1);//.ConfigureAwait(false);
+                //BitmapImage uma = await RenderPageAsync(88, 2);
+                //BitmapImage tako = await RenderPageAsync(88, 3);
+                //BitmapImage ika = await RenderPageAsync(88, 4);
+                //BitmapImage uni = await RenderPageAsync(88, 5);
+                //uni = await RenderPageAsync(88, 6);
+                //uni = await RenderPageAsync(88, 7);
+                //uni = await RenderPageAsync(88, 8);
+                //uni = await RenderPageAsync(88, 9);
+                //uni = await RenderPageAsync(88, 10);
 
                 MessageBox.Show("処理完了");
             }
@@ -256,5 +297,58 @@ namespace PDFtoGAZO
             finally { this.IsEnabled = true; }
 
         }
+
+        private async Task<BitmapImage> RenderPageAsync(double dpi, int pageIndex)
+        {
+            BitmapImage image = new BitmapImage();
+            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            {
+                //指定されたdpiを元に画像サイズ指定、四捨五入                
+                var options = new Windows.Data.Pdf.PdfPageRenderOptions();
+                options.DestinationHeight = (uint)Math.Round(page.Size.Height * (dpi / 96.0), MidpointRounding.AwayFromZero);
+
+                using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                {
+                    await page.RenderToStreamAsync(stream, options);
+
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = stream.AsStream();
+                    image.EndInit();
+                }
+            }
+            return image;
+        }
+
+        private BitmapImage RenderPage(double dpi, int pageIndex)
+        {
+            BitmapImage image = new BitmapImage();
+            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            {
+                //指定されたdpiを元に画像サイズ指定、四捨五入                
+                var options = new Windows.Data.Pdf.PdfPageRenderOptions();
+                options.DestinationHeight = (uint)Math.Round(page.Size.Height * (dpi / 96.0), MidpointRounding.AwayFromZero);
+
+                using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                {
+                    page.RenderToStreamAsync(stream, options);
+
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = stream.AsStream();
+                    image.EndInit();
+                }
+            }
+            return image;
+        }
+
+
+
+
+
+
+
+
+
     }
 }
