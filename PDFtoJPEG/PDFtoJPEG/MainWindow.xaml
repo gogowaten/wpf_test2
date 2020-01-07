@@ -75,10 +75,10 @@
       </StackPanel>
       
     </StackPanel>
-    <ScrollViewer Name="MyScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Name="MyScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" UseLayoutRounding="True">
       <Grid>
-        <Image Name="MyImage" Stretch="None" UseLayoutRounding="True"/>
-        <Image Name="MyImagePreviwer" Stretch="None" UseLayoutRounding="True"/>
+        <Image Name="MyImage" Stretch="None"/>
+        <Image Name="MyImagePreviwer" Stretch="None"/>
       </Grid>
     </ScrollViewer>
   </Grid>

@@ -34,7 +34,7 @@ namespace PDFtoGAZO
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Windows.Data.Pdf.PdfDocument PdfDocument;//PDFファイルを読み込んだもの
+        private Windows.Data.Pdf.PdfDocument MyPdfDocument;//PDFファイルを読み込んだもの
         private string MyPdfPath;//読み込んだPDFファイルのフルパス
         private string MyPdfDirectory;//読み込んだPDFファイルのフォルダ
         private string MyPdfName;//読み込んだPDFファイル名
@@ -69,12 +69,12 @@ namespace PDFtoGAZO
             var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
             try
             {
-                PdfDocument = await Windows.Data.Pdf.PdfDocument.LoadFromFileAsync(file);
+                MyPdfDocument = await Windows.Data.Pdf.PdfDocument.LoadFromFileAsync(file);
                 MyPdfDirectory = System.IO.Path.GetDirectoryName(filePath);
                 MyPdfName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                 MyDpi = 96;
                 DisplayImage(0, 96);
-                tbPageCount.Text = $"ページ数 : {PdfDocument.PageCount.ToString()}";
+                tbPageCount.Text = $"ページ数 : {MyPdfDocument.PageCount.ToString()}";
             }
             catch (Exception)
             { }
@@ -85,9 +85,9 @@ namespace PDFtoGAZO
 
         private async void DisplayImage(int pageIndex, double dpi)
         {
-            if (PdfDocument == null) { return; }
+            if (MyPdfDocument == null) { return; }
             MyDpi = dpi;
-            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            using (Windows.Data.Pdf.PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
                 double h = page.Size.Height;
                 var options = new Windows.Data.Pdf.PdfPageRenderOptions();
@@ -135,7 +135,7 @@ namespace PDFtoGAZO
 
         private async void SaveSub(double dpi, string directory, string fileName, int pageIndex, int quality, int keta)
         {
-            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            using (Windows.Data.Pdf.PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
                 //指定されたdpiを元に画像サイズ指定、四捨五入                
                 var options = new Windows.Data.Pdf.PdfPageRenderOptions();
@@ -168,10 +168,10 @@ namespace PDFtoGAZO
 
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-            if (PdfDocument == null) { return; }
-            int keta = PdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
+            if (MyPdfDocument == null) { return; }
+            int keta = MyPdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
 
-            for (int i = 0; i < PdfDocument.PageCount; i++)
+            for (int i = 0; i < MyPdfDocument.PageCount; i++)
             {
                 SaveSub(MyDpi, MyPdfDirectory, MyPdfName, i, 85, keta);
             }
@@ -197,7 +197,7 @@ namespace PDFtoGAZO
         /// <returns></returns>
         private async Task SaveSub2(double dpi, string directory, string fileName, int pageIndex, int quality, int keta)
         {
-            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            using (Windows.Data.Pdf.PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
                 //指定されたdpiを元に画像サイズ指定、四捨五入                
                 var options = new Windows.Data.Pdf.PdfPageRenderOptions();
@@ -230,16 +230,16 @@ namespace PDFtoGAZO
 
         private async void Button2_Click(object sender, RoutedEventArgs e)
         {
-            if (PdfDocument == null) { return; }
+            if (MyPdfDocument == null) { return; }
 
             this.IsEnabled = false;
             try
             {
-                int keta = PdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
+                int keta = MyPdfDocument.PageCount.ToString().Length;//0埋め連番の桁数
 
                 //各ページの保存処理のタスクのリスト作成
                 var MyTasks = new List<Task>();
-                for (int i = 0; i < PdfDocument.PageCount; i++)
+                for (int i = 0; i < MyPdfDocument.PageCount; i++)
                 {
                     //MyTasks.Add(SaveSub2(MyDpi, MyPdfDirectory, MyPdfName, i, 85, keta));
                 }
@@ -257,10 +257,10 @@ namespace PDFtoGAZO
 
 
                 }
-                
+
                 List<BitmapImage> imgList = new List<BitmapImage>();
                 List<Task<BitmapImage>> imgTaskList = new List<Task<BitmapImage>>();
-                for (int i = 0; i < PdfDocument.PageCount; i++)
+                for (int i = 0; i < MyPdfDocument.PageCount; i++)
                 {
                     //imgList.Add(RenderPage(85, i));//エラーになる
                     imgTaskList.Add(RenderPageAsync(88, i));//Taskのリストが作成されるだけで実行はされない
@@ -272,7 +272,7 @@ namespace PDFtoGAZO
                 }
                 BitmapImage neko;
                 System.Collections.Concurrent.ConcurrentBag<BitmapImage> inu = new System.Collections.Concurrent.ConcurrentBag<BitmapImage>();
-                Parallel.For(0, PdfDocument.PageCount, async i =>
+                Parallel.For(0, MyPdfDocument.PageCount, async i =>
                  {
                      //inu.Add(await RenderPageAsync(88,(int) i));//別スレッドが所有しているエラー
                      //neko = await RenderPageAsync(88, (int)i);//別スレッドが所有しているエラー
@@ -301,7 +301,7 @@ namespace PDFtoGAZO
         private async Task<BitmapImage> RenderPageAsync(double dpi, int pageIndex)
         {
             BitmapImage image = new BitmapImage();
-            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            using (Windows.Data.Pdf.PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
                 //指定されたdpiを元に画像サイズ指定、四捨五入                
                 var options = new Windows.Data.Pdf.PdfPageRenderOptions();
@@ -323,7 +323,7 @@ namespace PDFtoGAZO
         private BitmapImage RenderPage(double dpi, int pageIndex)
         {
             BitmapImage image = new BitmapImage();
-            using (Windows.Data.Pdf.PdfPage page = PdfDocument.GetPage((uint)pageIndex))
+            using (Windows.Data.Pdf.PdfPage page = MyPdfDocument.GetPage((uint)pageIndex))
             {
                 //指定されたdpiを元に画像サイズ指定、四捨五入                
                 var options = new Windows.Data.Pdf.PdfPageRenderOptions();
@@ -342,13 +342,65 @@ namespace PDFtoGAZO
             return image;
         }
 
+        private List<Windows.Data.Pdf.PdfPage> GetPages()
+        {
+            List<Windows.Data.Pdf.PdfPage> pages = new List<Windows.Data.Pdf.PdfPage>();
+            //for (uint i = 0; i < MyPdfDocument.PageCount; i++)
+            //{
+            //    using (var neko = MyPdfDocument.GetPage(i))
+            //    {
+            //        pages.Add(neko);
+            //    }
+            //}
+
+            Parallel.For(0, MyPdfDocument.PageCount, i =>
+           {
+               using (var neko = MyPdfDocument.GetPage((uint)i))
+               {
+                   pages.Add(neko);
+               }
+           });
+
+            return pages;
+        }
+
+        private async void ButtonTest1_Click(object sender, RoutedEventArgs e)
+        {
+            var pages = GetPages();
+            var neko = pages[0];
+            var streams = Test2();
+            //var inu= await streams;//list<image>
+            
+            List<BitmapImage> images = new List<BitmapImage>();
+            Task<List<BitmapImage>> tasks;
+            List<BitmapImage> bitmapImages = new List<BitmapImage>();
+            Parallel.Invoke(async () => { bitmapImages = await streams; });
+            //var inu= bitmapImages[0];
+        }
 
 
-
-
-
-
-
-
+        private async Task<List<BitmapImage>> Test2()
+        {
+            var streams = new List<Windows.Storage.Streams.InMemoryRandomAccessStream>();
+            var images = new List<BitmapImage>();
+            for (uint i = 0; i < MyPdfDocument.PageCount; i++)
+            {
+                using (var neko = MyPdfDocument.GetPage(i))
+                {
+                    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                    {
+                        await neko.RenderToStreamAsync(stream);
+                        streams.Add(stream);
+                        var img = new BitmapImage();
+                        img.BeginInit();
+                        img.CacheOption = BitmapCacheOption.OnLoad;
+                        img.StreamSource = stream.AsStream();
+                        img.EndInit();
+                        images.Add(img);
+                    }
+                }
+            }
+            return images;
+        }
     }
 }

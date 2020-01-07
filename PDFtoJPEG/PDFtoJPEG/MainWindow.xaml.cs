@@ -32,9 +32,11 @@ using System.IO.Compression;
 //C# Taskの待ちかた集 - Qiita
 //https://qiita.com/takutoy/items/d45aa736ced25a8158b3
 
+//    Windows 8.1の新機能、PDFを表示するには？［Windows 8.1ストア・アプリ開発］：WinRT／Metro TIPS - ＠IT
+//https://www.atmarkit.co.jp/ait/articles/1310/24/news070.html
 
-//農林水産省 トマトの種類と見分け方
-//http://www.maff.go.jp/j/pr/aff/1708/pdf/1708_04.pdf
+
+
 
 
 namespace PDFtoJPEG

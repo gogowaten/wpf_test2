@@ -22,6 +22,8 @@ namespace _20200102_atmarkitより_PDF表示
     public partial class PdfView : UserControl
     {
         Windows.Data.Pdf.PdfDocument _pdfDoc;
+        uint _currentPageIndex;
+
         public uint PageCount { get { return _pdfDoc.PageCount; } }
 
 
@@ -37,7 +39,6 @@ namespace _20200102_atmarkitより_PDF表示
             return this.PageCount;
         }
 
-        uint _currentPageIndex;
         private async Task<Windows.Storage.Streams.InMemoryRandomAccessStream> RenderPageBitmapAsync()
         {
             using (Windows.Data.Pdf.PdfPage pdfPage = _pdfDoc.GetPage(_currentPageIndex))
