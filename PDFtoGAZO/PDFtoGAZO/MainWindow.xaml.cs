@@ -27,6 +27,11 @@ using System.IO;//必須
 //http://blog.hiros-dot.net/?p=7346
 
 
+//    (C#)Parallel.For, Parallel.ForEach並列処理の挙動確認 - Qiita
+//https://qiita.com/longlongago_k/items/8f19d84fce6dd677922e
+//マルチスレッドがわからん
+
+
 namespace PDFtoGAZO
 {
     /// <summary>
@@ -366,16 +371,67 @@ namespace PDFtoGAZO
 
         private async void ButtonTest1_Click(object sender, RoutedEventArgs e)
         {
+            //await Task.Run(() => WorkerThread1());
+            //Func<string> func = () => { return WorkerThread1(); };
+            //string s = func();
+
             var pages = GetPages();
-            var neko = pages[0];
-            var streams = Test2();
+            Task<BitmapImage> image = MakeImage(pages[0]);
+            var neko = await image;
+            var inu = image.Result;
+
+            //List<BitmapImage> ii = new List<BitmapImage>();
+            //for (int i = 0; i < pages.Count; i++)
+            //{
+            //    ii.Add(await MakeImage(pages[i]));
+            //}
+
+            System.Collections.Concurrent.ConcurrentBag<BitmapImage> bag = new System.Collections.Concurrent.ConcurrentBag<BitmapImage>();
+            Parallel.For(0, pages.Count, async i =>
+             {
+                 bag.Add(await MakeImage(pages[i]));//エラー、別スレッドが所有している
+             });
+        }
+
+        private string WorkerThread1()
+        {
+            var pages = GetPages();
+            //var neko = pages[0];
+            //var taskTest2 = Test2();
             //var inu= await streams;//list<image>
-            
-            List<BitmapImage> images = new List<BitmapImage>();
-            Task<List<BitmapImage>> tasks;
-            List<BitmapImage> bitmapImages = new List<BitmapImage>();
-            Parallel.Invoke(async () => { bitmapImages = await streams; });
+
+            //List<BitmapImage> images = new List<BitmapImage>();
+            //Task<List<BitmapImage>> tasks;
+            //List<BitmapImage> bitmapImages = new List<BitmapImage>();
+            //Parallel.Invoke(async () => { bitmapImages = await taskTest2; });
             //var inu= bitmapImages[0];
+
+            Parallel.For(0, pages.Count, async i =>
+            {
+                //Windows.Data.Pdf.PdfPage page = pages[i];
+
+                using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                {
+                    await pages[i].RenderToStreamAsync(stream);
+                }
+
+                //using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                //{
+                //    await Task.Run(async () =>
+                //    {                          
+                //        await pages[i].RenderToStreamAsync(stream);
+                //    });
+                //}
+
+                //await Task.Run(async () =>
+                //{
+                //    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                //    {
+                //        await pages[i].RenderToStreamAsync(stream);
+                //    }
+                //});
+            });
+            return "終了";
         }
 
 
@@ -401,6 +457,20 @@ namespace PDFtoGAZO
                 }
             }
             return images;
+        }
+
+        private async Task<BitmapImage> MakeImage(Windows.Data.Pdf.PdfPage page)
+        {
+            var img = new BitmapImage();
+            using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            {
+                await page.RenderToStreamAsync(stream);
+                img.BeginInit();
+                img.CacheOption = BitmapCacheOption.OnLoad;
+                img.StreamSource = stream.AsStream();
+                img.EndInit();
+            }
+            return img;
         }
     }
 }

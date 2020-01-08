@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "20200108_Bitmapビジュアライザー", "20200108_Bitmapビジュアライザー\20200108_Bitmapビジュアライザー.csproj", "{E266A93C-0267-4EAB-8CF2-23566E48A671}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{0853DFC6-6125-4F7D-823A-27FB9F829E7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E266A93C-0267-4EAB-8CF2-23566E48A671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E266A93C-0267-4EAB-8CF2-23566E48A671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E266A93C-0267-4EAB-8CF2-23566E48A671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E266A93C-0267-4EAB-8CF2-23566E48A671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0853DFC6-6125-4F7D-823A-27FB9F829E7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0853DFC6-6125-4F7D-823A-27FB9F829E7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0853DFC6-6125-4F7D-823A-27FB9F829E7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0853DFC6-6125-4F7D-823A-27FB9F829E7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BA03FE7B-D70C-4CD5-AC64-D8E36BEC1C73}
+	EndGlobalSection
+EndGlobal
