@@ -57,6 +57,8 @@ namespace PDFtoGAZO
             MyPdfPath = @"M:\小説ラノベ\test\Neorude 2 (Manual)(JP)(PlayStation)(PSX).pdf";
             MyDpi = 96;
 
+            var source = new BitmapImage(new Uri(@"D:\ブログ用\20200107_pdftojpeg_07.png"));
+            BitmapSource bmp = (BitmapSource)source;
             LoadPdf(MyPdfPath);
 
         }

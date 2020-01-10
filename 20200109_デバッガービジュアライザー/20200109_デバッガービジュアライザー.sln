@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "20200109_デバッガービジュアライザー", "20200109_デバッガービジュアライザー\20200109_デバッガービジュアライザー.csproj", "{63AAD600-5A20-432D-95A6-BC3F4D8E31DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "20200109_デバッガービジュアライザーテスト", "20200109_デバッガービジュアライザーテスト\20200109_デバッガービジュアライザーテスト.csproj", "{2D35B89A-3228-46AB-8A21-A0D478F2FA8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63AAD600-5A20-432D-95A6-BC3F4D8E31DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63AAD600-5A20-432D-95A6-BC3F4D8E31DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63AAD600-5A20-432D-95A6-BC3F4D8E31DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63AAD600-5A20-432D-95A6-BC3F4D8E31DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D35B89A-3228-46AB-8A21-A0D478F2FA8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D35B89A-3228-46AB-8A21-A0D478F2FA8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D35B89A-3228-46AB-8A21-A0D478F2FA8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D35B89A-3228-46AB-8A21-A0D478F2FA8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E725E8F2-388F-4F89-8F39-E7A931D21DF8}
+	EndGlobalSection
+EndGlobal
