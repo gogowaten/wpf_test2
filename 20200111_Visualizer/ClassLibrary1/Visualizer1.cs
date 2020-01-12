@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
-using System.Windows;
+//using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 
@@ -19,54 +19,54 @@ namespace ClassLibrary1
 {
     public class Visualizer1 : DialogDebuggerVisualizer
     {
-        //protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
-        //{
-        //    var data = (MyBitmapSourceProxy)objectProvider.GetObject();
-        //    //↑GetDataが実行されている？
+        protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
+        {
+            var data = (MyBitmapSourceProxy)objectProvider.GetObject();
+            //↑GetDataが実行されている？
 
-        //    //PixelFormatを再構成
-        //    Guid guid = Guid.Parse(data.format);
-        //    PixelFormat pxFormat = (PixelFormat)Activator.CreateInstance(typeof(PixelFormat),
-        //        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.CreateInstance,
-        //        null, new object[] { guid }, null);
-        //    //paletteを再構成
-        //    BitmapPalette palette = MakePalette(data.palette);
+            //PixelFormatを再構成
+            Guid guid = Guid.Parse(data.Format);
+            PixelFormat pxFormat = (PixelFormat)Activator.CreateInstance(typeof(PixelFormat),
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.CreateInstance,
+                null, new object[] { guid }, null);
+            //paletteを再構成
+            BitmapPalette palette = MakePalette(data.Palette);
 
-        //    //bitmapSourceを再構成
-        //    var bitmapSource = BitmapSource.Create(data.width, data.height, 96, 96, pxFormat, palette, data.pixels, data.stride);
+            //bitmapSourceを再構成
+            var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, pxFormat, palette, data.Pixels, data.Stride);
 
-        //    //pngエンコーダーでストリームに保存、ストリームからbitmap作成
-        //    var encoder = new PngBitmapEncoder();
-        //    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-        //    Bitmap bmp = null;
-        //    using (var stream = new MemoryStream())
-        //    {
-        //        encoder.Save(stream);
-        //        stream.Seek(0, SeekOrigin.Begin);
-        //        //おまじない
-        //        using (Bitmap temp = new Bitmap(stream))
-        //        {
-        //            bmp = new Bitmap(temp);
-        //        }
-        //    }
+            //pngエンコーダーでストリームに保存、ストリームからbitmap作成
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            Bitmap bmp = null;
+            using (var stream = new MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                //おまじない
+                using (Bitmap temp = new Bitmap(stream))
+                {
+                    bmp = new Bitmap(temp);
+                }
+            }
 
 
-        //    PictureBox pictureBox = new PictureBox
-        //    {
-        //        Image = bmp,
-        //        SizeMode = PictureBoxSizeMode.AutoSize
-        //    };
+            PictureBox pictureBox = new PictureBox
+            {
+                Image = bmp,
+                SizeMode = PictureBoxSizeMode.AutoSize
+            };
 
-        //    //Formに画像表示
-        //    using (Form displayForm = new Form())
-        //    {
-        //        displayForm.Text = data.ToString();
-        //        displayForm.Controls.Add(pictureBox);
-        //        windowService.ShowDialog(displayForm);
-        //    }
-        //    pictureBox.Dispose();
-        //    bmp.Dispose();
-        //}
+            //Formに画像表示
+            using (Form displayForm = new Form())
+            {
+                displayForm.Text = data.ToString();
+                displayForm.Controls.Add(pictureBox);
+                windowService.ShowDialog(displayForm);
+            }
+            pictureBox.Dispose();
+            bmp.Dispose();
+        }
 
 
         private BitmapPalette MakePalette(List<byte[]> colors)
@@ -86,31 +86,31 @@ namespace ClassLibrary1
             return new BitmapPalette(cl);
         }
 
-        //sono2
-        protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
-        {
-            var data = (MyBitmapSourceProxy)objectProvider.GetObject();
-            //bitmapSourceからbitmapを作成
-            var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, PixelFormats.Bgra32, null, data.Pixels, data.Stride);
-            var bmp = new Bitmap(data.Width, data.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat);
-            bitmapSource.CopyPixels(Int32Rect.Empty, bmpData.Scan0, bmpData.Height * bmpData.Stride, bmpData.Stride);
-            bmp.UnlockBits(bmpData);
+        ////sono2
+        //protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
+        //{
+        //    var data = (MyBitmapSourceProxy)objectProvider.GetObject();
+        //    //bitmapSourceからbitmapを作成
+        //    var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, PixelFormats.Bgra32, null, data.Pixels, data.Stride);
+        //    var bmp = new Bitmap(data.Width, data.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        //    var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat);
+        //    bitmapSource.CopyPixels(Int32Rect.Empty, bmpData.Scan0, bmpData.Height * bmpData.Stride, bmpData.Stride);
+        //    bmp.UnlockBits(bmpData);
 
-            PictureBox pictureBox = new PictureBox
-            {
-                Image = bmp,
-                SizeMode = PictureBoxSizeMode.AutoSize
-            };
-            using (Form displayForm = new Form())
-            {
-                displayForm.Text = data.ToString();
-                displayForm.Controls.Add(pictureBox);
-                windowService.ShowDialog(displayForm);
-            }
-            bmp.Dispose();
-            pictureBox.Dispose();
-        }
+        //    PictureBox pictureBox = new PictureBox
+        //    {
+        //        Image = bmp,
+        //        SizeMode = PictureBoxSizeMode.AutoSize
+        //    };
+        //    using (Form displayForm = new Form())
+        //    {
+        //        displayForm.Text = data.ToString();
+        //        displayForm.Controls.Add(pictureBox);
+        //        windowService.ShowDialog(displayForm);
+        //    }
+        //    bmp.Dispose();
+        //    pictureBox.Dispose();
+        //}
 
         //sono3、失敗、本当はこれがいい、bitmapSourceをそのまま表示できる
         //protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
@@ -175,51 +175,7 @@ namespace ClassLibrary1
     }
 
 
-    ////sono1とsono3用
-    //[Serializable]
-    //public class MyBitmapSourceProxy
-    //{
-    //    public int Stride { get; private set; }
-    //    public int Width { get; private set; }
-    //    public int Height { get; private set; }
-    //    public byte[] Pixels { get; private set; }
-    //    public string Format { get; private set; }
-    //    public List<byte[]> Palette { get; private set; }
-
-    //    public MyBitmapSourceProxy(BitmapSource source)
-    //    {
-    //        //PixelFormatのシリアライズに必要、GUIDっていうのを使う、さっぱりわからん
-    //        Format = typeof(PixelFormat).GetProperty("Guid",
-    //             System.Reflection.BindingFlags.NonPublic |
-    //             System.Reflection.BindingFlags.Instance).GetValue(source.Format).ToString();
-
-    //        //paletteをシリアライズできるように分解
-    //        Palette = null;
-    //        if (source.Palette != null)
-    //        {
-    //            Palette = new List<byte[]>();
-    //            for (int i = 0; i < source.Palette.Colors.Count; i++)
-    //            {
-    //                var c = new byte[4];
-    //                c[0] = source.Palette.Colors[i].A;
-    //                c[1] = source.Palette.Colors[i].R;
-    //                c[2] = source.Palette.Colors[i].G;
-    //                c[3] = source.Palette.Colors[i].B;
-    //                Palette.Add(c);
-    //            }
-    //        }
-
-    //        Width = source.PixelWidth;
-    //        Height = source.PixelHeight;
-    //        Stride = (Width * source.Format.BitsPerPixel + 7) / 8;
-    //        Pixels = new byte[Height * Stride];
-    //        source.CopyPixels(new Int32Rect(0, 0, Width, Height), Pixels, Stride, 0);
-    //    }
-    //}
-
-
-    //sono2
-    //PixelFormatをBgra32に決め打ち方式
+    //sono1とsono3用
     [Serializable]
     public class MyBitmapSourceProxy
     {
@@ -227,20 +183,64 @@ namespace ClassLibrary1
         public int Width { get; private set; }
         public int Height { get; private set; }
         public byte[] Pixels { get; private set; }
+        public string Format { get; private set; }
+        public List<byte[]> Palette { get; private set; }
 
         public MyBitmapSourceProxy(BitmapSource source)
         {
-            if (source.Format != PixelFormats.Bgra32)
+            //PixelFormatのシリアライズに必要、GUIDっていうのを使う、さっぱりわからん
+            Format = typeof(PixelFormat).GetProperty("Guid",
+                 System.Reflection.BindingFlags.NonPublic |
+                 System.Reflection.BindingFlags.Instance).GetValue(source.Format).ToString();
+
+            //paletteをシリアライズできるように分解
+            Palette = null;
+            if (source.Palette != null)
             {
-                source = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+                Palette = new List<byte[]>();
+                for (int i = 0; i < source.Palette.Colors.Count; i++)
+                {
+                    var c = new byte[4];
+                    c[0] = source.Palette.Colors[i].A;
+                    c[1] = source.Palette.Colors[i].R;
+                    c[2] = source.Palette.Colors[i].G;
+                    c[3] = source.Palette.Colors[i].B;
+                    Palette.Add(c);
+                }
             }
+
             Width = source.PixelWidth;
             Height = source.PixelHeight;
             Stride = (Width * source.Format.BitsPerPixel + 7) / 8;
             Pixels = new byte[Height * Stride];
-            source.CopyPixels(new Int32Rect(0, 0, Width, Height), Pixels, Stride, 0);
+            source.CopyPixels(new System.Windows.Int32Rect(0, 0, Width, Height), Pixels, Stride, 0);
         }
     }
+
+
+    ////sono2
+    ////PixelFormatをBgra32に決め打ち方式
+    //[Serializable]
+    //public class MyBitmapSourceProxy
+    //{
+    //    public int Stride { get; private set; }
+    //    public int Width { get; private set; }
+    //    public int Height { get; private set; }
+    //    public byte[] Pixels { get; private set; }
+
+    //    public MyBitmapSourceProxy(BitmapSource source)
+    //    {
+    //        if (source.Format != PixelFormats.Bgra32)
+    //        {
+    //            source = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+    //        }
+    //        Width = source.PixelWidth;
+    //        Height = source.PixelHeight;
+    //        Stride = (Width * source.Format.BitsPerPixel + 7) / 8;
+    //        Pixels = new byte[Height * Stride];
+    //        source.CopyPixels(new Int32Rect(0, 0, Width, Height), Pixels, Stride, 0);
+    //    }
+    //}
 
 
 
