@@ -8,12 +8,13 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.Windows;
 
 [assembly: System.Diagnostics.DebuggerVisualizer(
     typeof(ClassLibrary20200112.Visualizer20200112),
     typeof(ClassLibrary20200112.MyObjectSource),
     Target = typeof(BitmapSource),
-    Description = "びっとまっぷそーす🐭")]
+    Description = "🐭びっとまっぷそーす🐭")]
 namespace ClassLibrary20200112
 {
   
@@ -27,7 +28,7 @@ namespace ClassLibrary20200112
             var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, PixelFormats.Bgra32, null, data.Pixels, data.Stride);
             var bmp = new Bitmap(data.Width, data.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat);
-            bitmapSource.CopyPixels(System.Windows.Int32Rect.Empty, bmpData.Scan0, bmpData.Height * bmpData.Stride, bmpData.Stride);
+            bitmapSource.CopyPixels(Int32Rect.Empty, bmpData.Scan0, bmpData.Height * bmpData.Stride, bmpData.Stride);
             bmp.UnlockBits(bmpData);
 
             PictureBox pictureBox = new PictureBox
@@ -48,7 +49,8 @@ namespace ClassLibrary20200112
       
         public static void TestShowVisualizer(object objectToVisualize)
         {
-            //var visualizerHost = new VisualizerDevelopmentHost(objectToVisualize, typeof(Visualizer20200112));//これだとGetDataが使用されない
+            //var visualizerHost = new VisualizerDevelopmentHost(objectToVisualize, typeof(Visualizer20200112));
+            //↑これだとGetDataが使用されないので↓
             var visualizerHost = new VisualizerDevelopmentHost(objectToVisualize, typeof(Visualizer20200112), typeof(MyObjectSource));
             visualizerHost.ShowVisualizer();
         }
@@ -97,9 +99,9 @@ namespace ClassLibrary20200112
             }
             Width = source.PixelWidth;
             Height = source.PixelHeight;
-            Stride = (Width * source.Format.BitsPerPixel + 7) / 8;
+            Stride = Width * 4;// (Width * source.Format.BitsPerPixel + 7) / 8;
             Pixels = new byte[Height * Stride];
-            source.CopyPixels(new System.Windows.Int32Rect(0, 0, Width, Height), Pixels, Stride, 0);
+            source.CopyPixels(new Int32Rect(0, 0, Width, Height), Pixels, Stride, 0);
         }
     }
 
