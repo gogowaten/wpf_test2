@@ -19,54 +19,54 @@ namespace ClassLibrary1
 {
     public class Visualizer1 : DialogDebuggerVisualizer
     {
-        protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
-        {
-            var data = (MyBitmapSourceProxy)objectProvider.GetObject();
-            //↑GetDataが実行されている？
+        //protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
+        //{
+        //    var data = (MyBitmapSourceProxy)objectProvider.GetObject();
+        //    //↑GetDataが実行されている？
 
-            //PixelFormatを再構成
-            Guid guid = Guid.Parse(data.Format);
-            PixelFormat pxFormat = (PixelFormat)Activator.CreateInstance(typeof(PixelFormat),
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.CreateInstance,
-                null, new object[] { guid }, null);
-            //paletteを再構成
-            BitmapPalette palette = MakePalette(data.Palette);
+        //    //PixelFormatを再構成
+        //    Guid guid = Guid.Parse(data.Format);
+        //    PixelFormat pxFormat = (PixelFormat)Activator.CreateInstance(typeof(PixelFormat),
+        //        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.CreateInstance,
+        //        null, new object[] { guid }, null);
+        //    //paletteを再構成
+        //    BitmapPalette palette = MakePalette(data.Palette);
 
-            //bitmapSourceを再構成
-            var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, pxFormat, palette, data.Pixels, data.Stride);
+        //    //bitmapSourceを再構成
+        //    var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, pxFormat, palette, data.Pixels, data.Stride);
 
-            //pngエンコーダーでストリームに保存、ストリームからbitmap作成
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-            Bitmap bmp = null;
-            using (var stream = new MemoryStream())
-            {
-                encoder.Save(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                //おまじない
-                using (Bitmap temp = new Bitmap(stream))
-                {
-                    bmp = new Bitmap(temp);
-                }
-            }
+        //    //pngエンコーダーでストリームに保存、ストリームからbitmap作成
+        //    var encoder = new PngBitmapEncoder();
+        //    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+        //    Bitmap bmp = null;
+        //    using (var stream = new MemoryStream())
+        //    {
+        //        encoder.Save(stream);
+        //        stream.Seek(0, SeekOrigin.Begin);
+        //        //おまじない
+        //        using (Bitmap temp = new Bitmap(stream))
+        //        {
+        //            bmp = new Bitmap(temp);
+        //        }
+        //    }
 
 
-            PictureBox pictureBox = new PictureBox
-            {
-                Image = bmp,
-                SizeMode = PictureBoxSizeMode.AutoSize
-            };
+        //    PictureBox pictureBox = new PictureBox
+        //    {
+        //        Image = bmp,
+        //        SizeMode = PictureBoxSizeMode.AutoSize
+        //    };
 
-            //Formに画像表示
-            using (Form displayForm = new Form())
-            {
-                displayForm.Text = data.ToString();
-                displayForm.Controls.Add(pictureBox);
-                windowService.ShowDialog(displayForm);
-            }
-            pictureBox.Dispose();
-            bmp.Dispose();
-        }
+        //    //Formに画像表示
+        //    using (Form displayForm = new Form())
+        //    {
+        //        displayForm.Text = data.ToString();
+        //        displayForm.Controls.Add(pictureBox);
+        //        windowService.ShowDialog(displayForm);
+        //    }
+        //    pictureBox.Dispose();
+        //    bmp.Dispose();
+        //}
 
 
         private BitmapPalette MakePalette(List<byte[]> colors)
@@ -113,38 +113,38 @@ namespace ClassLibrary1
         //}
 
         //sono3、失敗、本当はこれがいい、bitmapSourceをそのまま表示できる
-        //protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
-        //{
-        //    var data = (MyBitmapSourceProxy)objectProvider.GetObject();
-        //    //↑GetDataが実行されている？
+        protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
+        {
+            var data = (MyBitmapSourceProxy)objectProvider.GetObject();
+            //↑GetDataが実行されている？
 
-        //    //PixelFormatを再構成
-        //    Guid guid = Guid.Parse(data.Format);
-        //    PixelFormat pxFormat = (PixelFormat)Activator.CreateInstance(typeof(PixelFormat),
-        //        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.CreateInstance,
-        //        null, new object[] { guid }, null);
-        //    //paletteを再構成
-        //    BitmapPalette palette = MakePalette(data.Palette);
+            //PixelFormatを再構成
+            Guid guid = Guid.Parse(data.Format);
+            PixelFormat pxFormat = (PixelFormat)Activator.CreateInstance(typeof(PixelFormat),
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.CreateInstance,
+                null, new object[] { guid }, null);
+            //paletteを再構成
+            BitmapPalette palette = MakePalette(data.Palette);
 
-        //    //bitmapSourceを再構成
-        //    var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, pxFormat, palette, data.Pixels, data.Stride);
+            //bitmapSourceを再構成
+            var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, pxFormat, palette, data.Pixels, data.Stride);
 
-        //    //ここでエラー" 呼び出しスレッドは、多数の ui コンポーネントが必要としているため、sta である必要があります"
-        //    var wpf = new System.Windows.Forms.Integration.ElementHost
-        //    {
-        //        Child = new UserControl1(bitmapSource)
-        //    };
-        //    //Formに画像表示
-        //    var f = new Form { Controls = { wpf } };
-        //    windowService.ShowDialog(f);
-        //    f.Dispose();
-        //    //using (Form displayForm = new Form())
-        //    //{
-        //    //    displayForm.Text = data.ToString();
-        //    //    displayForm.Controls = { wpf }
-        //    //    windowService.ShowDialog(displayForm);
-        //    //}            
-        //}
+            //ここでエラー" 呼び出しスレッドは、多数の ui コンポーネントが必要としているため、sta である必要があります"
+            var wpf = new System.Windows.Forms.Integration.ElementHost
+            {
+                Child = new UserControl1(bitmapSource)
+            };
+            //Formに画像表示
+            var f = new Form { Controls = { wpf } };
+            windowService.ShowDialog(f);
+            f.Dispose();
+            //using (Form displayForm = new Form())
+            //{
+            //    displayForm.Text = data.ToString();
+            //    displayForm.Controls = { wpf }
+            //    windowService.ShowDialog(displayForm);
+            //}            
+        }
 
 
         //kyoutuu
