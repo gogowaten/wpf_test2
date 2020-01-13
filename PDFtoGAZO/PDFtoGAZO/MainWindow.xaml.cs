@@ -49,16 +49,57 @@ namespace PDFtoGAZO
         {
             InitializeComponent();
 
+            var source = new BitmapImage(new Uri(@"D:\ブログ用\テスト用画像\NEC_8041_2017_05_09_午後わてん_96dpi.jpg"));
+            var crop = new CroppedBitmap(source, new Int32Rect(100, 10, 100, 100));
+            var bitmap2 = new FormatConvertedBitmap(crop, PixelFormats.Indexed2, null, 0);
+
+
+
+
+
+
+
+
             this.AllowDrop = true;
             this.Drop += MainWindow_Drop;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
             MyPdfPath = @"D:\ブログ用\1708_04.pdf";
             MyPdfPath = @"M:\小説ラノベ\test\Neorude 2 (Manual)(JP)(PlayStation)(PSX).pdf";
             MyDpi = 96;
 
-            var source = new BitmapImage(new Uri(@"D:\ブログ用\20200107_pdftojpeg_07.png"));
-            BitmapSource bmp = (BitmapSource)source;
+            
             LoadPdf(MyPdfPath);
 
         }
