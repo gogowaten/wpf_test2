@@ -18,15 +18,43 @@ namespace _20200114_WindowsFormsToolStrip
         private ToolStrip ToolStrip1;
         private ToolStripButton ToolStripButton1;
         private ToolStripButton ToolStripButton2;
+        private PictureBox MyPictureBox;
 
         public Form1()
         {
             InitializeComponent();
 
+
             this.Load += Form1_Load;
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+            AddToolStrip();
+
+            this.SuspendLayout();
+            var MyPanel = new Panel
+            {
+                AutoScroll = true,
+                Dock = DockStyle.Fill
+            };
+
+            MyPictureBox = new PictureBox
+            {
+                SizeMode = PictureBoxSizeMode.AutoSize,
+            };
+            MyPanel.Controls.Add(MyPictureBox);
+            this.Controls.Add(MyPanel);
+
+            //PictureBoxをPanelに追加した後にImageを指定、これでスクロールバーが表示される
+            var image = new Bitmap(@"D:\ブログ用\チェック用2\WP_20200111_09_38_14_Pro_2020_01_11_午後わてん.jpg");
+            MyPictureBox.Image = image;
+            MyPanel.BringToFront();//最前面
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
+        private void AddToolStrip()
         {
             ToolStrip1 = new ToolStrip();
             this.SuspendLayout();
@@ -49,6 +77,7 @@ namespace _20200114_WindowsFormsToolStrip
             ToolStrip1.Items.Add(ToolStripButton2);
 
             this.Controls.Add(ToolStrip1);
+            //panel1.Controls.Add(ToolStrip1);
 
             this.ToolStrip1.ResumeLayout(false);
             this.ToolStrip1.PerformLayout();
