@@ -49,8 +49,10 @@ namespace PDFtoGAZO
         {
             InitializeComponent();
 
-            var source = new BitmapImage(new Uri(@"D:\ブログ用\テスト用画像\NEC_8041_2017_05_09_午後わてん_96dpi.jpg"));
-            var crop = new CroppedBitmap(source, new Int32Rect(100, 10, 100, 100));
+            //var source = new BitmapImage(new Uri(@"D:\ブログ用\テスト用画像\NEC_8041_2017_05_09_午後わてん_96dpi.jpg"));
+            var source = new BitmapImage(new Uri(@"D:\ブログ用\テスト用画像\TransparentRect.png"));
+        
+        var crop = new CroppedBitmap(source, new Int32Rect(10, 10, 100, 100));
             var bitmap2 = new FormatConvertedBitmap(crop, PixelFormats.Indexed2, null, 0);
 
 

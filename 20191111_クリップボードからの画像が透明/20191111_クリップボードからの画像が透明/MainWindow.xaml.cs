@@ -43,6 +43,8 @@ namespace _20191111_クリップボードからの画像が透明
 
         private void ButtonGetImage_Click(object sender, RoutedEventArgs e)
         {
+            //var neko =Clipboard.GetDataObject();
+            //var b = neko.GetData(typeof(BitmapSource));
             BitmapSource source = Clipboard.GetImage();
             //var neko = GetPixels(source);
             SetImageSource(source);

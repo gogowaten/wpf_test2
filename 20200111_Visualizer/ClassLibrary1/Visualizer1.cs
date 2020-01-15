@@ -130,12 +130,40 @@ namespace ClassLibrary1
             var bitmapSource = BitmapSource.Create(data.Width, data.Height, 96, 96, pxFormat, palette, data.Pixels, data.Stride);
 
             //ここでエラー" 呼び出しスレッドは、多数の ui コンポーネントが必要としているため、sta である必要があります"
-            var wpf = new System.Windows.Forms.Integration.ElementHost
-            {
-                Child = new UserControl1(bitmapSource)
-            };
+            //var wpf = new System.Windows.Forms.Integration.ElementHost
+            //{
+            //    Child = new UserControl1(bitmapSource)
+
+            //};
+            
+
+
+            System.Windows.Forms.Integration.ElementHost elementHost1;
+            //WPFのButtonコントロールを作成する
+            System.Windows.Controls.Button wpfButton =
+                new System.Windows.Controls.Button();
+            wpfButton.Content = "Push!";
+            
+
+            //ElementHostコントロールを作成する
+            elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            //コントロールの位置と大きさを設定する
+            elementHost1.SetBounds(20, 10, 100, 30);
+
+            //ElementHostのChildプロパティにWPFコントロールを設定する
+            elementHost1.Child = wpfButton;
+
+            var wpfImage = new System.Windows.Controls.Image();
+            wpfImage.Source = bitmapSource;
+            elementHost1.Child = wpfImage;
+
+            //ElementHostをフォームに配置する
+            //this.Controls.Add(elementHost1);
+
+
+
             //Formに画像表示
-            var f = new Form { Controls = { wpf } };
+            var f = new Form { Controls = { elementHost1 } };
             windowService.ShowDialog(f);
             f.Dispose();
             //using (Form displayForm = new Form())
