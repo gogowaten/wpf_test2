@@ -96,6 +96,8 @@ namespace BitmapSourceVisualizer
 
             button = new ToolStripButton { Text = "コピー(&C)" };
             button.Click += (s, e) => { System.Windows.Forms.Clipboard.SetImage(OriginBitmap); };
+            //button.Click += (s, e) => { System.Windows.Clipboard.SetImage(OriginBitmapSource); };//アルファ値が失われる
+            //button.Click += (s, e) => { Image2Clipboard(); };
             toolStrip.Items.Add(button);
 
             //var b3 = new ToolStripButton { Text = "x2" };
@@ -167,7 +169,17 @@ namespace BitmapSourceVisualizer
             MyPictureBox.Image = canvas;
         }
 
+        private void Image2Clipboard()
+        {
+            var data = new System.Windows.Forms.DataObject();
+            using (var stream = new MemoryStream())
+            {
+                OriginBitmap.Save(stream, ImageFormat.Png);
+                data.SetData("PNG", false, stream);
+            }
+            System.Windows.Forms.Clipboard.SetDataObject(data);
 
+        }
 
 
 
