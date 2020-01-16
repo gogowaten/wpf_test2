@@ -66,7 +66,7 @@ namespace BitmapSourceVisualizer
                 MyForm.Height = Screen.PrimaryScreen.Bounds.Height / 2;
                 windowService.ShowDialog(MyForm);
             }
-            this.OriginBitmap.Dispose();
+            //this.OriginBitmap.Dispose();
         }
 
         // TODO: ビジュアライザーをテストするために、次のコードをユーザーのコードに追加します:
@@ -159,27 +159,27 @@ namespace BitmapSourceVisualizer
             dialog.Dispose();
         }
 
-        private void Scale2()
-        {
-            Bitmap canvas = new Bitmap(OriginBitmap.Width * 2, OriginBitmap.Height * 2);
-            Graphics g = Graphics.FromImage(canvas);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            g.DrawImage(OriginBitmap, 0, 0, OriginBitmap.Width * 2, OriginBitmap.Height * 2);
-            g.Dispose();
-            MyPictureBox.Image = canvas;
-        }
+        //private void Scale2()
+        //{
+        //    Bitmap canvas = new Bitmap(OriginBitmap.Width * 2, OriginBitmap.Height * 2);
+        //    Graphics g = Graphics.FromImage(canvas);
+        //    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+        //    g.DrawImage(OriginBitmap, 0, 0, OriginBitmap.Width * 2, OriginBitmap.Height * 2);
+        //    g.Dispose();
+        //    MyPictureBox.Image = canvas;
+        //}
 
-        private void Image2Clipboard()
-        {
-            var data = new System.Windows.Forms.DataObject();
-            using (var stream = new MemoryStream())
-            {
-                OriginBitmap.Save(stream, ImageFormat.Png);
-                data.SetData("PNG", false, stream);
-            }
-            System.Windows.Forms.Clipboard.SetDataObject(data);
+        //private void Image2Clipboard()
+        //{
+        //    var data = new System.Windows.Forms.DataObject();
+        //    using (var stream = new MemoryStream())
+        //    {
+        //        OriginBitmap.Save(stream, ImageFormat.Png);
+        //        data.SetData("PNG", false, stream);
+        //    }
+        //    System.Windows.Forms.Clipboard.SetDataObject(data);
 
-        }
+        //}
 
 
 
