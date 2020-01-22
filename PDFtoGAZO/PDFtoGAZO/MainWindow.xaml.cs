@@ -49,54 +49,8 @@ namespace PDFtoGAZO
         {
             InitializeComponent();
 
-            var source = new BitmapImage(new Uri(@"D:\ブログ用\テスト用画像\NEC_8041_2017_05_09_午後わてん_96dpi.jpg"));
-            //var source = new BitmapImage(new Uri(@"D:\ブログ用\テスト用画像\TransparentRect.png"));
-            //var source = new BitmapImage(new Uri(@"D:\ブログ用\チェック用2\WP_20200111_09_38_14_Pro_2020_01_11_午後わてん.jpg"));
-
-            var crop = new CroppedBitmap(source, new Int32Rect(10, 10, 100, 100));
-            var bitmap2 = new FormatConvertedBitmap(crop, PixelFormats.Indexed2, null, 0);
-
-
-
-
-
-
-
-
             this.AllowDrop = true;
             this.Drop += MainWindow_Drop;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             MyPdfPath = @"D:\ブログ用\1708_04.pdf";
             MyPdfPath = @"M:\小説ラノベ\test\Neorude 2 (Manual)(JP)(PlayStation)(PSX).pdf";
@@ -517,6 +471,55 @@ namespace PDFtoGAZO
                 img.EndInit();
             }
             return img;
+        }
+
+        //全ページBitmapSourceのリスト
+        private async void ButtonTest2_Click(object sender, RoutedEventArgs e)
+        {
+            List<BitmapFrame> frames = new List<BitmapFrame>();
+            var ps = GetPages();
+            for (int i = 0; i < ps.Count; i++)
+            {
+                using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                {
+                    await ps[i].RenderToStreamAsync(stream);
+                    frames.Add(BitmapFrame.Create(stream.AsStream()));
+
+                }
+            }
+        }
+
+        private async void ButtonTest3_Click(object sender, RoutedEventArgs e)
+        {
+            int cpuCount = Environment.ProcessorCount;
+            //System.Collections.Concurrent.ConcurrentBag<BitmapFrame> frames = new System.Collections.Concurrent.ConcurrentBag<BitmapFrame>();
+            List<BitmapFrame> frames = new List<BitmapFrame>();
+            List<Windows.Data.Pdf.PdfPage> ps = GetPages();
+            int windowSize = ps.Count / cpuCount;
+
+            await Task.WhenAll(Enumerable.Range(0, cpuCount).Select(n => Task.Run(async () =>
+             {
+                 for (int i = n * windowSize; i < (n + 1) * windowSize; i++)
+                 {
+                     using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                     {
+                         await ps[i].RenderToStreamAsync(stream);
+                         frames.Add(BitmapFrame.Create(stream.AsStream()));
+                     }
+                 }
+             })));
+
+            //var neko = Enumerable.Range(0, cpuCount).Select(n => Task.Run(async () =>
+            //  {
+            //      for (int i = n * windowSize; i < (n + 1) * windowSize; i++)
+            //      {
+            //          using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            //          {
+            //              await ps[i].RenderToStreamAsync(stream);
+            //              frames.Add(BitmapFrame.Create(stream.AsStream()));
+            //          }
+            //      }
+            //  }));
         }
     }
 }
