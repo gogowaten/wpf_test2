@@ -491,35 +491,85 @@ namespace PDFtoGAZO
 
         private async void ButtonTest3_Click(object sender, RoutedEventArgs e)
         {
+
             int cpuCount = Environment.ProcessorCount;
             //System.Collections.Concurrent.ConcurrentBag<BitmapFrame> frames = new System.Collections.Concurrent.ConcurrentBag<BitmapFrame>();
-            List<BitmapFrame> frames = new List<BitmapFrame>();
+            var frames = new List<BitmapFrame>();
             List<Windows.Data.Pdf.PdfPage> ps = GetPages();
             int windowSize = ps.Count / cpuCount;
 
-            await Task.WhenAll(Enumerable.Range(0, cpuCount).Select(n => Task.Run(async () =>
-             {
-                 for (int i = n * windowSize; i < (n + 1) * windowSize; i++)
-                 {
-                     using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
-                     {
-                         await ps[i].RenderToStreamAsync(stream);
-                         frames.Add(BitmapFrame.Create(stream.AsStream()));
-                     }
-                 }
-             })));
+            var ff = new BitmapFrame[ps.Count];
+            var tt = new Task[ps.Count];
 
-            //var neko = Enumerable.Range(0, cpuCount).Select(n => Task.Run(async () =>
-            //  {
-            //      for (int i = n * windowSize; i < (n + 1) * windowSize; i++)
-            //      {
-            //          using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
-            //          {
-            //              await ps[i].RenderToStreamAsync(stream);
-            //              frames.Add(BitmapFrame.Create(stream.AsStream()));
-            //          }
-            //      }
-            //  }));
+            //IEnumerable<Windows.Foundation.IAsyncAction> pp = ps.Select(n => n.RenderToStreamAsync(stream));
+            var tb = new List<Task<BitmapImage>>();
+            for (int i = 0; i < ps.Count; i++)
+            {
+                tb.Add(MakeImage(ps[i]));
+            }
+            //BitmapImage[] ko = await Task.WhenAll(tb).ConfigureAwait(true);
+            BitmapImage[] ko =await Task.WhenAll(tb).ConfigureAwait(false);
+            var neko = ko[1];
+
+            var bb = new List<BitmapImage>();
+            
+            //for (int i = 0; i < ps.Count; i++)
+            //{
+            //    bb.Add(await tb[i].ConfigureAwait(true));//ok
+            //    //bb.Add(tb[i].Result);//デッドロックになる
+            //    //BitmapImage ii = tb[i].Result;
+            //}
+            //var inu = bb[1];
+
+            var cc = new BitmapImage[ps.Count];
+            Parallel.For(0, ps.Count,async n =>
+             {
+                 //cc[n] =  tb[n].Result;//デッドロックになる
+                 cc[n] =await tb[n].ConfigureAwait(false);
+             });
+            var inuu = cc[1];
+            
+            //for (int n = 0; n < ps.Count; n++)
+            //{
+            //    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            //    {
+            //        await ps[n].RenderToStreamAsync(stream);
+            //        //tt[n] = ps[n].RenderToStreamAsync(stream).AsTask();
+            //        ff[n] = BitmapFrame.Create(stream.AsStream());
+            //    }
+            //}
+
+            //await Task.WhenAll(Enumerable.Range(0, cpuCount).Select(n => Task.Run(async () =>
+            // {
+            //     for (int i = n * windowSize; i < (n + 1) * windowSize; i++)
+            //     {
+            //         using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            //         {
+            //             await ps[i].RenderToStreamAsync(stream);
+            //             frames.Add(BitmapFrame.Create(stream.AsStream()));
+            //         }
+            //     }
+            // })));
+
+
+        }
+        
+        //未検証、ページから画像作成から保存までの処理をTaskにする、あとでTaskWhenAllで実行？
+        private async Task SaveTaskAsync(Windows.Data.Pdf.PdfPage page, string directory, string fileName, int pageIndex, int quality, int keta)
+        {
+            using (var stream=new Windows.Storage.Streams.InMemoryRandomAccessStream())
+            {
+               await page.RenderToStreamAsync(stream);
+                var encoder = new JpegBitmapEncoder();
+                encoder.QualityLevel = quality;
+                encoder.Frames.Add(BitmapFrame.Create(stream.AsStream()));
+                string renban = pageIndex.ToString("d" + keta);
+                using (var fileStream = new FileStream(
+                    System.IO.Path.Combine(directory, fileName) + "_" + renban + ".jpg", FileMode.Create, FileAccess.Write))
+                {
+                    encoder.Save(fileStream);
+                }
+            }
         }
     }
 }
