@@ -99,17 +99,35 @@ namespace BitmapSourceVisualizer
             //button.Click += (s, e) => { System.Windows.Clipboard.SetImage(OriginBitmapSource); };//アルファ値が失われる
             //button.Click += (s, e) => { Image2Clipboard(); };
             toolStrip.Items.Add(button);
+            button.ToolTipText = $"画像をクリップボードにコピーしますが、アルファ値は失われます\n" +
+                $"ほとんどの画像アプリに貼り付けることができます";
+
+            //クリップボードにpng形式でコピー
+            button = new ToolStripButton { Text = "PNG形式でコピー(&D)" };
+            toolStrip.Items.Add(button);
+            button.ToolTipText = $"画像をPNG(アルファ値を保つ)形式にしてクリップボードにコピーします\n" +
+                $"クリップボードのPNG画像に対応したアプリなら貼り付けることができます";
+            button.Click += (s, e) =>
+            {
+                var enc = new PngBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(OriginBitmapSource));
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    enc.Save(ms);
+                    System.Windows.Clipboard.SetData("PNG", ms);
+                }
+            };
 
             //var b3 = new ToolStripButton { Text = "x2" };
             //b3.Click += (e, x) => { Scale2(); };
             //ts.Items.Add(b3);
 
 
-            button = new ToolStripButton { Text = "ウィンドウに合わせる(&Z)" };
+            button = new ToolStripButton { Text = "ウィンドウに合わせて表示(&Z)" };
             button.Click += (e, x) => { MyPictureBox.SizeMode = PictureBoxSizeMode.Zoom; MyPictureBox.Dock = DockStyle.Fill; };
             toolStrip.Items.Add(button);
 
-            button = new ToolStripButton { Text = "実寸(&A)" };
+            button = new ToolStripButton { Text = "実寸表示(&A)" };
             button.Click += (o, e) => { MyPictureBox.SizeMode = PictureBoxSizeMode.AutoSize; MyPictureBox.Dock = DockStyle.None; };
             toolStrip.Items.Add(button);
 
@@ -140,6 +158,7 @@ namespace BitmapSourceVisualizer
 
         }
 
+       
         //画像の保存
         private void SaveImage(Bitmap bmp)
         {

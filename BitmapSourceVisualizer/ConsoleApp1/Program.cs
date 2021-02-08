@@ -11,7 +11,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            var image = new BitmapImage(new Uri(@"D:\ブログ用\チェック用2\WP_20200111_09_38_14_Pro_2020_01_11_午後わてん.jpg"));
+            var image = new BitmapImage(new Uri(@"D:\ブログ用\消費期限とか\WP_20200111_09_38_14_Pro_2020_01_11_午後わてん.jpg"));
             BitmapSourceVisualizer.MyDialog.TestShowVisualizer(image);
         }
     }
