@@ -94,29 +94,40 @@ namespace BitmapSourceVisualizer
             button.Click += (s, e) => { SaveImage(OriginBitmap); };
             toolStrip.Items.Add(button);
 
+            //クリップボードにコピー、BMP、PNG両対応版
             button = new ToolStripButton { Text = "コピー(&C)" };
+            toolStrip.Items.Add(button);
+            button.ToolTipText = $"画像をクリップボードにコピーする\n" +
+                $"貼り付け先のアプリによってはアルファ(透明)値が再現されないことがある";
+            button.Click += (s, e) =>
+            {
+                //DataObjectに入れたいデータを入れて、それをクリップボードにセットする                
+                var data = new System.Windows.DataObject();
+
+                //BitmapSource形式そのままでセット
+                data.SetData(typeof(BitmapSource), OriginBitmapSource);
+
+                //PNG形式にエンコードしたものをMemoryStreamして、それをセット
+                //画像をPNGにエンコード
+                var enc = new PngBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(OriginBitmapSource));
+                //エンコードした画像をMemoryStreamにSava
+                using (var ms = new MemoryStream())
+                {
+                    enc.Save(ms);
+                    data.SetData("PNG", ms);
+                    //クリップボードにセット
+                    System.Windows.Clipboard.SetDataObject(data, true);
+                }
+            };
+
+            //クリップボードにコピー、BMP版、アルファ値が255になる
+            button = new ToolStripButton { Text = "特殊コピー(&D)" };
             button.Click += (s, e) => { System.Windows.Forms.Clipboard.SetImage(OriginBitmap); };
             //button.Click += (s, e) => { System.Windows.Clipboard.SetImage(OriginBitmapSource); };//アルファ値が失われる
             //button.Click += (s, e) => { Image2Clipboard(); };
             toolStrip.Items.Add(button);
-            button.ToolTipText = $"画像をクリップボードにコピーしますが、アルファ値は失われます\n" +
-                $"ほとんどの画像アプリに貼り付けることができます";
-
-            //クリップボードにpng形式でコピー
-            button = new ToolStripButton { Text = "PNG形式でコピー(&D)" };
-            toolStrip.Items.Add(button);
-            button.ToolTipText = $"画像をPNG(アルファ値を保つ)形式にしてクリップボードにコピーします\n" +
-                $"クリップボードのPNG画像に対応したアプリなら貼り付けることができます";
-            button.Click += (s, e) =>
-            {
-                var enc = new PngBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(OriginBitmapSource));
-                using (var ms = new System.IO.MemoryStream())
-                {
-                    enc.Save(ms);
-                    System.Windows.Clipboard.SetData("PNG", ms);
-                }
-            };
+            button.ToolTipText = $"アルファ(透明)値を255(不透明に)して画像をクリップボードにコピーする";
 
             //var b3 = new ToolStripButton { Text = "x2" };
             //b3.Click += (e, x) => { Scale2(); };
@@ -158,7 +169,7 @@ namespace BitmapSourceVisualizer
 
         }
 
-       
+
         //画像の保存
         private void SaveImage(Bitmap bmp)
         {
