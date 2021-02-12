@@ -11,6 +11,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
+//WPFのBitmapSourceVisualizer、アルファ値を保持して画像のコピーできるようにした - 午後わてんのブログ
+//https://gogowaten.hatenablog.com/entry/2021/02/12/110032
+
 
 [assembly: System.Diagnostics.DebuggerVisualizer(
     typeof(BitmapSourceVisualizer.MyDialog),
