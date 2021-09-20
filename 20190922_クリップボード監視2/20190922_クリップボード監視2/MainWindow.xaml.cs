@@ -189,7 +189,7 @@ namespace _20190922_クリップボード監視2
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             //更新通知が来たらイベント起動
-            if (msg == WM_DRAWCLIPBOARD)//クリップボード更新がなくても、なぜか5分ごとに更新されたよって通知が来る
+            if (msg == WM_DRAWCLIPBOARD)
             {
                 this.raiseDrawClipboard();//イベント起動
                 handled = true;//コレがよくわからん
